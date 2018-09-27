@@ -1,6 +1,24 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // Require  html-webpack-plugin plugin
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+require('dotenv').config()
 
-module.exports = {
+const ENV = process.env.APP_ENV;
+const isTest = ENV === 'test'
+const isProd = ENV === 'prod';
+
+function setDevTool() {  // function to set dev-tool depending on environment
+    if (isTest) {
+      return 'inline-source-map';
+    } else if (isProd) {
+      return 'source-map';
+    } else {
+      return 'eval-source-map';
+    }
+}
+
+const config = {
+  devtool: setDevTool(),  //Set the devtool
   entry: __dirname + "/src/app/index.js", // webpack entry point. Module to start building dependency graph
   output: {
     path: __dirname + '/dist', // Folder to store generated bundle
@@ -39,3 +57,17 @@ module.exports = {
       port: 7700, // port to run dev-server
   } 
 };
+
+// Minify and copy assets in production
+if(isProd) {  // plugins to use in a production environment
+    config.plugins.push(
+        new UglifyJSPlugin(),  // minify the chunk
+        new CopyWebpackPlugin([{  // copy assets to public folder
+          from: __dirname + '/src/public'
+        }])
+    );
+};
+
+
+
+module.exports = config;
