@@ -1,5 +1,6 @@
 import React from 'react';
 import { Header, Segment, Grid, Button, Icon } from "semantic-ui-react";
+import MapContainer from './map_container';
 
 class App extends React.Component {
   render() {
@@ -12,6 +13,10 @@ class App extends React.Component {
               real-time new york city subway map
             </Header.Subheader>
           </Header>
+        </Segment>
+
+        <Segment>
+          <MapContainer />
         </Segment>
 
         <Segment inverted vertical style={{padding: '1em 2em'}}>
