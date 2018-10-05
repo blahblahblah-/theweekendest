@@ -15,7 +15,7 @@ class App extends React.Component {
           </Header>
         </Segment>
 
-        <Segment>
+        <Segment basic>
           <MapContainer />
         </Segment>
 

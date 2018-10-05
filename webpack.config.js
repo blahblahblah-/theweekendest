@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // Require  html-webpack-plugin plugin
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const WebpackShellPlugin = require('webpack-shell-plugin');
 require('dotenv').config()
 
 const ENV = process.env.APP_ENV;
@@ -24,6 +25,11 @@ const config = {
     path: __dirname + '/dist', // Folder to store generated bundle
     filename: 'bundle.js',  // Name of generated bundle after build
     publicPath: '/' // public URL of the output directory when referenced in a browser
+  },
+  node: {
+    fs: 'empty',
+    process: 'mock',
+    Buffer: true,
   },
   module: {  // where we defined file patterns and their loaders
       rules: [
@@ -50,12 +56,22 @@ const config = {
       new HtmlWebpackPlugin({
           template: __dirname + "/src/public/index.html",
           inject: 'body'
-      })
+      }),
+      new WebpackShellPlugin(
+        {
+          onBuildStart:
+            [
+              'csvtojson --headers=\'["stationId", "complexId", "stopId", "division", "line", "name", "borough", "daytimeRoutes", "structure", "latitude", "longitude"]\' ' +
+                __dirname + '/src/data/stations.csv > ' + __dirname + '/src/data/stations.json'
+            ],
+          safe: true,
+        }
+      )
   ],
   devServer: {  // configuration for webpack-dev-server
       contentBase: './src/public',  //source of static assets
       port: 7700, // port to run dev-server
-  } 
+  },
 };
 
 // Minify and copy assets in production
