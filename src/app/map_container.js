@@ -18,7 +18,7 @@ class MapContainer extends React.Component {
 
   componentDidMount() {
     this.fetchData();
-    this.timer = setInterval(() => this.fetchData(), 60000);
+    this.timer = setInterval(() => this.fetchData(), 360000);
     // create map
     this.map = L.map('map', {
       center: center,
