@@ -25,7 +25,7 @@ class MapContainer extends React.Component {
       maxBounds: bounds,
       zoom: 11,
       layers: [
-        L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
+        L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png', {
           attribution: 'Map tiles by <a href=&quot;http://stamen.com&quot;>Stamen Design</a>,\
             under <a href=&quot;http://creativecommons.org/licenses/by/3.0&quot;>CC BY 3.0</a>.\
             Data by <a href=&quot;http://openstreetmap.org&quot;>OpenStreetMap</a>,\
