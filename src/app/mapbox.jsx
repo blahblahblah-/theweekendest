@@ -4,7 +4,7 @@ import mapboxgl from 'mapbox-gl';
 import { Header, Segment, Grid, Button, Icon } from "semantic-ui-react";
 import stationData from '../data/station_details.json';
 
-const bounds = [[-74.251961, 40.512764], [-73.755405, 40.903125]]
+const bounds = [[-74.3586, 41.2176], [-73.5183, 40.215]]
 const apiUrl = 'https://www.goodservice.io/api/routes';
 const stations = {};
 const center = [-74.003683, 40.7079445]
@@ -27,8 +27,10 @@ class Mapbox extends React.Component {
       container: this.mapContainer,
       style: 'mapbox://styles/theweekendest/ck1fhati848311cp6ezdzj5cm',
       center: center,
-      maxBounds: bounds,
-      zoom: 1.5,
+      // maxBounds: bounds,
+      bearing: 29,
+      minZoom: 9,
+      zoom: 12,
       hash: true
     });
 
@@ -90,9 +92,13 @@ class Mapbox extends React.Component {
   renderLines(routes) {
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
-      stations[key]["northStops"] = [];
-      stations[key]["southStops"] = [];
+      stations[key]["northStops"] = new Set();
+      stations[key]["southStops"] = new Set();
+      stations[key]["stops"] = new Set();
     });
+
+    const routeLayers = {};
+    const routeStops = {}
 
     Object.keys(routes).forEach((key) => {
       const route = routes[key];
@@ -100,6 +106,7 @@ class Mapbox extends React.Component {
       if (this.map.getLayer(layerId)) {
         this.map.removeLayer(layerId)
       }
+      routeStops[key] = new Set();
       const northRoutings = route.routings.north.filter((routing) => {
         return routing.every((stopId) => {
           return stopId.substr(3, 1) == 'N';
@@ -107,7 +114,9 @@ class Mapbox extends React.Component {
       }).map((routing) => {
         return routing.map((stopId) => {
           const stopIdPrefix = stopId.substr(0, 3);
-          stations[stopIdPrefix].northStops.push(key);
+          stations[stopIdPrefix].northStops.add(key);
+          stations[stopIdPrefix].stops.add(key);
+          routeStops[key].add(stopIdPrefix);
           return stopIdPrefix;
         });
       });
@@ -118,7 +127,9 @@ class Mapbox extends React.Component {
       }).map((routing) => {
         return routing.map((stopId) => {
           const stopIdPrefix = stopId.substr(0, 3);
-          stations[stopIdPrefix].southStops.push(key);
+          stations[stopIdPrefix].southStops.add(key);
+          stations[stopIdPrefix].stops.add(key);
+          routeStops[key].add(stopIdPrefix);
           return stopIdPrefix;
         }).reverse();
       });
@@ -131,7 +142,7 @@ class Mapbox extends React.Component {
           return this.routingGeoJson(routing)
         })
       };
-      this.map.addLayer({
+      routeLayers[layerId] = {
         "id": layerId,
         "type": "line",
         "source": {
@@ -143,10 +154,44 @@ class Mapbox extends React.Component {
           "line-cap": "round"
         },
         "paint": {
-          'line-width': 3,
-          'line-color': route.color
+          'line-width': {
+            'stops': [[8, 1], [14, 3], [16, 5]]
+          },
+          'line-color': route.color,
         }
-      });
+      };
+    });
+
+    const offsets = {};
+    const offsetMap = [[[8, 0], [14, 0], [16, 0]], [[8, -3], [14, -5], [16, -7]], [[8, 3], [14, 5], [16, 7]], [[8, -6], [14, 10], [16, 14]], [[8, 6], [14, 10], [16, 14]], [[8, -9], [14, -15], [16, -21]], [[8, 9], [14, 15], [16, 21]]];
+
+    ['2', '3', '1', '4', '5', '6', '7', '7X', 'E', 'A', 'C', 'F', 'FX', 'D', 'B', 'M', 'J', 'Z', 'N', 'Q', 'R', 'W', 'G', 'H', 'FS', 'GS'].forEach((train) => {
+      const layerId = `${train}-train`;
+      const routeLayer = routeLayers[layerId];
+
+      if (routeLayer) {
+        let offset = 0;
+        let conflictingOffsets = new Set();
+        const stops = routeStops[train];
+
+        stops.forEach((stop) => {
+          stations[stop]["stops"].forEach((route) => {
+            if (offsets[route] != undefined) {
+              conflictingOffsets.add(offsets[route]);
+            }
+          });
+        });
+
+        while(conflictingOffsets.has(offset)) {
+          offset++;
+        }
+
+        offsets[train] = offset;
+        routeLayer.paint["line-offset"] = {
+          'stops': offsetMap[offset]
+        };
+        this.map.addLayer(routeLayer);
+      }
     });
   }
 
@@ -155,7 +200,7 @@ class Mapbox extends React.Component {
     let prev = routing.splice(0, 1);
     routing.forEach((stopId) => {
       path.push([stations[prev].longitude, stations[prev].latitude]);
-      let potentialPath = this.findPath(prev, stopId);
+      let potentialPath = this.findPath(prev, stopId, 0);
       if (potentialPath) {
         potentialPath.forEach((coord) => {
           path.push(coord);
@@ -166,6 +211,10 @@ class Mapbox extends React.Component {
     });
     return {
       "type": "Feature",
+      "properties": {
+        "active": true,
+        "offset": 0,
+      },
       "geometry": {
         "type": "LineString",
         "coordinates": path
@@ -173,21 +222,23 @@ class Mapbox extends React.Component {
     }
   }
 
-  findPath(start, end) {
+  findPath(start, end, stepsTaken) {
     if (stations[start]["north"][end] != undefined) {
       if (stations[start]["north"][end].length) {
         return stations[start]["north"][end];
       }
       return [[stations[end].longitude, stations[end].latitude]];
+    } else if (stepsTaken > 8) {
+      return;
     }
     let results = [];
     Object.keys(stations[start]["north"]).forEach((key) => {
-      const path = this.findPath(key, end);
+      const path = this.findPath(key, end, stepsTaken + 1);
       if (path && path.length) {
         if (stations[start]["north"][key].length) {
-          results = stations[start]["north"][key].concat(path);
+          return results = stations[start]["north"][key].concat(path);
         }
-        results = [[stations[key].longitude, stations[key].latitude]].concat(path);
+        return results = [[stations[key].longitude, stations[key].latitude]].concat(path);
       }
     });
     return results;
