@@ -43,6 +43,8 @@ class Mapbox extends React.Component {
     }));
 
     this.map.on('load', () => {
+      this.fetchData();
+      this.timer = setInterval(() => this.fetchData(), 360000);
       this.map.addLayer({
         "id": "Stops",
         "type": "symbol",
@@ -51,17 +53,23 @@ class Mapbox extends React.Component {
           "data": this.stopsGeoJson()
         },
         "layout": {
-          'text-field': ['get', 'name'],
-          'text-size': 12,
-          'text-anchor': 'right',
-          'text-optional': true,
+          "text-field": ['get', 'name'],
+          "text-size": {
+            "stops": [[8, 12], [15, 14]]
+          },
+          "text-anchor": "right",
+          "text-optional": true,
+          "text-justify": "left",
+          "text-padding": 10,
+          // "text-variable-anchor": ['bottom-right', 'right', 'top-right', 'bottom', 'bottom-left', 'left', 'top-left']
         },
         "paint": {
-          'text-color': "#aaaaaa"
+          "text-translate": {
+            "stops": [[8, [-5, 0]], [14, [-12, -15]]]
+          },
+          "text-color": "#aaaaaa"
         }
       })
-      this.fetchData();
-      this.timer = setInterval(() => this.fetchData(), 360000);
     });
   }
 
@@ -72,7 +80,7 @@ class Mapbox extends React.Component {
         return {
           "type": "Feature",
           "properties": {
-            "name": stations[key].name
+            "name": stations[key].name.replace(/ - /g, "–")
           },
           "geometry": {
             "type": "Point",
@@ -103,9 +111,6 @@ class Mapbox extends React.Component {
     Object.keys(routes).forEach((key) => {
       const route = routes[key];
       const layerId = `${key}-train`;
-      if (this.map.getLayer(layerId)) {
-        this.map.removeLayer(layerId)
-      }
       routeStops[key] = new Set();
       const northRoutings = route.routings.north.filter((routing) => {
         return routing.every((stopId) => {
@@ -163,9 +168,10 @@ class Mapbox extends React.Component {
     });
 
     const offsets = {};
-    const offsetMap = [[[8, 0], [14, 0], [16, 0]], [[8, -3], [14, -5], [16, -7]], [[8, 3], [14, 5], [16, 7]], [[8, -6], [14, 10], [16, 14]], [[8, 6], [14, 10], [16, 14]], [[8, -9], [14, -15], [16, -21]], [[8, 9], [14, 15], [16, 21]]];
+    const offsetMap = [[[8, 0], [14, 0], [16, 0]], [[8, -3], [14, -5], [16, -7]], [[8, 3], [14, 5], [16, 7]], [[8, -6], [14, -10], [16, -14]], [[8, 6], [14, 10], [16, 14]], [[8, -9], [14, -15], [16, -21]], [[8, 9], [14, 15], [16, 21]]];
+    const textOffsetMap = [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [-3, 0], [3, 0]];
 
-    ['2', '3', '1', '4', '5', '6', '7', '7X', 'E', 'A', 'C', 'F', 'FX', 'D', 'B', 'M', 'J', 'Z', 'N', 'Q', 'R', 'W', 'G', 'H', 'FS', 'GS'].forEach((train) => {
+    ['2', '3', '1', '4', '5', '6', '7', '7X', 'A', 'C', 'E', 'F', 'FX', 'D', 'B', 'M', 'J', 'Z', 'N', 'Q', 'R', 'W', 'G', 'H', 'FS', 'GS'].forEach((train) => {
       const layerId = `${train}-train`;
       const routeLayer = routeLayers[layerId];
 
@@ -188,9 +194,28 @@ class Mapbox extends React.Component {
 
         offsets[train] = offset;
         routeLayer.paint["line-offset"] = {
-          'stops': offsetMap[offset]
+          "stops": offsetMap[offset]
         };
+        if (this.map.getLayer(layerId)) {
+          this.map.removeLayer(layerId)
+        }
         this.map.addLayer(routeLayer);
+        // this.map.addLayer({
+        //   "id": `${layerId}-symbol`,
+        //   "type": "symbol",
+        //   "source": {
+        //     "type": "geojson",
+        //     "data": routeLayer.source.data,
+        //   },
+        //   "layout": {
+        //     "symbol-placement": "line",
+        //     "text-font": ["Open Sans Regular"],
+        //     "text-field": train,
+        //     "text-size": 14,
+        //     "text-rotation-alignment": "viewport",
+        //     "text-offset": textOffsetMap[offset]
+        //   },
+        // });
       }
     });
   }
