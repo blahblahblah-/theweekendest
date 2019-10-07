@@ -2,7 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin'); // Require  html-webpa
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const WebpackShellPlugin = require('webpack-shell-plugin');
-require('dotenv').config()
+const Dotenv = require('dotenv-webpack');
 
 const ENV = process.env.APP_ENV;
 const isTest = ENV === 'test'
@@ -20,7 +20,7 @@ function setDevTool() {  // function to set dev-tool depending on environment
 
 const config = {
   devtool: setDevTool(),  //Set the devtool
-  entry: __dirname + "/src/app/index.js", // webpack entry point. Module to start building dependency graph
+  entry: __dirname + "/src/app/index.jsx", // webpack entry point. Module to start building dependency graph
   output: {
     path: __dirname + '/dist', // Folder to store generated bundle
     filename: 'bundle.js',  // Name of generated bundle after build
@@ -34,7 +34,7 @@ const config = {
   module: {  // where we defined file patterns and their loaders
       rules: [
           {
-            test: /\.js$/,
+            test: /\.js[x]?$/,
             use: 'babel-loader',
             exclude: [
               /node_modules/
@@ -49,6 +49,10 @@ const config = {
             }, {
                 loader: "sass-loader" // compiles Sass to CSS
             }]
+          },
+          {
+            test: /\.css$/i,
+            use: ['style-loader', 'css-loader'],
           }
       ]
   },
@@ -66,7 +70,8 @@ const config = {
             ],
           safe: true,
         }
-      )
+      ),
+      new Dotenv()
   ],
   devServer: {  // configuration for webpack-dev-server
       contentBase: './src/public',  //source of static assets
