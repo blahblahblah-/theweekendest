@@ -334,6 +334,14 @@ class Mapbox extends React.Component {
     return (
       <div>
         <div ref={el => this.mapContainer = el} style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}></div>
+        <Segment inverted vertical style={{overflowY: "auto", display: "block", position: "absolute", top: "10px", left: "10px", bottom: "auto", width: "350px"}}>
+          <Header inverted as='h1' color='yellow'>
+            the weekendest<span id="alpha">beta</span>
+            <Header.Subheader>
+              real-time new york city subway map
+            </Header.Subheader>
+          </Header>
+        </Segment>
       </div>
     )
   }
