@@ -1,10 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
-import { Header, Segment, Grid, Button, Icon } from "semantic-ui-react";
+import { Header, Segment, Accordion, Statistic } from "semantic-ui-react";
 import stationData from '../data/station_details.json';
+import Circle from "./icons/circle-15.svg";
+import ExpressStop from "./icons/express-stop.svg";
+import UptownAllTrains from "./icons/uptown-all-trains.svg";
+import DowntownOnly from "./icons/downtown-only.svg";
 
 const apiUrl = 'https://www.goodservice.io/api/routes';
+const statusUrl = 'https://www.goodservice.io/api/info'
 const stations = {};
 const stationLocations = {}
 const center = [-74.003683, 40.7079445]
@@ -14,7 +19,7 @@ mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 class Mapbox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {routes: {}};
+    this.state = {trains: {}};
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["northStops"] = new Set();
@@ -55,6 +60,10 @@ class Mapbox extends React.Component {
       .then(response => response.json())
       .then(data => this.renderLines(data.routes))
       .then(() => this.renderStops())
+
+    // fetch(statusUrl)
+    //   .then(response => response.json())
+    //   .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }))
   }
 
   renderLines(routes) {
@@ -154,7 +163,7 @@ class Mapbox extends React.Component {
     const offsetMap = [[[8, 0], [14, 0], [16, 0]], [[8, -2], [14, -4], [16, -6]], [[8, 2], [14, 4], [16, 6]], [[8, -4], [14, -8], [16, -12]], [[8, 4], [14, 8], [16, 12]], [[8, -6], [14, -12], [16, -18]], [[8, 6], [14, 12], [16, 18]]];
     const textOffsetMap = [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [-3, 0], [3, 0]];
 
-    ['2', '3', '1', '4', '5', '6', '7', '7X', 'A', 'C', 'E', 'F', 'FX', 'D', 'B', 'M', 'J', 'Z', 'N', 'Q', 'R', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"].forEach((train) => {
+    ['2', '3', '1', '4', '5', '6', '6X', '7', '7X', 'A', 'C', 'E', 'F', 'FX', 'D', 'B', 'M', 'J', 'Z', 'R', 'N', 'Q', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"].forEach((train) => {
       const layerId = `${train}-train`;
       const routeLayer = routeLayers[layerId];
 
@@ -340,13 +349,45 @@ class Mapbox extends React.Component {
     return (
       <div>
         <div ref={el => this.mapContainer = el} style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}></div>
-        <Segment inverted vertical style={{overflowY: "auto", display: "block", position: "absolute", top: "10px", left: "10px", bottom: "auto", width: "350px"}}>
+        <Segment inverted vertical style={{overflowY: "auto", display: "block", position: "absolute", top: "10px", left: "10px", bottom: "auto", width: "350px", padding: "10px"}}>
           <Header inverted as='h1' color='yellow'>
             the weekendest<span id="alpha">beta</span>
             <Header.Subheader>
               real-time new york city subway map
             </Header.Subheader>
           </Header>
+          <Segment>
+            <Header as='h4'>
+              stops
+            </Header>
+            <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
+              <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
+              </Statistic>
+              <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
+              </Statistic>
+              <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                <Statistic.Label style={{fontSize: "0.75em"}}>All uptown</Statistic.Label>
+              </Statistic>
+              <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                <Statistic.Label style={{fontSize: "0.75em"}}>Only Downtown</Statistic.Label>
+              </Statistic>
+            </Statistic.Group>
+          </Segment>
+{/*          <Accordion styled>
+            
+              <Accordion.Title>
+              </Accordion.Title>
+              <Accordion.Content>
+                
+              </Accordion.Content>
+            
+          </Accordion>*/}
         </Segment>
       </div>
     )
