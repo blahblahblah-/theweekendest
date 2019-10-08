@@ -21,7 +21,7 @@ class Mapbox extends React.Component {
       stations[key]["southStops"] = new Set();
       stations[key]["passed"] = new Set();
       stations[key]["stops"] = new Set();
-      stationLocations[stationData[key].longitude + stationData[key].latitude] = key
+      stationLocations[`${stationData[key].longitude}-${stationData[key].latitude}`] = key
     });
   }
   
@@ -123,8 +123,8 @@ class Mapbox extends React.Component {
 
       geojson.features.forEach((routing) => {
         routing.geometry.coordinates.forEach((coord) => {
-          if (stationLocations[coord[0] + coord[1]]) {
-            const stationId = stationLocations[coord[0] + coord[1]];
+          if (stationLocations[`${coord[0]}-${coord[1]}`]) {
+            const stationId = stationLocations[`${coord[0]}-${coord[1]}`];
             stations[stationId]["passed"].add(key);
           }
         })
@@ -238,7 +238,7 @@ class Mapbox extends React.Component {
       const path = this.findPath(key, end, stepsTaken + 1);
       if (path && path.length) {
         if (stations[start]["north"][key].length) {
-          return results = stations[start]["north"][key].concat(path);
+          return results = stations[start]["north"][key].concat([[stations[key].longitude, stations[key].latitude]]).concat(path);
         }
         return results = [[stations[key].longitude, stations[key].latitude]].concat(path);
       }
@@ -247,6 +247,12 @@ class Mapbox extends React.Component {
   }
 
   renderStops() {
+    if (this.map.getLayer("Stops")) {
+      this.map.removeLayer("Stops")
+    }
+    if (this.map.getSource("Stops")) {
+      this.map.removeSource("Stops");
+    }
     this.map.addLayer({
       "id": "Stops",
       "type": "symbol",
