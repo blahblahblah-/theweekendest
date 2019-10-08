@@ -471,7 +471,7 @@
 {"stationId":"467","complexId":"611","stopId":"725","division":"IRT","line":"Flushing","name":"Times Sq - 42 St","borough":"M","daytimeRoutes":"7","structure":"Subway","latitude":"40.755477","longitude":"-73.987691"},
 {"stationId":"468","complexId":"611","stopId":"902","division":"IRT","line":"Lexington - Shuttle","name":"Times Sq - 42 St","borough":"M","daytimeRoutes":"S","structure":"Subway","latitude":"40.755983","longitude":"-73.986229"},
 {"stationId":"469","complexId":"610","stopId":"901","division":"IRT","line":"Lexington - Shuttle","name":"Grand Central - 42 St","borough":"M","daytimeRoutes":"S","structure":"Subway","latitude":"40.752769","longitude":"-73.979189"},
-{"stationId":"471","complexId":"471","stopId":"726","division":"IRT","line":"Flushing","name":"34 St - 11 Av","borough":"M","daytimeRoutes":"7","structure":"Subway","latitude":"40.755882","longitude":"-74.00191"},
+{"stationId":"471","complexId":"471","stopId":"726","division":"IRT","line":"Flushing","name":"34 St - Hudson Yards","borough":"M","daytimeRoutes":"7","structure":"Subway","latitude":"40.755882","longitude":"-74.00191"},
 {"stationId":"475","complexId":"475","stopId":"Q05","division":"IND","line":"Second Av","name":"96 St","borough":"M","daytimeRoutes":"Q","structure":"Subway","latitude":"40.784318","longitude":"-73.947152"},
 {"stationId":"476","complexId":"476","stopId":"Q04","division":"IND","line":"Second Av","name":"86 St","borough":"M","daytimeRoutes":"Q","structure":"Subway","latitude":"40.777891","longitude":"-73.951787"},
 {"stationId":"477","complexId":"477","stopId":"Q03","division":"IND","line":"Second Av","name":"72 St","borough":"M","daytimeRoutes":"Q","structure":"Subway","latitude":"40.768799","longitude":"-73.958424"},

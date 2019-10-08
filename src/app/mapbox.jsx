@@ -159,7 +159,10 @@ class Mapbox extends React.Component {
       const routeLayer = routeLayers[layerId];
 
       if (this.map.getLayer(layerId)) {
-        this.map.removeLayer(layerId)
+        this.map.removeLayer(layerId);
+      }
+      if (this.map.getSource(layerId)) {
+        this.map.removeSource(layerId);
       }
 
       if (routeLayer) {
@@ -185,6 +188,9 @@ class Mapbox extends React.Component {
         };
         if (this.map.getLayer(layerId)) {
           this.map.removeLayer(layerId)
+        }
+        if (this.map.getSource(layerId)) {
+          this.map.removeSource(layerId);
         }
         this.map.addLayer(routeLayer);
       }
