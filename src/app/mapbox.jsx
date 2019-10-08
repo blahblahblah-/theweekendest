@@ -6,6 +6,7 @@ import stationData from '../data/station_details.json';
 
 const apiUrl = 'https://www.goodservice.io/api/routes';
 const stations = {};
+const stationLocations = {}
 const center = [-74.003683, 40.7079445]
 
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
@@ -20,6 +21,7 @@ class Mapbox extends React.Component {
       stations[key]["southStops"] = new Set();
       stations[key]["passed"] = new Set();
       stations[key]["stops"] = new Set();
+      stationLocations[stationData[key].longitude + stationData[key].latitude] = key
     });
   }
   
@@ -80,11 +82,15 @@ class Mapbox extends React.Component {
       }).map((routing) => {
         return routing.map((stopId) => {
           const stopIdPrefix = stopId.substr(0, 3);
-          stations[stopIdPrefix].northStops.add(key);
-          stations[stopIdPrefix].stops.add(key);
-          routeStops[key].add(stopIdPrefix);
-          northStops.add(stopIdPrefix);
+          if (stations[stopIdPrefix]) {
+            stations[stopIdPrefix].northStops.add(key);
+            stations[stopIdPrefix].stops.add(key);
+            routeStops[key].add(stopIdPrefix);
+            northStops.add(stopIdPrefix);
+          }
           return stopIdPrefix;
+        }).filter((stopId) => {
+          return stations[stopId];
         });
       });
       const southRoutings = route.routings.south.filter((routing) => {
@@ -94,11 +100,15 @@ class Mapbox extends React.Component {
       }).map((routing) => {
         return routing.map((stopId) => {
           const stopIdPrefix = stopId.substr(0, 3);
-          stations[stopIdPrefix].southStops.add(key);
-          stations[stopIdPrefix].stops.add(key);
-          routeStops[key].add(stopIdPrefix);
-          southStops.add(stopIdPrefix);
+          if (stations[stopIdPrefix]) {
+            stations[stopIdPrefix].southStops.add(key);
+            stations[stopIdPrefix].stops.add(key);
+            routeStops[key].add(stopIdPrefix);
+            southStops.add(stopIdPrefix);
+          }
           return stopIdPrefix;
+        }).filter((stopId) => {
+          return stations[stopId];
         }).reverse();
       });
       const allRoutings = northRoutings.concat(southRoutings);
@@ -107,9 +117,18 @@ class Mapbox extends React.Component {
       const geojson = {
         "type": "FeatureCollection",
         "features": routings.map((routing) => {
-          return this.routingGeoJson(key, routing)
+          return this.routingGeoJson(routing)
         })
       };
+
+      geojson.features.forEach((routing) => {
+        routing.geometry.coordinates.forEach((coord) => {
+          if (stationLocations[coord[0] + coord[1]]) {
+            const stationId = stationLocations[coord[0] + coord[1]];
+            stations[stationId]["passed"].add(key);
+          }
+        })
+      });
       
       routeLayers[layerId] = {
         "id": layerId,
@@ -138,6 +157,10 @@ class Mapbox extends React.Component {
     ['2', '3', '1', '4', '5', '6', '7', '7X', 'A', 'C', 'E', 'F', 'FX', 'D', 'B', 'M', 'J', 'Z', 'N', 'Q', 'R', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"].forEach((train) => {
       const layerId = `${train}-train`;
       const routeLayer = routeLayers[layerId];
+
+      if (this.map.getLayer(layerId)) {
+        this.map.removeLayer(layerId)
+      }
 
       if (routeLayer) {
         let offset = 0;
@@ -168,12 +191,12 @@ class Mapbox extends React.Component {
     });
   }
 
-  routingGeoJson(train, routing) {
+  routingGeoJson(routing) {
     let path = []
     let prev = routing.splice(0, 1);
     routing.forEach((stopId) => {
       path.push([stations[prev].longitude, stations[prev].latitude]);
-      let potentialPath = this.findPath(prev, stopId, 0, train);
+      let potentialPath = this.findPath(prev, stopId, 0);
       if (potentialPath) {
         potentialPath.forEach((coord) => {
           path.push(coord);
@@ -195,7 +218,7 @@ class Mapbox extends React.Component {
     }
   }
 
-  findPath(start, end, stepsTaken, train) {
+  findPath(start, end, stepsTaken) {
     if (stations[start]["north"][end] != undefined) {
       if (stations[start]["north"][end].length) {
         return stations[start]["north"][end];
@@ -206,9 +229,8 @@ class Mapbox extends React.Component {
     }
     let results = [];
     Object.keys(stations[start]["north"]).forEach((key) => {
-      const path = this.findPath(key, end, stepsTaken + 1, train);
+      const path = this.findPath(key, end, stepsTaken + 1);
       if (path && path.length) {
-        stations[start]["passed"].add(train);
         if (stations[start]["north"][key].length) {
           return results = stations[start]["north"][key].concat(path);
         }
@@ -259,7 +281,7 @@ class Mapbox extends React.Component {
           "type": "Feature",
           "properties": {
             "name": stations[key].name.replace(/ - /g, "–"),
-            "stopType": "circle-15"
+            "stopType": this.stopTypeIcon(key)
           },
           "geometry": {
             "type": "Point",
@@ -268,6 +290,38 @@ class Mapbox extends React.Component {
         }
       })
     };
+  }
+
+  stopTypeIcon(stopId) {
+    const passed = Array.from(stations[stopId]["passed"]);
+    if (stations[stopId]["stops"].size == 0) {
+      return "cross-15";
+    }
+    if (passed.every((train) => stations[stopId]["southStops"].has(train)) &&
+      (passed.every((train) => stations[stopId]["northStops"].has(train)))) {
+      return "express-stop";
+    }
+    if (stations[stopId]["northStops"].size == 0) {
+      if (passed.every((train) => stations[stopId]["southStops"].has(train))) {
+        return "all-downtown-trains";
+      } else {
+        return "downtown-only";
+      }
+    }
+    if (stations[stopId]["southStops"].size == 0) {
+      if (passed.every((train) => stations[stopId]["northStops"].has(train))) {
+        return "all-uptown-trains";
+      } else {
+        return "uptown-only";
+      }
+    }
+    if (passed.every((train) => stations[stopId]["southStops"].has(train))) {
+      return "downtown-all-trains";
+    }
+    if (passed.every((train) => stations[stopId]["northStops"].has(train))) {
+      return "uptown-all-trains";
+    }
+    return "circle-15";
   }
 
   render() {

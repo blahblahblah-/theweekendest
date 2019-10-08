@@ -471,7 +471,7 @@ Station ID,Complex ID,GTFS Stop ID,Division,Line,Stop Name,Borough,Daytime Route
 467,611,725,IRT,Flushing,Times Sq - 42 St,M,7,Subway,40.755477,-73.987691
 468,611,902,IRT,Lexington - Shuttle,Times Sq - 42 St,M,S,Subway,40.755983,-73.986229
 469,610,901,IRT,Lexington - Shuttle,Grand Central - 42 St,M,S,Subway,40.752769,-73.979189
-471,471,726,IRT,Flushing,34 St - 11 Av,M,7,Subway,40.755882,-74.00191
+471,471,726,IRT,Flushing,34 St - Hudson Yards,M,7,Subway,40.755882,-74.00191
 475,475,Q05,IND,Second Av,96 St,M,Q,Subway,40.784318,-73.947152
 476,476,Q04,IND,Second Av,86 St,M,Q,Subway,40.777891,-73.951787
 477,477,Q03,IND,Second Av,72 St,M,Q,Subway,40.768799,-73.958424
