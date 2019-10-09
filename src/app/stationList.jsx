@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import _ from 'lodash';
-import { Search, Header, Segment, List } from "semantic-ui-react";
+import { Header, Segment, List } from "semantic-ui-react";
 import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
@@ -38,45 +37,16 @@ class StationList extends React.Component {
       }
       return 0;
     });
-    this.stationSearch = this.stations.map((station) => {
-      station.title = station.name;
-      station.description = station.description;
-      return station;
-    });
-    this.state = { results: [], value: ''}
-  }
-
-  handleResultSelect = (e, { result }) => this.setState({ value: result.title })
-
-  handleSearchChange = (e, { value }) => {
-    this.setState({value});
-
-    if (this.state.value.length < 1) return this.setState({results: []})
-
-    const re = new RegExp(_.escapeRegExp(this.state.value), 'i')
-    const isMatch = (result) => re.test(result.title)
-
-    this.setState({
-      results: _.filter(this.stationSearch, isMatch),
-    })
   }
 
   render() {
     const { stations, trains } = this.props;
-    const { value, results } = this.state;
     const trainMap = {};
     trains.forEach((train) => {
       trainMap[train.id] = train;
     });
     return (
       <div>
-{/*        <Search
-            onResultSelect={this.handleResultSelect}
-            onSearchChange={this.handleSearchChange}
-            results={results}
-            value={value}
-            resultRenderer={resultRenderer}
-        />*/}
         <List divided relaxed selection>
           {
             this.stations.map((stop) => {
