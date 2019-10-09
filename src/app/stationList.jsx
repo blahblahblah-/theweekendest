@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Header, Segment, List } from "semantic-ui-react";
+import _ from 'lodash';
+import { Header, Segment, List, Input } from "semantic-ui-react";
 import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
@@ -37,6 +38,7 @@ class StationList extends React.Component {
       }
       return 0;
     });
+    this.state = {stationsDisplayed: this.stations};
   }
 
   handleClick = stop => {
@@ -44,17 +46,34 @@ class StationList extends React.Component {
     onStationSelect(stop.id);
   }
 
+  handleChange = (e, data) => {
+    if (data.value.length < 1) {
+      return this.setState({stationsDisplayed: this.stations});
+    }
+
+    setTimeout(() => {
+      const re = new RegExp(_.escapeRegExp(data.value), 'i')
+      const isMatch = (result) => re.test(result.name)
+
+      this.setState({
+        stationsDisplayed: _.filter(this.stations, isMatch),
+      })
+    }, 300);
+  }
+
   render() {
     const { stations, trains } = this.props;
+    const { stationsDisplayed } = this.state;
     const trainMap = {};
     trains.forEach((train) => {
       trainMap[train.id] = train;
     });
     return (
       <div>
-        <List divided relaxed selection>
+        <Input icon='search' placeholder='Search...' onChange={this.handleChange} className="station-search" />
+        <List divided relaxed selection style={{marginTop: 0}}>
           {
-            this.stations.map((stop) => {
+            stationsDisplayed && stationsDisplayed.map((stop) => {
               return(
                 <List.Item key={stop.id} className='station-list-item' onClick={this.handleClick.bind(this, stop)}>
                   <List.Content floated='left'>

@@ -509,7 +509,7 @@ class Mapbox extends React.Component {
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><TrainList trains={trains} onTrainSelect={this.handleTrainSelect.bind(this)} /></Tab.Pane>,
       },
       {
-        menuItem: 'Stops',
+        menuItem: 'Stations',
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList onStationSelect={this.handleStationSelect.bind(this)} stations={stations} trains={trains} /></Tab.Pane>,
       },
     ];

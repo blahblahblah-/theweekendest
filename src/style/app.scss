@@ -39,7 +39,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     width: 350px;
-    max-height: 80vh;
+    max-height: 75vh;
   }
 }
 
@@ -130,4 +130,15 @@
 
 .station-list-item {
   min-height: 28px;
+}
+
+.station-search {
+  width: 100%;
+
+  input {
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    height: 41px;
+  }
 }
