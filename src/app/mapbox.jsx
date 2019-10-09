@@ -560,11 +560,11 @@ class Mapbox extends React.Component {
                     </Statistic>
                     <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
                       <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some downtown</Statistic.Label>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some dntwn</Statistic.Label>
                     </Statistic>
                     <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
                       <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>Some downtown, no uptown</Statistic.Label>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>Some dntwn, no uptown</Statistic.Label>
                     </Statistic>
                   </Statistic.Group>
                 </Responsive>
@@ -583,11 +583,11 @@ class Mapbox extends React.Component {
                     </Statistic>
                     <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
                       <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some dntwn</Statistic.Label>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some downtown</Statistic.Label>
                     </Statistic>
                     <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
                       <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>Some dntwn, no uptown</Statistic.Label>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>Some downtown, no uptown</Statistic.Label>
                     </Statistic>
                   </Statistic.Group>
                 </Responsive>
