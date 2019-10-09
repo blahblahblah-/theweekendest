@@ -17,8 +17,8 @@ class TrainList extends React.Component {
   }
 
   handleClick = train => {
-    const { onSelect } = this.props;
-    onSelect(train.id);
+    const { onTrainSelect } = this.props;
+    onTrainSelect(train.id);
   }
 
   render() {

@@ -41,6 +41,7 @@
   font-weight: bold;
   color: #fff;
   margin: .25em;
+  display: inline-block;
 
   &.medium {
     height: 1.75em;
@@ -54,7 +55,6 @@
     width: 1.5em;
     font-size: 1em;
     line-height: 1.5em;
-    display: inline-block;
   }
 }
 
@@ -109,6 +109,11 @@
     h6 {
       margin-top: 0;
     }
+  }
+
+  .route {
+    display: inline-block;
+    margin-left: 2px;
   }
 }
 

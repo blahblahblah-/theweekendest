@@ -3,7 +3,7 @@ require 'json'
 
 stations = {}
 
-stations_csv = File.read('stations.csv')
+stations_csv = File.read('files/stations.csv')
 csv = CSV.parse(stations_csv, headers: true)
 csv.each do |row|
   stations[row['GTFS Stop ID']] = {

@@ -97,8 +97,13 @@ class TrainMapStop extends React.Component {
     )
   }
 
+  handleClick = stop => {
+    const { onStationSelect } = this.props;
+    onStationSelect(stop.id);
+  }
+
   render() {
-    const { stop, transfers, activeBranches, branchStart, branchEnd, onSelect } = this.props;
+    const { stop, transfers, activeBranches, branchStart, branchEnd, onTrainSelect } = this.props;
     return (
       <li>
         <div style={{minHeight: "50px", display: "flex"}}>
@@ -107,7 +112,7 @@ class TrainMapStop extends React.Component {
             })
           }
           <Header as='h5'
-            style={{display: "inline", margin: "auto 0"}}>
+            style={{display: "inline", margin: "auto 0", cursor: "pointer"}} onClick={this.handleClick.bind(this, stop)}>
               {stop && stop.name.replace(/ - /g, "–")}
           </Header>
           <div style={{display: "inline-block", margin: "auto 0"}}>
@@ -115,7 +120,7 @@ class TrainMapStop extends React.Component {
               transfers && transfers.map((route) => {
                 return (
                   <TrainBullet link={true} id={route.id} key={route.name} name={route.name} color={route.color}
-                    textColor={route.text_color} size='small' key={route.id} onSelect={onSelect} />
+                    textColor={route.text_color} size='small' key={route.id} onSelect={onTrainSelect} />
                 )
               })
             }

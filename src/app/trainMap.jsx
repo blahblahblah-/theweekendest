@@ -1,5 +1,4 @@
 import React from 'react';
-import { Header } from 'semantic-ui-react';
 import TrainMapStop from './trainMapStop.jsx';
 
 class TrainMap extends React.Component {
@@ -169,7 +168,7 @@ class TrainMap extends React.Component {
   }
 
   render() {
-    const { routing, stops, onSelect } = this.props;
+    const { routing, stops, onTrainSelect, onStationSelect } = this.props;
     const segments = this.generateSegments();
     const stopPattern = this.calculateStops();
     let currentBranches = [0];
@@ -260,7 +259,8 @@ class TrainMap extends React.Component {
                 return (
                   <TrainMapStop key={stopId} stop={stop} color={routing.color} southStop={stopPattern.southStops[stopId]}
                     northStop={stopPattern.northStops[stopId]} transfers={transfers} branchStops={branchStops} branchStart={branchStart}
-                    branchEnd={branchEnd} activeBranches={activeBranches} onSelect={onSelect} />
+                    branchEnd={branchEnd} activeBranches={activeBranches} onTrainSelect={onTrainSelect}
+                    onStationSelect={onStationSelect} />
                 )
               })
             }

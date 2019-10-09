@@ -5,8 +5,11 @@ import { Header, Segment, Statistic, Tab } from "semantic-ui-react";
 import TrainList from './trainList.jsx';
 import TrainDetails from './trainDetails.jsx';
 import StationList from './stationList.jsx';
+import StationDetails from './stationDetails.jsx';
 
 import stationData from '../data/station_details.json';
+import transfers from '../data/transfers.json';
+
 import Circle from "./icons/circle-15.svg";
 import ExpressStop from "./icons/express-stop.svg";
 import UptownAllTrains from "./icons/uptown-all-trains.svg";
@@ -27,7 +30,7 @@ mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 class Mapbox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {trains: {}};
+    this.state = {trains: {}, activeIndex: 0};
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["id"] = key;
@@ -35,7 +38,13 @@ class Mapbox extends React.Component {
       stations[key]["southStops"] = new Set();
       stations[key]["passed"] = new Set();
       stations[key]["stops"] = new Set();
+      stations[key]["transfers"] = new Set();
       stationLocations[`${stationData[key].longitude}-${stationData[key].latitude}`] = key
+    });
+    transfers.forEach((transfer) => {
+      if (stations[transfer['from']]) {
+        stations[transfer['from']]["transfers"].add(transfer['to']);
+      }
     });
   }
   
@@ -228,6 +237,12 @@ class Mapbox extends React.Component {
         this.map.on('click', layerId, () => {
           this.selectTrain(train);
         });
+        this.map.on('mouseenter', layerId, (() => {
+          this.map.getCanvas().style.cursor = 'pointer';
+        }).bind(this));
+        this.map.on('mouseleave', layerId, (() => {
+          this.map.getCanvas().style.cursor = '';
+        }).bind(this));
       }
     });
   }
@@ -319,6 +334,15 @@ class Mapbox extends React.Component {
         "text-color": "#aaaaaa"
       }
     });
+    this.map.on('click', "Stops", (e) => {
+      this.handleStationSelect(e.features[0].properties.id);
+    });
+    this.map.on('mouseenter', 'Stops', (() => {
+      this.map.getCanvas().style.cursor = 'pointer';
+    }).bind(this));
+    this.map.on('mouseleave', 'Stops', (() => {
+      this.map.getCanvas().style.cursor = '';
+    }).bind(this));
   }
 
   stopsGeoJson() {
@@ -328,6 +352,7 @@ class Mapbox extends React.Component {
         return {
           "type": "Feature",
           "properties": {
+            "id": stations[key].id,
             "name": stations[key].name.replace(/ - /g, "–"),
             "stopType": this.stopTypeIcon(key)
           },
@@ -387,17 +412,17 @@ class Mapbox extends React.Component {
         right: 20,
         left: 500,
         bottom: 20,
-      }
+      },
     });
     this.infoBox.scrollTop = 0;
   }
 
   selectTrain(train) {
-    const { selectedTrain } = this.state;
-    if (selectedTrain) {
-      this.setState({selectedTrain: train});
+    const { selectedTrain, selectedStation } = this.state;
+    if (selectedTrain || selectedStation) {
+      this.setState({selectedTrain: train, selectedStation: null});
     } else {
-      this.setState({selectedTrain: train, lastView: window.location.hash});
+      this.setState({selectedTrain: train, selectedStation: null, lastView: window.location.hash});
     }
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
@@ -411,33 +436,64 @@ class Mapbox extends React.Component {
     });
   }
 
-  handleResetView = _ => {
-    const { lastView } = this.state;
-    this.setState({selectedTrain: null, lastView: null});
+  handleStationSelect = (station) => {
+    const { selectedStation, selectedTrain } = this.state;
+    const stationData = stations[station];
+    if (selectedTrain || selectedStation) {
+      this.setState({selectedStation: station, selectedTrain: null});
+    } else {
+      this.setState({selectedStation: station, selectedTrain: null, lastView: window.location.hash});
+    }
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
-      this.map.setPaintProperty(layerId, 'line-opacity', 1);
+      if (this.map.getLayer(layerId)) {
+        if (!stationData.stops.has(t)) {
+          this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
+        } else {
+          this.map.setPaintProperty(layerId, 'line-opacity', 1);
+        }
+      }
+    });
+
+    this.map.easeTo({
+      center: [stationData.longitude, stationData.latitude],
+      zoom: 14,
+      bearing: 29,
+    });
+    this.infoBox.scrollTop = 0;
+  }
+
+  handleResetView = _ => {
+    const { lastView } = this.state;
+    this.setState({selectedTrain: null, selectedStation: null, lastView: null});
+    trainIds.forEach((t) => {
+      const layerId = `${t}-train`;
+      if (this.map.getLayer(layerId)) {
+        this.map.setPaintProperty(layerId, 'line-opacity', 1);
+      }
     });
     this.infoBox.scrollTop = 0;
     window.location.hash = lastView;
   }
+
+  handleTabChange = (e, { activeIndex }) => this.setState({ activeIndex })
 
   panes() {
     const { trains } = this.state;
     return [
       {
         menuItem: 'Trains',
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><TrainList trains={trains} onSelect={this.handleTrainSelect.bind(this)} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><TrainList trains={trains} onTrainSelect={this.handleTrainSelect.bind(this)} /></Tab.Pane>,
       },
       {
         menuItem: 'Stops',
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList onStationSelect={this.handleStationSelect.bind(this)} stations={stations} trains={trains} /></Tab.Pane>,
       },
     ];
   }
 
   render() {
-    const { trains, selectedTrain, routing, stops } = this.state;
+    const { trains, selectedTrain, selectedStation, routing, stops, activeIndex } = this.state;
     return (
       <div>
         <div ref={el => this.mapContainer = el} style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}></div>
@@ -449,7 +505,7 @@ class Mapbox extends React.Component {
                 real-time new york city subway map
               </Header.Subheader>
             </Header>
-            { !selectedTrain &&
+            { !selectedTrain && !selectedStation &&
               <div>
                 <Segment>
                   <Header as='h4'>
@@ -476,15 +532,22 @@ class Mapbox extends React.Component {
                 </Segment>
                 { trains && trains.length &&
                   <Segment style={{paddingTop: 0}}>
-                    <Tab menu={{secondary: true, pointing: true}} panes={this.panes()} />
+                    <Tab menu={{secondary: true, pointing: true}} panes={this.panes()} activeIndex={activeIndex} onTabChange={this.handleTabChange} />
                   </Segment>
                 }
               </div>
             }
-            { selectedTrain &&
+            { selectedTrain && !selectedStation &&
               <TrainDetails routing={routing[selectedTrain]} stops={stops}
                 train={trains.find((train) => train.id == selectedTrain)}
-                onReset={this.handleResetView.bind(this)} onSelect={this.handleTrainSelect.bind(this)}
+                onReset={this.handleResetView.bind(this)} onTrainSelect={this.handleTrainSelect.bind(this)}
+                onStationSelect={this.handleStationSelect.bind(this)}
+              />
+            }
+            { selectedStation && !selectedTrain &&
+              <StationDetails trains={trains} station={stations[selectedStation]} stations={stations}
+                onReset={this.handleResetView.bind(this)} onStationSelect={this.handleStationSelect.bind(this)}
+                onTrainSelect={this.handleTrainSelect.bind(this)}
               />
             }
             </div>

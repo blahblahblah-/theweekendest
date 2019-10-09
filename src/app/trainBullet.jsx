@@ -21,7 +21,7 @@ class TrainBullet extends React.Component {
 
   style() {
     const { onSelect } = this.props
-    const cursor = !!onSelect ? "pointer" : "default"
+    const cursor = !!onSelect ? "pointer" : ""
     if (this.props.textColor) {
       return {
         ...this.props.style,

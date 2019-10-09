@@ -39,6 +39,11 @@ class StationList extends React.Component {
     });
   }
 
+  handleClick = stop => {
+    const { onStationSelect } = this.props;
+    onStationSelect(stop.id);
+  }
+
   render() {
     const { stations, trains } = this.props;
     const trainMap = {};
@@ -51,7 +56,7 @@ class StationList extends React.Component {
           {
             this.stations.map((stop) => {
               return(
-                <List.Item key={stop.id} className='station-list-item'>
+                <List.Item key={stop.id} className='station-list-item' onClick={this.handleClick.bind(this, stop)}>
                   <List.Content floated='left'>
                     <Header as='h5'>
                       { stop.name.replace(/ - /g, "–") }

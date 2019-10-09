@@ -35,7 +35,7 @@ class TrainDetails extends React.Component {
   }
 
   render() {
-    const { routing, stops, train, onSelect } = this.props;
+    const { routing, stops, train, onTrainSelect, onStationSelect } = this.props;
     return (
       <Segment>
         <Button icon basic onClick={this.handleBack}>
@@ -43,7 +43,7 @@ class TrainDetails extends React.Component {
         </Button>
         <div className="train-details-header">
           <div className="train-info">
-            <TrainBullet name={train.name} color={train.color} textColor={train.text_color} style={{display: "inline-block"}} />
+            <TrainBullet name={train.name} color={train.color} textColor={train.text_color} />
             { train.alternate_name && 
               <Header as='h5' style={{display: "inline-block"}}>{train.alternate_name.replace(" Shuttle", "")}</Header>
             }
@@ -60,7 +60,7 @@ class TrainDetails extends React.Component {
         {
           this.renderSummary()
         }
-        <TrainMap routing={routing} stops={stops} train={train} onSelect={onSelect} />
+        <TrainMap routing={routing} stops={stops} train={train} onTrainSelect={onTrainSelect} onStationSelect={onStationSelect} />
       </Segment>
     );
   }
