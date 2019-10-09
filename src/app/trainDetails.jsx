@@ -35,7 +35,7 @@ class TrainDetails extends React.Component {
   }
 
   render() {
-    const { routing, stops, train } = this.props;
+    const { routing, stops, train, onSelect } = this.props;
     return (
       <Segment>
         <Button icon basic onClick={this.handleBack}>
@@ -60,7 +60,7 @@ class TrainDetails extends React.Component {
         {
           this.renderSummary()
         }
-        <TrainMap routing={routing} stops={stops} train={train} />
+        <TrainMap routing={routing} stops={stops} train={train} onSelect={onSelect} />
       </Segment>
     );
   }

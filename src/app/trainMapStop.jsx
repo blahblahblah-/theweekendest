@@ -98,7 +98,7 @@ class TrainMapStop extends React.Component {
   }
 
   render() {
-    const { stop, transfers, activeBranches, branchStart, branchEnd } = this.props;
+    const { stop, transfers, activeBranches, branchStart, branchEnd, onSelect } = this.props;
     return (
       <li>
         <div style={{minHeight: "50px", display: "flex"}}>
@@ -115,7 +115,7 @@ class TrainMapStop extends React.Component {
               transfers && transfers.map((route) => {
                 return (
                   <TrainBullet link={true} id={route.id} key={route.name} name={route.name} color={route.color}
-                    textColor={route.text_color} size='small' key={route.id} />
+                    textColor={route.text_color} size='small' key={route.id} onSelect={onSelect} />
                 )
               })
             }

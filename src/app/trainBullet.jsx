@@ -20,22 +20,38 @@ class TrainBullet extends React.Component {
   }
 
   style() {
+    const { onSelect } = this.props
+    const cursor = !!onSelect ? "pointer" : "default"
     if (this.props.textColor) {
       return {
         ...this.props.style,
         backgroundColor: `${this.props.color}`,
-        color: `${this.props.textColor}`
+        color: `${this.props.textColor}`,
+        cursor: cursor
       }
     } else {
       return {
         ...this.props.style,
-        backgroundColor: `${this.props.color}`
+        backgroundColor: `${this.props.color}`,
+        cursor: cursor
       };
     }
   }
 
+  handleClick = id => {
+    const { onSelect } = this.props;
+    onSelect(id);
+  }
+
   render() {
-    const { id, alternateName } = this.props;
+    const { id, alternateName, onSelect } = this.props;
+    if (onSelect) {
+      return(
+        <div className={this.classNames()} style={this.style()} onClick={this.handleClick.bind(this, id)}>
+          <div className={this.innerClassNames()}>{this.name()}<sup>{alternateName}</sup></div>
+        </div>
+      )
+    }
     return(
       <div className={this.classNames()} style={this.style()}>
         <div className={this.innerClassNames()}>{this.name()}<sup>{alternateName}</sup></div>

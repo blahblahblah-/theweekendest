@@ -24,33 +24,31 @@ class TrainList extends React.Component {
   render() {
     const { trains } = this.props;
     return (
-      <Segment>
-        <List divided relaxed selection>
-          {
-            trains.filter((train) => train.visible || train.status !== 'Not Scheduled').map((train) => {
-              return (
-                <List.Item key={train.id} onClick={this.handleClick.bind(this, train)} data-train={train.id}>
-                  <List.Content floated='left'>
-                    <TrainBullet name={train.name} color={train.color}
-                      textColor={train.text_color} size='small' />
-                  </List.Content>
-                  {
-                    train.alternate_name &&
-                      <List.Content floated='left'>
-                        { train.alternate_name.replace('Shuttle', '') }
-                      </List.Content>
-                  }
-                  <List.Content floated='right'>
-                    <Header as='h4' color={this.statusColor(train.status)}>
-                      { train.status }
-                    </Header>
-                  </List.Content>
-                </List.Item>
-              );
-            })
-          }
-        </List>
-      </Segment>
+      <List divided relaxed selection>
+        {
+          trains.filter((train) => train.visible || train.status !== 'Not Scheduled').map((train) => {
+            return (
+              <List.Item key={train.id} onClick={this.handleClick.bind(this, train)} data-train={train.id}>
+                <List.Content floated='left'>
+                  <TrainBullet name={train.name} color={train.color}
+                    textColor={train.text_color} size='small' />
+                </List.Content>
+                {
+                  train.alternate_name &&
+                    <List.Content floated='left'>
+                      { train.alternate_name.replace(' Shuttle', '').replace('Avenue', 'Av') }
+                    </List.Content>
+                }
+                <List.Content floated='right'>
+                  <Header as='h4' color={this.statusColor(train.status)}>
+                    { train.status }
+                  </Header>
+                </List.Content>
+              </List.Item>
+            );
+          })
+        }
+      </List>
     )
   }
 }

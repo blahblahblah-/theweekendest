@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
-import { Header, Segment, Statistic } from "semantic-ui-react";
+import { Header, Segment, Statistic, Tab } from "semantic-ui-react";
 import TrainList from './trainList.jsx';
 import TrainDetails from './trainDetails.jsx';
+import StationList from './stationList.jsx';
 
 import stationData from '../data/station_details.json';
 import Circle from "./icons/circle-15.svg";
@@ -29,6 +30,7 @@ class Mapbox extends React.Component {
     this.state = {trains: {}};
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
+      stations[key]["id"] = key;
       stations[key]["northStops"] = new Set();
       stations[key]["southStops"] = new Set();
       stations[key]["passed"] = new Set();
@@ -77,6 +79,7 @@ class Mapbox extends React.Component {
   }
 
   renderLines(routes) {
+    const { selectedTrain } = this.state;
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["northStops"] = new Set();
@@ -205,6 +208,16 @@ class Mapbox extends React.Component {
         routeLayer.paint["line-offset"] = {
           "stops": offsetMap[offset]
         };
+        if (selectedTrain) {
+          if (selectedTrain === train) {
+            routeLayer.paint["line-opacity"] = 1;
+          } else {
+            routeLayer.paint["line-opacity"] = 0.1;
+          }
+        } else {
+          routeLayer.paint["line-opacity"] = 1;
+        }
+
         if (this.map.getLayer(layerId)) {
           this.map.removeLayer(layerId)
         }
@@ -212,6 +225,9 @@ class Mapbox extends React.Component {
           this.map.removeSource(layerId);
         }
         this.map.addLayer(routeLayer);
+        this.map.on('click', layerId, () => {
+          this.selectTrain(train);
+        });
       }
     });
   }
@@ -357,15 +373,7 @@ class Mapbox extends React.Component {
   }
 
   handleTrainSelect = (train) => {
-    this.setState({selectedTrain: train, lastView: window.location.hash});
-    trainIds.forEach((t) => {
-      if (t !== train) {
-        const layerId = `${t}-train`;
-        if (this.map.getLayer(layerId)) {
-          this.map.setLayoutProperty(layerId, 'visibility', 'none');
-        }
-      }
-    });
+    this.selectTrain(train);
 
     const data = this.map.getSource(`${train}-train`)._data;
     const coordinatesArray = data.features.map((feature) => feature.geometry.coordinates);
@@ -384,15 +392,48 @@ class Mapbox extends React.Component {
     this.infoBox.scrollTop = 0;
   }
 
+  selectTrain(train) {
+    const { selectedTrain } = this.state;
+    if (selectedTrain) {
+      this.setState({selectedTrain: train});
+    } else {
+      this.setState({selectedTrain: train, lastView: window.location.hash});
+    }
+    trainIds.forEach((t) => {
+      const layerId = `${t}-train`;
+      if (this.map.getLayer(layerId)) {
+        if (t !== train) {
+          this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
+        } else {
+          this.map.setPaintProperty(layerId, 'line-opacity', 1);
+        }
+      }
+    });
+  }
+
   handleResetView = _ => {
     const { lastView } = this.state;
     this.setState({selectedTrain: null, lastView: null});
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
-      this.map.setLayoutProperty(layerId, 'visibility', 'visible');
+      this.map.setPaintProperty(layerId, 'line-opacity', 1);
     });
     this.infoBox.scrollTop = 0;
     window.location.hash = lastView;
+  }
+
+  panes() {
+    const { trains } = this.state;
+    return [
+      {
+        menuItem: 'Trains',
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><TrainList trains={trains} onSelect={this.handleTrainSelect.bind(this)} /></Tab.Pane>,
+      },
+      {
+        menuItem: 'Stops',
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} /></Tab.Pane>,
+      },
+    ];
   }
 
   render() {
@@ -434,13 +475,16 @@ class Mapbox extends React.Component {
                   </Statistic.Group>
                 </Segment>
                 { trains && trains.length &&
-                  <TrainList trains={trains} onSelect={this.handleTrainSelect.bind(this)} />
+                  <Segment style={{paddingTop: 0}}>
+                    <Tab menu={{secondary: true, pointing: true}} panes={this.panes()} />
+                  </Segment>
                 }
               </div>
             }
             { selectedTrain &&
               <TrainDetails routing={routing[selectedTrain]} stops={stops}
-                train={trains.find((train) => train.id == selectedTrain)} onReset={this.handleResetView.bind(this)}
+                train={trains.find((train) => train.id == selectedTrain)}
+                onReset={this.handleResetView.bind(this)} onSelect={this.handleTrainSelect.bind(this)}
               />
             }
             </div>
