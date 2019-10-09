@@ -10,17 +10,28 @@
   top: 10px;
   left: 10px;
   bottom: auto;
-  width: 370px;
+  width: 300px;
   padding: 10px !important;
   max-height: 90%;
   border-radius: 1rem !important;
 }
 
+@media only screen and (min-width: 768px) {
+  .infobox {
+    width: 370px;
+  }
+}
+
 .inner-infobox {
   overflow-y: hidden;
   overflow-x: hidden;
-  width: 350px;
-  max-height: 60px;
+  width: 280px;
+  max-height: 38px;
+
+  &.open {
+    overflow-y: auto;
+    max-height: 80vh;
+  }
 }
 
 @media only screen and (min-width: 768px) {
@@ -28,7 +39,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     width: 350px;
-    max-height: 88vh;
+    max-height: 80vh;
   }
 }
 
@@ -113,7 +124,7 @@
 
   .route {
     display: inline-block;
-    margin-left: 2px;
+    margin-left: 3px;
   }
 }
 

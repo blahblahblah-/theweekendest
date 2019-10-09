@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Button, Icon, Header, Segment, List } from "semantic-ui-react";
+import { Responsive, Button, Icon, Header, Segment, List } from "semantic-ui-react";
 import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
@@ -19,13 +19,23 @@ class StationDetails extends React.Component {
   render() {
     const { stations, station, trains, onTrainSelect } = this.props;
     return (
-      <Segment>
-        <Button icon basic onClick={this.handleBack}>
-          <Icon name='arrow left' />
-        </Button>
-        <Header as="h3">
-          { station.name.replace(/ - /g, "–") }
-        </Header>
+      <Segment style={{paddingTop: 0}}>
+        <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{marginTop: "14px"}}>
+          <Button icon basic onClick={this.handleBack}>
+            <Icon name='arrow left' />
+          </Button>
+          <Header as="h3">
+            { station.name.replace(/ - /g, "–") }
+          </Header>
+        </Responsive>
+        <Responsive {...Responsive.onlyMobile} as='div' style={{display: "flex", height: "36px", marginBottom: "14px", alignItems: "center", flexGrow: 0}}>
+          <Button icon basic onClick={this.handleBack}>
+            <Icon name='arrow left' />
+          </Button>
+          <Header as="h3" style={{margin: 0}}>
+            { station.name.replace(/ - /g, "–") }
+          </Header>
+        </Responsive>
         <Segment>
           <Header as="h4">
             To {

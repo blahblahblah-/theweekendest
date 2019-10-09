@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
-import { Header, Segment, Statistic, Tab } from "semantic-ui-react";
+import { Responsive, Header, Segment, Statistic, Tab, Button, Loader, Icon } from "semantic-ui-react";
 import TrainList from './trainList.jsx';
 import TrainDetails from './trainDetails.jsx';
 import StationList from './stationList.jsx';
@@ -30,7 +30,7 @@ mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 class Mapbox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {trains: {}, activeIndex: 0};
+    this.state = {trains: {}, activeIndex: 0, openMobilePane: false};
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["id"] = key;
@@ -59,13 +59,13 @@ class Mapbox extends React.Component {
       hash: true
     });
 
-    this.map.addControl(new mapboxgl.NavigationControl());
+    this.map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
     this.map.addControl(new mapboxgl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true
       },
       trackUserLocation: true
-    }));
+    }), 'bottom-right');
 
     this.map.on('load', () => {
       this.fetchData();
@@ -398,6 +398,7 @@ class Mapbox extends React.Component {
   }
 
   handleTrainSelect = (train) => {
+    const { width } = this.state;
     this.selectTrain(train);
 
     const data = this.map.getSource(`${train}-train`)._data;
@@ -410,10 +411,11 @@ class Mapbox extends React.Component {
       padding: {
         top: 20,
         right: 20,
-        left: 500,
+        left: (width > Responsive.onlyTablet.minWidth) ? 400 : 20,
         bottom: 20,
       },
     });
+    this.closeMobilePane();
     this.infoBox.scrollTop = 0;
   }
 
@@ -434,6 +436,7 @@ class Mapbox extends React.Component {
         }
       }
     });
+    this.closeMobilePane();
   }
 
   handleStationSelect = (station) => {
@@ -460,6 +463,7 @@ class Mapbox extends React.Component {
       zoom: 14,
       bearing: 29,
     });
+    this.closeMobilePane();
     this.infoBox.scrollTop = 0;
   }
 
@@ -473,10 +477,29 @@ class Mapbox extends React.Component {
       }
     });
     this.infoBox.scrollTop = 0;
+    this.closeMobilePane();
     window.location.hash = lastView;
   }
 
   handleTabChange = (e, { activeIndex }) => this.setState({ activeIndex })
+
+  handleToggleMobilePane = _ => {
+    const { openMobilePane } = this.state;
+    this.infoBox.scrollTop = 0;
+    if (openMobilePane) {
+      this.infoBox.classList.remove('open');
+    } else {
+      this.infoBox.classList.add('open');
+    }
+    this.setState({openMobilePane: !openMobilePane});
+  };
+
+  handleOnUpdate = (e, { width }) => this.setState({ width })
+
+  closeMobilePane() {
+    this.infoBox.classList.remove('open');
+    this.setState({openMobilePane: false});
+  }
 
   panes() {
     const { trains } = this.state;
@@ -493,23 +516,38 @@ class Mapbox extends React.Component {
   }
 
   render() {
-    const { trains, selectedTrain, selectedStation, routing, stops, activeIndex } = this.state;
+    const { trains, selectedTrain, selectedStation, routing, stops, activeIndex, timestamp, openMobilePane } = this.state;
     return (
-      <div>
-        <div ref={el => this.mapContainer = el} style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}></div>
+      <Responsive as='div' onUpdate={this.handleOnUpdate}>
+        <div ref={el => this.mapContainer = el}
+          style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}>
+        </div>
         <Segment inverted vertical className="infobox">
-          <div ref={el => this.infoBox = el} className="inner-infobox">
-            <Header inverted as='h1' color='yellow' style={{paddingLeft: "5px"}}>
-              the weekendest<span id="alpha">beta</span>
+          <Responsive {...Responsive.onlyMobile} as='div'>
+            <Header inverted as='h3' color='yellow' style={{padding: "5px", float: "left"}}>
+            the weekendest<span id="alpha">beta</span>
               <Header.Subheader>
                 real-time new york city subway map
               </Header.Subheader>
             </Header>
+            <Button icon style={{marginTop: "10px", float: "left"}} onClick={this.handleToggleMobilePane}>
+              <Icon name={`angle ${openMobilePane ? 'up' : 'down'}`} />
+            </Button>
+          </Responsive>
+          <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div'>
+            <Header inverted as='h1' color='yellow' style={{padding: "5px"}}>
+            the weekendest<span id="alpha">beta</span>
+              <Header.Subheader>
+                real-time new york city subway map
+              </Header.Subheader>
+            </Header>
+          </Responsive>
+          <div ref={el => this.infoBox = el} className="inner-infobox">
             { !selectedTrain && !selectedStation &&
               <div>
-                <Segment>
+                <Responsive {...Responsive.onlyMobile} as={Segment}>
                   <Header as='h4'>
-                    stops
+                    information
                   </Header>
                   <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
                     <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
@@ -526,15 +564,39 @@ class Mapbox extends React.Component {
                     </Statistic>
                     <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
                       <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>Some Downtown, no uptown</Statistic.Label>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>Some downtown, no uptown</Statistic.Label>
                     </Statistic>
                   </Statistic.Group>
-                </Segment>
-                { trains && trains.length &&
-                  <Segment style={{paddingTop: 0}}>
+                </Responsive>
+                <Responsive minWidth={Responsive.onlyTablet.minWidth} as={Segment}>
+                  <Header as='h4'>
+                    stops
+                  </Header>
+                  <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
+                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                      <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
+                    </Statistic>
+                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                      <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
+                    </Statistic>
+                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                      <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some dntwn</Statistic.Label>
+                    </Statistic>
+                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                      <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>Some dntwn, no uptown</Statistic.Label>
+                    </Statistic>
+                  </Statistic.Group>
+                </Responsive>
+                <Segment style={{paddingTop: 0, minHeight: "50px"}}>
+                  <Loader active={!(trains && trains.length)} />
+                  { trains && trains.length &&
                     <Tab menu={{secondary: true, pointing: true}} panes={this.panes()} activeIndex={activeIndex} onTabChange={this.handleTabChange} />
-                  </Segment>
-                }
+                  }
+                </Segment>
               </div>
             }
             { selectedTrain && !selectedStation &&
@@ -550,9 +612,15 @@ class Mapbox extends React.Component {
                 onTrainSelect={this.handleTrainSelect.bind(this)}
               />
             }
+            <Header inverted as='h5' floated='left' style={{margin: "10px 5px"}}>
+              Last updated {timestamp && (new Date(timestamp)).toLocaleTimeString('en-US')}.<br />
+              Powered by <a href='https://www.goodservice.io' target='_blank'>goodservice.io</a>.<br />
+              Created by <a href='https://twitter.com/_blahblahblah' target='_blank'>Sunny Ng</a>.<br />
+              <a href='https://github.com/blahblahblah-/theweekendest' target='_blank'>Source code</a>.
+            </Header>
             </div>
         </Segment>
-      </div>
+      </Responsive>
     )
   }
 }

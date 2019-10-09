@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Button, Icon, Header, Segment, List } from "semantic-ui-react";
+import { Responsive, Button, Icon, Header, Segment, List } from "semantic-ui-react";
 import TrainMap from './trainMap.jsx';
 import TrainBullet from './trainBullet.jsx';
 
@@ -37,26 +37,42 @@ class TrainDetails extends React.Component {
   render() {
     const { routing, stops, train, onTrainSelect, onStationSelect } = this.props;
     return (
-      <Segment>
-        <Button icon basic onClick={this.handleBack}>
-          <Icon name='arrow left' />
-        </Button>
-        <div className="train-details-header">
-          <div className="train-info">
-            <TrainBullet name={train.name} color={train.color} textColor={train.text_color} />
-            { train.alternate_name && 
-              <Header as='h5' style={{display: "inline-block"}}>{train.alternate_name.replace(" Shuttle", "")}</Header>
-            }
+      <Segment style={{paddingTop: 0}}>
+        <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{marginTop: "14px"}}>
+          <Button icon basic onClick={this.handleBack}>
+            <Icon name='arrow left' />
+          </Button>
+          <div className="train-details-header">
+            <div className="train-info">
+              <TrainBullet name={train.name} color={train.color} textColor={train.text_color} />
+              { train.alternate_name && 
+                <Header as='h5' style={{display: "inline-block"}}>{train.alternate_name.replace(" Shuttle", "")}</Header>
+              }
+            </div>
+            <div className="status">
+              <Header as='h4' color={this.statusColor(train.status)}>
+                { train.status }
+              </Header>
+              <Header as='h6'>
+                Powered by <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>
+              </Header>
+            </div>
           </div>
-          <div className="status">
-            <Header as='h4' color={this.statusColor(train.status)}>
-              { train.status }
+        </Responsive>
+        <Responsive {...Responsive.onlyMobile} as='div' style={{display: "flex", height: "36px", marginBottom: "14px", alignItems: "center"}}>
+          <Button icon basic onClick={this.handleBack}>
+            <Icon name='arrow left' />
+          </Button>
+          <TrainBullet name={train.name} color={train.color} textColor={train.text_color} size='small' style={{display: "inline-block", flexGrow: 0}} />
+          { train.alternate_name && 
+            <Header as='h5' style={{margin: 0, flexGrow: 0}}>
+              {train.alternate_name.replace(" Shuttle", "")}
             </Header>
-            <Header as='h6'>
-              Powered by <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>
-            </Header>
-          </div>
-        </div>
+          }
+          <Header as='h4' color={this.statusColor(train.status)} style={{margin: 0, flexGrow: 1, textAlign: "right"}}>
+            { train.status }
+          </Header>
+        </Responsive>
         {
           this.renderSummary()
         }
