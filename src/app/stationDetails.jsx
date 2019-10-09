@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Icon, Header, Segment, List } from "semantic-ui-react";
-import TrainBullet from './trainBullet.jsx'
+import TrainBullet from './trainBullet.jsx';
+
+import Cross from "./icons/cross-15.svg";
 
 class StationDetails extends React.Component {
   handleBack = _ => {

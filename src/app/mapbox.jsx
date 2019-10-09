@@ -499,7 +499,7 @@ class Mapbox extends React.Component {
         <div ref={el => this.mapContainer = el} style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}></div>
         <Segment inverted vertical className="infobox">
           <div ref={el => this.infoBox = el} className="inner-infobox">
-            <Header inverted as='h1' color='yellow'>
+            <Header inverted as='h1' color='yellow' style={{paddingLeft: "5px"}}>
               the weekendest<span id="alpha">beta</span>
               <Header.Subheader>
                 real-time new york city subway map
