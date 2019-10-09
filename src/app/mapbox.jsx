@@ -1,7 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
-import { Header, Segment, Accordion, Statistic } from "semantic-ui-react";
+import { Header, Segment, Statistic } from "semantic-ui-react";
+import TrainList from './trainList.jsx';
+import TrainDetails from './trainDetails.jsx';
+
 import stationData from '../data/station_details.json';
 import Circle from "./icons/circle-15.svg";
 import ExpressStop from "./icons/express-stop.svg";
@@ -13,6 +16,10 @@ const statusUrl = 'https://www.goodservice.io/api/info'
 const stations = {};
 const stationLocations = {}
 const center = [-74.003683, 40.7079445]
+const trainIds = [
+  '2', '3', '1', '4', '5', '6', '6X', '7', '7X', 'A', 'C', 'E', 'F', 'FX',
+  'D', 'B', 'M', 'J', 'Z', 'R', 'N', 'Q', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"
+];
 
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
@@ -58,12 +65,15 @@ class Mapbox extends React.Component {
   fetchData() {
     fetch(apiUrl)
       .then(response => response.json())
-      .then(data => this.renderLines(data.routes))
+      .then(data => {
+        this.renderLines(data.routes);
+        this.setState({routing: data.routes, stops: data.stops});
+      })
       .then(() => this.renderStops())
 
-    // fetch(statusUrl)
-    //   .then(response => response.json())
-    //   .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }))
+    fetch(statusUrl)
+      .then(response => response.json())
+      .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }))
   }
 
   renderLines(routes) {
@@ -163,7 +173,7 @@ class Mapbox extends React.Component {
     const offsetMap = [[[8, 0], [14, 0], [16, 0]], [[8, -2], [14, -4], [16, -6]], [[8, 2], [14, 4], [16, 6]], [[8, -4], [14, -8], [16, -12]], [[8, 4], [14, 8], [16, 12]], [[8, -6], [14, -12], [16, -18]], [[8, 6], [14, 12], [16, 18]]];
     const textOffsetMap = [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [-3, 0], [3, 0]];
 
-    ['2', '3', '1', '4', '5', '6', '6X', '7', '7X', 'A', 'C', 'E', 'F', 'FX', 'D', 'B', 'M', 'J', 'Z', 'R', 'N', 'Q', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"].forEach((train) => {
+    trainIds.forEach((train) => {
       const layerId = `${train}-train`;
       const routeLayer = routeLayers[layerId];
 
@@ -274,6 +284,7 @@ class Mapbox extends React.Component {
         "text-size": {
           "stops": [[8, 10], [13, 14]]
         },
+        "text-font": ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"],
         "text-anchor": "right",
         "text-optional": true,
         "text-justify": "left",
@@ -345,49 +356,94 @@ class Mapbox extends React.Component {
     return "circle-15";
   }
 
+  handleTrainSelect = (train) => {
+    this.setState({selectedTrain: train, lastView: window.location.hash});
+    trainIds.forEach((t) => {
+      if (t !== train) {
+        const layerId = `${t}-train`;
+        if (this.map.getLayer(layerId)) {
+          this.map.setLayoutProperty(layerId, 'visibility', 'none');
+        }
+      }
+    });
+
+    const data = this.map.getSource(`${train}-train`)._data;
+    const coordinatesArray = data.features.map((feature) => feature.geometry.coordinates);
+    const bounds = coordinatesArray.flat().reduce((bounds, coord) => {
+      return bounds.extend(coord);
+    }, new mapboxgl.LngLatBounds(coordinatesArray[0][0], coordinatesArray[0][0]));
+ 
+    this.map.fitBounds(bounds, {
+      padding: {
+        top: 20,
+        right: 20,
+        left: 500,
+        bottom: 20,
+      }
+    });
+    this.infoBox.scrollTop = 0;
+  }
+
+  handleResetView = _ => {
+    const { lastView } = this.state;
+    this.setState({selectedTrain: null, lastView: null});
+    trainIds.forEach((t) => {
+      const layerId = `${t}-train`;
+      this.map.setLayoutProperty(layerId, 'visibility', 'visible');
+    });
+    this.infoBox.scrollTop = 0;
+    window.location.hash = lastView;
+  }
+
   render() {
+    const { trains, selectedTrain, routing, stops } = this.state;
     return (
       <div>
         <div ref={el => this.mapContainer = el} style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}></div>
-        <Segment inverted vertical style={{overflowY: "auto", display: "block", position: "absolute", top: "10px", left: "10px", bottom: "auto", width: "350px", padding: "10px"}}>
-          <Header inverted as='h1' color='yellow'>
-            the weekendest<span id="alpha">beta</span>
-            <Header.Subheader>
-              real-time new york city subway map
-            </Header.Subheader>
-          </Header>
-          <Segment>
-            <Header as='h4'>
-              stops
+        <Segment inverted vertical className="infobox">
+          <div ref={el => this.infoBox = el} className="inner-infobox">
+            <Header inverted as='h1' color='yellow'>
+              the weekendest<span id="alpha">beta</span>
+              <Header.Subheader>
+                real-time new york city subway map
+              </Header.Subheader>
             </Header>
-            <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
-              <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
-              </Statistic>
-              <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
-              </Statistic>
-              <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                <Statistic.Label style={{fontSize: "0.75em"}}>All uptown</Statistic.Label>
-              </Statistic>
-              <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                <Statistic.Label style={{fontSize: "0.75em"}}>Only Downtown</Statistic.Label>
-              </Statistic>
-            </Statistic.Group>
-          </Segment>
-{/*          <Accordion styled>
-            
-              <Accordion.Title>
-              </Accordion.Title>
-              <Accordion.Content>
-                
-              </Accordion.Content>
-            
-          </Accordion>*/}
+            { !selectedTrain &&
+              <div>
+                <Segment>
+                  <Header as='h4'>
+                    stops
+                  </Header>
+                  <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
+                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                      <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
+                    </Statistic>
+                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                      <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
+                    </Statistic>
+                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                      <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some downtown</Statistic.Label>
+                    </Statistic>
+                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+                      <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
+                      <Statistic.Label style={{fontSize: "0.75em"}}>Some Downtown, no uptown</Statistic.Label>
+                    </Statistic>
+                  </Statistic.Group>
+                </Segment>
+                { trains && trains.length &&
+                  <TrainList trains={trains} onSelect={this.handleTrainSelect.bind(this)} />
+                }
+              </div>
+            }
+            { selectedTrain &&
+              <TrainDetails routing={routing[selectedTrain]} stops={stops}
+                train={trains.find((train) => train.id == selectedTrain)} onReset={this.handleResetView.bind(this)}
+              />
+            }
+            </div>
         </Segment>
       </div>
     )
