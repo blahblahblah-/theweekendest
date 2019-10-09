@@ -5,6 +5,9 @@ import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
 
+// M train directions are reversed between Essex St and Myrtle Av to match with J/Z trains
+const mTrainShuffle = ["M18", "M16", "M14", "M13", "M12", "M11"];
+
 class StationDetails extends React.Component {
   handleBack = _ => {
     const { onReset } = this.props;
@@ -41,8 +44,11 @@ class StationDetails extends React.Component {
             To {
               Array.from(new Set(Array.from(station.southStops).sort().map((trainId) => {
                 const train = trains.find((t) => {
-                  return t.id == trainId;
+                  return t.id === trainId;
                 });
+                if (trainId === 'M' & mTrainShuffle.includes(station.id)) {
+                  return train.destinations.north;
+                }
                 return train.destinations.south;
               }).flat())).sort().join(', ').replace(/ - /g, "–")
             }
@@ -51,7 +57,7 @@ class StationDetails extends React.Component {
             {
               Array.from(station.southStops).sort().map((trainId) => {
                 const train = trains.find((t) => {
-                  return t.id == trainId;
+                  return t.id === trainId;
                 });
                 return (
                   <TrainBullet link={true} id={trainId} key={train.name} name={train.name} color={train.color}
@@ -68,6 +74,9 @@ class StationDetails extends React.Component {
                 const train = trains.find((t) => {
                   return t.id == trainId;
                 });
+                if (trainId === 'M' & mTrainShuffle.includes(station.id)) {
+                  return train.destinations.south;
+                }
                 return train.destinations.north;
               }).flat())).sort().join(', ').replace(/ - /g, "–")
             }
