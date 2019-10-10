@@ -52,12 +52,17 @@ class StationDetails extends React.Component {
     const { arrivals } = this.state;
     const { station } = this.props;
     const currentTime = Date.now() / 1000;
+    let actualDirection = direction;
 
-    if (!arrivals[trainId] || !arrivals[trainId].arrival_times[direction]) {
+    if (trainId === 'M' && mTrainShuffle.includes(station.id)) {
+      actualDirection = direction === "north" ? "south" : "north";
+    }
+
+    if (!arrivals[trainId] || !arrivals[trainId].arrival_times[actualDirection]) {
       return;
     }
 
-    const times = arrivals[trainId].arrival_times[direction].flat().filter((estimate) => {
+    const times = arrivals[trainId].arrival_times[actualDirection].flat().filter((estimate) => {
       return estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= currentTime;
     }).map((estimate) => {
       return Math.round((estimate.estimated_time - currentTime) / 60);
