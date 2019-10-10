@@ -22,15 +22,17 @@
   }
 }
 
-.inner-infobox {
-  overflow-y: hidden;
-  overflow-x: hidden;
-  width: 280px;
-  max-height: 38px;
+@media only screen and (max-width: 768px) {
+  .inner-infobox {
+    overflow-y: hidden;
+    overflow-x: hidden;
+    width: 280px;
+    max-height: 38px;
 
-  &.open {
-    overflow-y: auto;
-    max-height: 60vh;
+    &.open {
+      overflow-y: auto;
+      max-height: 60vh;
+    }
   }
 }
 
@@ -154,13 +156,13 @@
   width: 270px;
 }
 
-.selection-pane {
+.ui.segment.selection-pane {
   padding-top: 0;
   min-height: 50px;
 }
 
 @media only screen and (max-width: 768px) {
-  .selection-pane {
+  .ui.segment.selection-pane {
     width: 270px;
   }
 }

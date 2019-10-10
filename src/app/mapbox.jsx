@@ -417,7 +417,7 @@ class Mapbox extends React.Component {
  
     this.map.fitBounds(bounds, {
       padding: {
-        top: 20,
+        top: (width > Responsive.onlyTablet.minWidth) ? 20 : 140,
         right: 20,
         left: (width > Responsive.onlyTablet.minWidth) ? 400 : 20,
         bottom: 20,
