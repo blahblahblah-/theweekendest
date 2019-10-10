@@ -16,10 +16,12 @@ See it live at [https://www.theweekendest.com](https://www.theweekendest.com/).
 
 * To have nice looking paths, you'd need to parse out the `shapes.txt` file from the GTFS package. I wrote a script that takes .csv files to generate these paths. Each .csv file is expected to be a contiguous path for a train route. I took the first shape path (with some exceptions) for each route in `shapes.txt` and dumped each into its own .csv file before running it.
 
-`ruby src/data/generate_json.rb`
-`ruby src/data/generate_transfers_json.rb`
-`yarn install`
-`yarn start`
+`````
+ruby src/data/generate_json.rb
+ruby src/data/generate_transfers_json.rb
+yarn install
+yarn start
+`````
 
 Inspirations:
 * [http://web.mta.info/weekender/servicestatus.html](http://web.mta.info/weekender/servicestatus.html)
