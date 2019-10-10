@@ -152,8 +152,9 @@
   z-index: 1;
 }
 
-.mobile-top-bar {
+.ui.segment.mobile-top-bar {
   width: 270px;
+  padding-top: 10px
 }
 
 .ui.segment.selection-pane {
@@ -184,6 +185,15 @@
   align-items: center;
   width: 227px;
   padding-right: 5px;
+
+  &.mobile-train-details-header {
+    margin-bottom: 0;
+  }
+}
+
+.mobile-goodservice {
+  text-align: right;
+  margin: 0 45px 14px 0;
 }
 
 .details-body {

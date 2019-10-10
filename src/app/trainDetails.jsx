@@ -66,7 +66,7 @@ class TrainDetails extends React.Component {
             </div>
           </div>
         </Responsive>
-        <Responsive {...Responsive.onlyMobile} as='div' className="mobile-details-header">
+        <Responsive {...Responsive.onlyMobile} as='div' className="mobile-details-header mobile-train-details-header">
           <Button icon onClick={this.handleBack}>
             <Icon name='arrow left' />
           </Button>
@@ -80,9 +80,12 @@ class TrainDetails extends React.Component {
             { train.status }
           </Header>
         </Responsive>
-          {
-            this.renderSummary()
-          }
+        <Responsive maxWidth={Responsive.onlyTablet.minWidth} as='h6' className="mobile-goodservice">
+          Powered by <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>
+        </Responsive>
+        {
+          this.renderSummary()
+        }
         <TrainMap routing={routing} stops={stops} train={train} onTrainSelect={onTrainSelect} onStationSelect={onStationSelect} />
       </Segment>
     );
