@@ -30,7 +30,7 @@ mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 class Mapbox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {trains: {}, activeIndex: 0, openMobilePane: false};
+    this.state = {trains: {}, activeIndex: 0, openMobilePane: true};
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["id"] = key;
@@ -88,7 +88,7 @@ class Mapbox extends React.Component {
   }
 
   renderLines(routes) {
-    const { selectedTrain } = this.state;
+    const { selectedTrain, selectedStation } = this.state;
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["northStops"] = new Set();
@@ -222,6 +222,14 @@ class Mapbox extends React.Component {
             routeLayer.paint["line-opacity"] = 1;
           } else {
             routeLayer.paint["line-opacity"] = 0.1;
+          }
+        } else if (selectedStation) {
+          const stationData = stations[selectedStation];
+
+          if (!stationData.stops.has(train)) {
+            this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
+          } else {
+            this.map.setPaintProperty(layerId, 'line-opacity', 1);
           }
         } else {
           routeLayer.paint["line-opacity"] = 1;
@@ -477,7 +485,7 @@ class Mapbox extends React.Component {
       }
     });
     this.infoBox.scrollTop = 0;
-    this.closeMobilePane();
+    this.openMobilePane();
     window.location.hash = lastView;
   }
 
@@ -499,6 +507,11 @@ class Mapbox extends React.Component {
   closeMobilePane() {
     this.infoBox.classList.remove('open');
     this.setState({openMobilePane: false});
+  }
+
+  openMobilePane() {
+    this.infoBox.classList.add('open');
+    this.setState({openMobilePane: true});
   }
 
   panes() {
@@ -523,6 +536,9 @@ class Mapbox extends React.Component {
           style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}>
         </div>
         <Segment inverted vertical className="infobox">
+          <Responsive as={Button} maxWidth={Responsive.onlyTablet.minWidth} icon className="mobile-pane-control" onClick={this.handleToggleMobilePane}>
+            <Icon name={`angle ${openMobilePane ? 'up' : 'down'}`} />
+          </Responsive>
           <Responsive {...Responsive.onlyMobile} as='div'>
             <Header inverted as='h3' color='yellow' style={{padding: "5px", float: "left"}}>
             the weekendest<span id="alpha">beta</span>
@@ -530,9 +546,6 @@ class Mapbox extends React.Component {
                 real-time new york city subway map
               </Header.Subheader>
             </Header>
-            <Button icon style={{marginTop: "10px", float: "left"}} onClick={this.handleToggleMobilePane}>
-              <Icon name={`angle ${openMobilePane ? 'up' : 'down'}`} />
-            </Button>
           </Responsive>
           <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div'>
             <Header inverted as='h1' color='yellow' style={{padding: "5px"}}>
@@ -542,10 +555,10 @@ class Mapbox extends React.Component {
               </Header.Subheader>
             </Header>
           </Responsive>
-          <div ref={el => this.infoBox = el} className="inner-infobox">
+          <div ref={el => this.infoBox = el} className="inner-infobox open">
             { !selectedTrain && !selectedStation &&
               <div>
-                <Responsive {...Responsive.onlyMobile} as={Segment}>
+                <Responsive {...Responsive.onlyMobile} as={Segment} className="mobile-top-bar">
                   <Header as='h4'>
                     information
                   </Header>
@@ -591,7 +604,7 @@ class Mapbox extends React.Component {
                     </Statistic>
                   </Statistic.Group>
                 </Responsive>
-                <Segment style={{paddingTop: 0, minHeight: "50px"}}>
+                <Segment className="selection-pane">
                   <Loader active={!(trains && trains.length)} />
                   { trains && trains.length &&
                     <Tab menu={{secondary: true, pointing: true}} panes={this.panes()} activeIndex={activeIndex} onTabChange={this.handleTabChange} />

@@ -26,7 +26,14 @@ class TrainDetails extends React.Component {
     if (train.service_summaries.north) {
       out.push(<Header as='h5' key="north">{train.service_summaries.north.replace(/ - /g, "–")}</Header>)
     }
-    return out;
+    if (out.length < 1) {
+      return;
+    }
+    return (
+      <div className="details-body">
+        { out }
+      </div>
+    );
   }
 
   handleBack = _ => {
@@ -37,9 +44,9 @@ class TrainDetails extends React.Component {
   render() {
     const { routing, stops, train, onTrainSelect, onStationSelect } = this.props;
     return (
-      <Segment style={{paddingTop: 0}}>
-        <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{marginTop: "14px"}}>
-          <Button icon basic onClick={this.handleBack}>
+      <Segment className="details-pane">
+        <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
+          <Button icon onClick={this.handleBack}>
             <Icon name='arrow left' />
           </Button>
           <div className="train-details-header">
@@ -59,8 +66,8 @@ class TrainDetails extends React.Component {
             </div>
           </div>
         </Responsive>
-        <Responsive {...Responsive.onlyMobile} as='div' style={{display: "flex", height: "36px", marginBottom: "14px", alignItems: "center"}}>
-          <Button icon basic onClick={this.handleBack}>
+        <Responsive {...Responsive.onlyMobile} as='div' className="mobile-details-header">
+          <Button icon onClick={this.handleBack}>
             <Icon name='arrow left' />
           </Button>
           <TrainBullet name={train.name} color={train.color} textColor={train.text_color} size='small' style={{display: "inline-block", flexGrow: 0}} />
@@ -73,9 +80,9 @@ class TrainDetails extends React.Component {
             { train.status }
           </Header>
         </Responsive>
-        {
-          this.renderSummary()
-        }
+          {
+            this.renderSummary()
+          }
         <TrainMap routing={routing} stops={stops} train={train} onTrainSelect={onTrainSelect} onStationSelect={onStationSelect} />
       </Segment>
     );

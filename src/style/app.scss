@@ -142,3 +142,48 @@
     height: 41px;
   }
 }
+
+.mobile-pane-control {
+  position: absolute;
+  top: 63px;
+  left: 240px;
+  z-index: 1;
+}
+
+.mobile-top-bar {
+  width: 270px;
+}
+
+.selection-pane {
+  padding-top: 0;
+  min-height: 50px;
+}
+
+@media only screen and (max-width: 768px) {
+  .selection-pane {
+    width: 270px;
+  }
+}
+
+.ui.segment.details-pane {
+  padding: 0;
+}
+
+@media only screen and (max-width: 768px) {
+  .ui.segment.details-pane {
+    width: 270px;
+  }
+}
+
+.mobile-details-header {
+  display: flex;
+  height: 36px;
+  margin-bottom: 14px;
+  align-items: center;
+  width: 227px;
+  padding-right: 5px;
+}
+
+.details-body {
+  padding: 0 14px 14px 14px;
+}
