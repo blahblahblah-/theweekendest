@@ -5,10 +5,27 @@ import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
 
+const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
+
 // M train directions are reversed between Essex St and Myrtle Av to match with J/Z trains
 const mTrainShuffle = ["M18", "M16", "M14", "M13", "M12", "M11"];
 
 class StationDetails extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { arrivals: {} }
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData() {
+    fetch(arrivalsUrl)
+      .then(response => response.json())
+      .then(data => this.setState({ arrivals: data.routes, timestamp: data.timestamp }))
+  }
+
   statusColor(status) {
     if (status == 'Good Service') {
       return 'green';
@@ -29,6 +46,26 @@ class StationDetails extends React.Component {
   handleClick = stop => {
     const { onStationSelect } = this.props;
     onStationSelect(stop.id);
+  }
+
+  renderArrivalTimes(trainId, direction) {
+    const { arrivals } = this.state;
+    const { station } = this.props;
+    const currentTime = Date.now() / 1000;
+
+    if (!arrivals[trainId] || !arrivals[trainId].arrival_times[direction]) {
+      return;
+    }
+
+    const times = arrivals[trainId].arrival_times[direction].flat().filter((estimate) => {
+      return estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= currentTime;
+    }).map((estimate) => {
+      return Math.round((estimate.estimated_time - currentTime) / 60);
+    }).sort((a, b) => a - b).slice(0, 2);
+
+    return times.map((time) => {
+      return `${time} min`;
+    }).join(', ')
   }
 
   render() {
@@ -53,7 +90,7 @@ class StationDetails extends React.Component {
         </Responsive>
         <div className="details-body">
           <Segment>
-            <Header as="h4">
+            <Header as="h5">
               To {
                 Array.from(new Set(Array.from(station.southStops).sort().map((trainId) => {
                   const train = trains.find((t) => {
@@ -79,7 +116,8 @@ class StationDetails extends React.Component {
                           <TrainBullet name={train.name} id={trainId} color={train.color}
                             textColor={train.text_color} size='small' onSelect={onTrainSelect} />
                         </List.Content>
-                        <List.Content floated='right'>
+                        <List.Content floated='right' className="station-details-route-status">
+                          <div>{ this.renderArrivalTimes(trainId, "south") }</div>
                           <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
                             { train.direction_statuses.south }
                           </Header>
@@ -92,7 +130,7 @@ class StationDetails extends React.Component {
             </div>
           </Segment>
           <Segment>
-            <Header as="h4">
+            <Header as="h5">
               To {
                 Array.from(new Set(Array.from(station.northStops).sort().map((trainId) => {
                   const train = trains.find((t) => {
@@ -118,7 +156,8 @@ class StationDetails extends React.Component {
                           <TrainBullet name={train.name} id={trainId} color={train.color}
                             textColor={train.text_color} size='small' onSelect={onTrainSelect} />
                         </List.Content>
-                        <List.Content floated='right'>
+                        <List.Content floated='right' className="station-details-route-status">
+                          <div>{ this.renderArrivalTimes(trainId, "north") }</div>
                           <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
                             { train.direction_statuses.north }
                           </Header>
