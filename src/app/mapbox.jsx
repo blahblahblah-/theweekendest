@@ -80,7 +80,10 @@ class Mapbox extends React.Component {
         this.renderLines(data.routes);
         this.setState({routing: data.routes, stops: data.stops});
       })
-      .then(() => this.renderStops())
+      .then(() => {
+        const { selectedTrain } = this.state;
+        this.renderStops(selectedTrain);
+      })
 
     fetch(statusUrl)
       .then(response => response.json())
@@ -304,20 +307,21 @@ class Mapbox extends React.Component {
     return results;
   }
 
-  renderStops() {
+  renderStops(selectedTrain) {
     if (this.map.getLayer("Stops")) {
       this.map.removeLayer("Stops")
     }
     if (this.map.getSource("Stops")) {
       this.map.removeSource("Stops");
     }
+    this.map.addSource("Stops", {
+      "type": "geojson",
+      "data": this.stopsGeoJson(selectedTrain)
+    });
     this.map.addLayer({
       "id": "Stops",
       "type": "symbol",
-      "source": {
-        "type": "geojson",
-        "data": this.stopsGeoJson()
-      },
+      "source": "Stops",
       "layout": {
         "text-field": ['get', 'name'],
         "text-size": {
@@ -333,13 +337,13 @@ class Mapbox extends React.Component {
           "stops": [[8, 0.25], [12, 0.75], [14, 1]]
         },
         "icon-allow-overlap": true,
-        // "text-variable-anchor": ['bottom-right', 'right', 'top-right', 'bottom', 'bottom-left', 'left', 'top-left']
       },
       "paint": {
         "text-translate": {
           "stops": [[8, [-5, 0]], [14, [-12, -15]]]
         },
-        "text-color": "#aaaaaa"
+        "text-color": "#aaaaaa",
+        "icon-opacity": ['get', 'opacity']
       }
     });
     this.map.on('click', "Stops", (e) => {
@@ -353,16 +357,21 @@ class Mapbox extends React.Component {
     }).bind(this));
   }
 
-  stopsGeoJson() {
+  stopsGeoJson(selectedTrain) {
     return {
       "type": "FeatureCollection",
       "features": Object.keys(stations).map((key) => {
+        let opacity = 1;
+        if (selectedTrain && !stations[key].stops.has(selectedTrain)) {
+          opacity = 0.3;
+        }
         return {
           "type": "Feature",
           "properties": {
             "id": stations[key].id,
             "name": stations[key].name.replace(/ - /g, "–"),
-            "stopType": this.stopTypeIcon(key)
+            "stopType": this.stopTypeIcon(key, selectedTrain),
+            "opacity": opacity
           },
           "geometry": {
             "type": "Point",
@@ -373,7 +382,23 @@ class Mapbox extends React.Component {
     };
   }
 
-  stopTypeIcon(stopId) {
+  stopTypeIcon(stopId, selectedTrain) {
+    if (selectedTrain) {
+      if (stations[stopId]["southStops"].has(selectedTrain) && stations[stopId]["northStops"].has(selectedTrain)) {
+        return "express-stop";
+      }
+      if (stations[stopId]["southStops"].has(selectedTrain)) {
+        return "all-downtown-trains";
+      }
+      if (stations[stopId]["northStops"].has(selectedTrain)) {
+        return "all-uptown-trains";
+      }
+      if (stations[stopId]["stops"].size == 0) {
+        return "cross-15";
+      }
+      return "circle-15";
+    }
+
     const passed = Array.from(stations[stopId]["passed"]);
     if (stations[stopId]["stops"].size == 0) {
       return "cross-15";
@@ -423,6 +448,7 @@ class Mapbox extends React.Component {
         bottom: 20,
       },
     });
+
     this.closeMobilePane();
     this.infoBox.scrollTop = 0;
   }
@@ -444,6 +470,7 @@ class Mapbox extends React.Component {
         }
       }
     });
+    this.renderStops(train);
     this.closeMobilePane();
   }
 
@@ -465,7 +492,7 @@ class Mapbox extends React.Component {
         }
       }
     });
-
+    this.renderStops(null);
     this.map.easeTo({
       center: [stationData.longitude, stationData.latitude],
       zoom: 14,
@@ -486,6 +513,7 @@ class Mapbox extends React.Component {
     });
     this.infoBox.scrollTop = 0;
     this.openMobilePane();
+    this.renderStops(null);
     window.location.hash = lastView;
   }
 
