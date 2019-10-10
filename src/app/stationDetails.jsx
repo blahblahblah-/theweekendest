@@ -9,6 +9,18 @@ import Cross from "./icons/cross-15.svg";
 const mTrainShuffle = ["M18", "M16", "M14", "M13", "M12", "M11"];
 
 class StationDetails extends React.Component {
+  statusColor(status) {
+    if (status == 'Good Service') {
+      return 'green';
+    } else if (status == 'Service Change') {
+      return 'orange';
+    } else if (status == 'Not Good') {
+      return 'yellow';
+    } else if (status == 'Delay') {
+      return 'red';
+    }
+  }
+
   handleBack = _ => {
     const { onReset } = this.props;
     onReset();
@@ -55,17 +67,28 @@ class StationDetails extends React.Component {
               }
             </Header>
             <div>
-              {
-                Array.from(station.southStops).sort().map((trainId) => {
-                  const train = trains.find((t) => {
-                    return t.id === trainId;
-                  });
-                  return (
-                    <TrainBullet link={true} id={trainId} key={train.name} name={train.name} color={train.color}
-                      textColor={train.text_color} key={train.id} onSelect={onTrainSelect} />
-                  )
-                })
-              }
+              <List divided relaxed>
+                {
+                  Array.from(station.southStops).sort().map((trainId) => {
+                    const train = trains.find((t) => {
+                      return t.id === trainId;
+                    });
+                    return (
+                      <List.Item key={trainId}>
+                        <List.Content floated='left'>
+                          <TrainBullet name={train.name} id={trainId} color={train.color}
+                            textColor={train.text_color} size='small' onSelect={onTrainSelect} />
+                        </List.Content>
+                        <List.Content floated='right'>
+                          <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
+                            { train.direction_statuses.south }
+                          </Header>
+                        </List.Content>
+                      </List.Item>
+                    );
+                  })
+                }
+              </List>
             </div>
           </Segment>
           <Segment>
@@ -83,17 +106,28 @@ class StationDetails extends React.Component {
               }
             </Header>
             <div>
-              {
-                Array.from(station.northStops).sort().map((trainId) => {
-                  const train = trains.find((t) => {
-                    return t.id == trainId;
-                  });
-                  return (
-                    <TrainBullet link={true} id={trainId} key={train.name} name={train.name} color={train.color}
-                      textColor={train.text_color} key={train.id} onSelect={onTrainSelect} />
-                  )
-                })
-              }
+              <List divided relaxed>
+                {
+                  Array.from(station.northStops).sort().map((trainId) => {
+                    const train = trains.find((t) => {
+                      return t.id === trainId;
+                    });
+                    return (
+                      <List.Item key={trainId}>
+                        <List.Content floated='left'>
+                          <TrainBullet name={train.name} id={trainId} color={train.color}
+                            textColor={train.text_color} size='small' onSelect={onTrainSelect} />
+                        </List.Content>
+                        <List.Content floated='right'>
+                          <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
+                            { train.direction_statuses.north }
+                          </Header>
+                        </List.Content>
+                      </List.Item>
+                    );
+                  })
+                }
+              </List>
             </div>
           </Segment>
           {
