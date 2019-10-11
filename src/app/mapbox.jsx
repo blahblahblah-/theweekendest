@@ -498,7 +498,7 @@ class Mapbox extends React.Component {
       zoom: 14,
       bearing: 29,
     });
-    this.closeMobilePane();
+    this.openMobilePane();
     this.infoBox.scrollTop = 0;
   }
 
