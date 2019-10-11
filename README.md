@@ -1,6 +1,6 @@
 # theweekendest
 
-This is a React app that relies heavily on [https://github.com/blahblahblah-/goodservice](goodservice.io)'s APIs to dynamically generate real-time route maps for the New York City subway with the help of Mapbox, particularly useful when service changes regularly occur on weekends and overnights.
+This is a React app that relies heavily on [goodservice.io](https://github.com/blahblahblah-/goodservice)'s APIs to dynamically generate real-time route maps for the New York City subway with the help of Mapbox, particularly useful when service changes regularly occur on weekends and overnights.
 
 A Mapbox theme was created for this project and has been made public.
 
@@ -8,9 +8,9 @@ See it live at [https://www.theweekendest.com](https://www.theweekendest.com/).
 
 ## Running locally
 
-* Sign up for an account with [https://www.mapbox.com](Mapbox), get a token and add it to an `.env` file as `MAPBOX_TOKEN`.
+* Sign up for an account with [Mapbox](https://www.mapbox.com), get a token and add it to an `.env` file as `MAPBOX_TOKEN`.
 
-* Download [http://web.mta.info/developers/data/nyct/subway/Stations.csv](Stations.csv) from the MTA's website and drop it in `/src/data/files`
+* Download [Stations.csv](http://web.mta.info/developers/data/nyct/subway/Stations.csv) from the MTA's website and drop it in `/src/data/files`
 
 * Download the GTFS schedule files from MTA at [https://web.mta.info/developers/developer-data-terms.html](https://web.mta.info/developers/developer-data-terms.html) (agree to the terms, and then download the data for New York City Transit. (look for "GTFS"). Drop `transfers.txt` in `/src/data/files`
 
