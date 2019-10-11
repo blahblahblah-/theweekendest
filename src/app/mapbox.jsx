@@ -477,7 +477,7 @@ class Mapbox extends React.Component {
   }
 
   handleStationSelect = (station) => {
-    const { selectedStation, selectedTrain } = this.state;
+    const { selectedStation, selectedTrain, width } = this.state;
     const stationData = stations[station];
     if (selectedTrain || selectedStation) {
       this.setState({selectedStation: station, selectedTrain: null});
@@ -496,8 +496,8 @@ class Mapbox extends React.Component {
     });
     this.renderStops(null);
     this.map.easeTo({
-      center: [stationData.longitude, stationData.latitude],
-      zoom: 14,
+      center: [stationData.longitude + ((width > Responsive.onlyTablet.minWidth) ? 0 : 0.002), stationData.latitude + ((width > Responsive.onlyTablet.minWidth) ? 0 : 0.004)],
+      zoom: 15,
       bearing: 29,
     });
     this.openMobilePane();
