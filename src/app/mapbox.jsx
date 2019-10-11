@@ -566,7 +566,7 @@ class Mapbox extends React.Component {
           style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}>
         </div>
         <Segment inverted vertical className="infobox">
-          <Responsive as={Button} maxWidth={Responsive.onlyTablet.minWidth} icon className="mobile-pane-control" onClick={this.handleToggleMobilePane}>
+          <Responsive as={Button} maxWidth={Responsive.onlyMobile.maxWidth} icon className="mobile-pane-control" onClick={this.handleToggleMobilePane}>
             <Icon name={`angle ${openMobilePane ? 'up' : 'down'}`} />
           </Responsive>
           <Responsive {...Responsive.onlyMobile} as='div'>

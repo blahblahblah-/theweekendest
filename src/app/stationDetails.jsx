@@ -78,7 +78,7 @@ class StationDetails extends React.Component {
     return (
       <Segment className='details-pane'>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
-          <Button icon basic onClick={this.handleBack}>
+          <Button icon onClick={this.handleBack}>
             <Icon name='arrow left' />
           </Button>
           <Header as="h3">

@@ -80,7 +80,7 @@ class TrainDetails extends React.Component {
             { train.status }
           </Header>
         </Responsive>
-        <Responsive maxWidth={Responsive.onlyTablet.minWidth} as='h6' className="mobile-goodservice">
+        <Responsive maxWidth={Responsive.onlyMobile.maxWidth} as='h6' className="mobile-goodservice">
           Powered by <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>
         </Responsive>
         {
