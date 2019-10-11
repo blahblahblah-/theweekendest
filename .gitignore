@@ -23,6 +23,8 @@
 /node_modules
 /yarn-error.log
 /dist
+/src/data/files
+/src/data/*.json
 
 /public/assets
 .byebug_history
