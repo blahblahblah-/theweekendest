@@ -69,9 +69,6 @@ const config = {
           template: __dirname + "/src/public/index.html",
           inject: 'body'
       }),
-      new HtmlWebpackPlugin({
-        favicon: 'src/images/favicon.png'
-      }),
       new Dotenv()
   ],
   devServer: {  // configuration for webpack-dev-server
