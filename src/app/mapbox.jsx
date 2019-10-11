@@ -436,18 +436,20 @@ class Mapbox extends React.Component {
 
     const data = this.map.getSource(`${train}-train`)._data;
     const coordinatesArray = data.features.map((feature) => feature.geometry.coordinates);
-    const bounds = coordinatesArray.flat().reduce((bounds, coord) => {
-      return bounds.extend(coord);
-    }, new mapboxgl.LngLatBounds(coordinatesArray[0][0], coordinatesArray[0][0]));
- 
-    this.map.fitBounds(bounds, {
-      padding: {
-        top: (width > Responsive.onlyTablet.minWidth) ? 20 : 140,
-        right: 20,
-        left: (width > Responsive.onlyTablet.minWidth) ? 400 : 20,
-        bottom: 20,
-      },
-    });
+    if (coordinatesArray[0]) {
+      const bounds = coordinatesArray.flat().reduce((bounds, coord) => {
+        return bounds.extend(coord);
+      }, new mapboxgl.LngLatBounds(coordinatesArray[0][0], coordinatesArray[0][0]));
+
+      this.map.fitBounds(bounds, {
+        padding: {
+          top: (width > Responsive.onlyTablet.minWidth) ? 20 : 140,
+          right: 20,
+          left: (width > Responsive.onlyTablet.minWidth) ? 400 : 20,
+          bottom: 20,
+        },
+      });
+    }
 
     this.closeMobilePane();
     this.infoBox.scrollTop = 0;
