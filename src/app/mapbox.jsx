@@ -561,7 +561,7 @@ class Mapbox extends React.Component {
   render() {
     const { trains, selectedTrain, selectedStation, routing, stops, activeIndex, timestamp, openMobilePane } = this.state;
     return (
-      <Responsive as='div' onUpdate={this.handleOnUpdate}>
+      <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
         <div ref={el => this.mapContainer = el}
           style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}>
         </div>
