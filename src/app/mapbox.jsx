@@ -69,7 +69,7 @@ class Mapbox extends React.Component {
 
     this.map.on('load', () => {
       this.fetchData();
-      this.timer = setInterval(() => this.fetchData(), 360000);
+      this.timer = setInterval(() => this.fetchData(), 120000);
     });
   }
 
