@@ -638,20 +638,20 @@ class Mapbox extends React.Component {
                 </Responsive>
                 <Segment className="selection-pane">
                   <Loader active={!(trains && trains.length)} />
-                  { trains && trains.length &&
+                  { trains && trains.length > 1 &&
                     <Tab menu={{secondary: true, pointing: true}} panes={this.panes()} activeIndex={activeIndex} onTabChange={this.handleTabChange} />
                   }
                 </Segment>
               </div>
             }
-            { selectedTrain && !selectedStation &&
+            { selectedTrain && !selectedStation && trains.length > 1 &&
               <TrainDetails routing={routing[selectedTrain]} stops={stops}
                 train={trains.find((train) => train.id == selectedTrain)}
                 onReset={this.handleResetView.bind(this)} onTrainSelect={this.handleTrainSelect.bind(this)}
                 onStationSelect={this.handleStationSelect.bind(this)}
               />
             }
-            { selectedStation && !selectedTrain &&
+            { selectedStation && !selectedTrain && trains.length > 1 &&
               <StationDetails trains={trains} station={stations[selectedStation]} stations={stations}
                 arrivals={arrivals}
                 onReset={this.handleResetView.bind(this)} onStationSelect={this.handleStationSelect.bind(this)}
