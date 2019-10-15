@@ -69,12 +69,14 @@ class Mapbox extends React.Component {
     }), 'bottom-right');
 
     this.map.on('load', () => {
+      this.fetchRoutes();
       this.fetchData();
-      this.timer = setInterval(() => this.fetchData(), 60000);
+      this.routeTimer = setInterval(() => this.fetchRoutes(), 120000);
+      this.dataTimer = setInterval(() => this.fetchData(), 60000);
     });
   }
 
-  fetchData() {
+  fetchRoutes() {
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
@@ -85,7 +87,9 @@ class Mapbox extends React.Component {
         const { selectedTrain } = this.state;
         this.renderStops(selectedTrain);
       })
+  }
 
+  fetchData() {
     fetch(statusUrl)
       .then(response => response.json())
       .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }));
