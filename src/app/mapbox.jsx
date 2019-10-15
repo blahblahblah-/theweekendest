@@ -17,6 +17,7 @@ import DowntownOnly from "./icons/downtown-only.svg";
 
 const apiUrl = 'https://www.goodservice.io/api/routes';
 const statusUrl = 'https://www.goodservice.io/api/info'
+const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
 const stations = {};
 const stationLocations = {}
 const center = [-74.003683, 40.7079445]
@@ -30,7 +31,7 @@ mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 class Mapbox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {trains: {}, activeIndex: 0, openMobilePane: true};
+    this.state = {trains: {}, arrivals: {}, activeIndex: 0, openMobilePane: true};
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["id"] = key;
@@ -69,7 +70,7 @@ class Mapbox extends React.Component {
 
     this.map.on('load', () => {
       this.fetchData();
-      this.timer = setInterval(() => this.fetchData(), 120000);
+      this.timer = setInterval(() => this.fetchData(), 60000);
     });
   }
 
@@ -87,7 +88,11 @@ class Mapbox extends React.Component {
 
     fetch(statusUrl)
       .then(response => response.json())
-      .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }))
+      .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }));
+
+    fetch(arrivalsUrl)
+      .then(response => response.json())
+      .then(data => this.setState({ arrivals: data.routes }));
   }
 
   renderLines(routes) {
@@ -552,7 +557,7 @@ class Mapbox extends React.Component {
   }
 
   render() {
-    const { trains, selectedTrain, selectedStation, routing, stops, activeIndex, timestamp, openMobilePane } = this.state;
+    const { trains, arrivals, selectedTrain, selectedStation, routing, stops, activeIndex, timestamp, openMobilePane } = this.state;
     return (
       <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
         <div ref={el => this.mapContainer = el}
@@ -644,6 +649,7 @@ class Mapbox extends React.Component {
             }
             { selectedStation && !selectedTrain &&
               <StationDetails trains={trains} station={stations[selectedStation]} stations={stations}
+                arrivals={arrivals}
                 onReset={this.handleResetView.bind(this)} onStationSelect={this.handleStationSelect.bind(this)}
                 onTrainSelect={this.handleTrainSelect.bind(this)}
               />

@@ -5,27 +5,10 @@ import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
 
-const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
-
 // M train directions are reversed between Essex St and Myrtle Av to match with J/Z trains
 const mTrainShuffle = ["M18", "M16", "M14", "M13", "M12", "M11"];
 
 class StationDetails extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { arrivals: {} }
-  }
-
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  fetchData() {
-    fetch(arrivalsUrl)
-      .then(response => response.json())
-      .then(data => this.setState({ arrivals: data.routes, timestamp: data.timestamp }))
-  }
-
   statusColor(status) {
     if (status == 'Good Service') {
       return 'green';
@@ -49,8 +32,7 @@ class StationDetails extends React.Component {
   }
 
   renderArrivalTimes(trainId, direction) {
-    const { arrivals } = this.state;
-    const { station } = this.props;
+    const { station, arrivals } = this.props;
     const currentTime = Date.now() / 1000;
     let actualDirection = direction;
 
