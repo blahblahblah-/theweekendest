@@ -192,13 +192,6 @@ class Mapbox extends React.Component {
       const layerId = `${train}-train`;
       const routeLayer = routeLayers[layerId];
 
-      if (this.map.getLayer(layerId)) {
-        this.map.removeLayer(layerId);
-      }
-      if (this.map.getSource(layerId)) {
-        this.map.removeSource(layerId);
-      }
-
       if (routeLayer) {
         let offset = 0;
         let conflictingOffsets = new Set();
@@ -230,9 +223,9 @@ class Mapbox extends React.Component {
           const stationData = stations[selectedStation];
 
           if (!stationData.stops.has(train)) {
-            this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
+            routeLayer.paint["line-opacity"] = 0.1;
           } else {
-            this.map.setPaintProperty(layerId, 'line-opacity', 1);
+            routeLayer.paint["line-opacity"] = 1;
           }
         } else {
           routeLayer.paint["line-opacity"] = 1;
