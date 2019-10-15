@@ -31,7 +31,7 @@ mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 class Mapbox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {trains: {}, arrivals: {}, activeIndex: 0, openMobilePane: true};
+    this.state = {trains: [], arrivals: {}, activeIndex: 0, openMobilePane: true};
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["id"] = key;
