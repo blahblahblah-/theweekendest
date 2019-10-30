@@ -57,7 +57,11 @@ class Mapbox extends React.Component {
       bearing: 29,
       minZoom: 9,
       zoom: 12,
-      hash: true
+      hash: true,
+      maxBounds: [
+        [-74.8113, 40.3797],
+        [-73.3584, 41.0247]
+      ]
     });
 
     this.map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
