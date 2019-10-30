@@ -265,7 +265,7 @@ class Mapbox extends React.Component {
     let prev = routing.splice(0, 1);
     routing.forEach((stopId) => {
       path.push([stations[prev].longitude, stations[prev].latitude]);
-      let potentialPath = this.findPath(prev, stopId, 0);
+      let potentialPath = this.findPath(prev, stopId, 0, []);
       if (potentialPath) {
         potentialPath.forEach((coord) => {
           path.push(coord);
@@ -287,7 +287,11 @@ class Mapbox extends React.Component {
     }
   }
 
-  findPath(start, end, stepsTaken) {
+  findPath(start, end, stepsTaken, stopsVisited) {
+    if (stopsVisited.includes(start)) {
+      return;
+    }
+    stopsVisited.push(start);
     if (stations[start]["north"][end] != undefined) {
       if (stations[start]["north"][end].length) {
         return stations[start]["north"][end];
@@ -298,7 +302,7 @@ class Mapbox extends React.Component {
     }
     let results = [];
     Object.keys(stations[start]["north"]).forEach((key) => {
-      const path = this.findPath(key, end, stepsTaken + 1);
+      const path = this.findPath(key, end, stepsTaken + 1, stopsVisited);
       if (path && path.length) {
         if (stations[start]["north"][key].length) {
           return results = stations[start]["north"][key].concat([[stations[key].longitude, stations[key].latitude]]).concat(path);
