@@ -5,24 +5,31 @@ import TrainBullet from './trainBullet.jsx';
 class TrainMapStop extends React.Component {
 
   renderStop() {
-    const { southStop, northStop } = this.props;
+    const { southStop, northStop, stop } = this.props;
 
     if (southStop && northStop) {
       return (
-        <div style={{border: "1px #999 solid", height: "10px", width: "10px", borderRadius: "50%", position: "relative", backgroundColor: "white", left: "5px", top: "20px"}}>
+        <div style={{border: "1px #999 solid", height: "10px", width: "10px", borderRadius: "50%",
+          position: "relative", backgroundColor: "white", left: "5px", top: "20px", cursor: "pointer"}}
+          onClick={this.handleClick.bind(this, stop)}>
         </div>
       )
     }
 
     if (northStop) {
       return (
-        <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderTopLeftRadius: "10px", borderTopRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px", top: "20px"}}>
+        <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderTopLeftRadius: "10px", 
+          orderTopRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
+          top: "20px", cursor: "pointer"}}
+          onClick={this.handleClick.bind(this, stop)}>
         </div>
       )
     }
 
     return (
-      <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderBottomLeftRadius: "10px", borderBottomRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px", top: "25px"}}>
+      <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderBottomLeftRadius: "10px",
+        borderBottomRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
+        top: "25px", cursor: "pointer"}} onClick={this.handleClick.bind(this, stop)}>
       </div>
     )
   }
