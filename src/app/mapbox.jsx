@@ -84,8 +84,8 @@ class Mapbox extends React.Component {
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
-        this.renderLines(data.routes);
-        this.setState({routing: data.routes, stops: data.stops});
+        this.renderLines(data.routes, data.checksum);
+        this.setState({routing: data.routes, stops: data.stops, checksum: data.checksum});
       })
       .then(() => {
         const { selectedTrain } = this.state;
@@ -103,8 +103,13 @@ class Mapbox extends React.Component {
       .then(data => this.setState({ arrivals: data.routes }));
   }
 
-  renderLines(routes) {
-    const { selectedTrain, selectedStation } = this.state;
+  renderLines(routes, newChecksum) {
+    const { selectedTrain, selectedStation, checksum } = this.state;
+
+    if (newChecksum === checksum) {
+      return;
+    }
+
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["northStops"] = new Set();
