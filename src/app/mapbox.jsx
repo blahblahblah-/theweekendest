@@ -665,7 +665,7 @@ class Mapbox extends React.Component {
               />
             }
             { selectedStation && !selectedTrain && trains.length > 1 &&
-              <StationDetails trains={trains} station={stations[selectedStation]} stations={stations}
+              <StationDetails routings={routing} trains={trains} station={stations[selectedStation]} stations={stations}
                 arrivals={arrivals}
                 onReset={this.handleResetView.bind(this)} onStationSelect={this.handleStationSelect.bind(this)}
                 onTrainSelect={this.handleTrainSelect.bind(this)}

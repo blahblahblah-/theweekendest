@@ -55,6 +55,68 @@ class StationDetails extends React.Component {
     }).join(', ')
   }
 
+  southDestinations() {
+    const { routings, stations, station } = this.props;
+    let destinations = [];
+    Object.keys(routings).forEach((key) => {
+      const route = routings[key];
+      if (key !== 'M' || !mTrainShuffle.includes(station.id)) {
+        route.routings.south.forEach((routing) => {
+          if (routing.includes(station.id + "S")) {
+            destinations.push(routing[routing.length - 1]);
+          }
+        })
+      }
+    })
+
+    if (mTrainShuffle.includes(station.id)) {
+      const route = routings["M"];
+      route.routings.north.forEach((routing) => {
+        if (routing.includes(station.id + "N")) {
+          destinations.push(routing[routing.length - 1]);
+        }
+      })
+    }
+
+    return Array.from(new Set(destinations.map((s) => {
+      const st = stations[s.substring(0, 3)];
+      if (st) {
+        return st.name;
+      }
+    }))).sort().join(', ').replace(/ - /g, "–");
+  }
+
+  northDestinations() {
+    const { routings, stations, station } = this.props;
+    let destinations = [];
+    Object.keys(routings).forEach((key) => {
+      const route = routings[key];
+      if (key !== 'M' || !mTrainShuffle.includes(station.id)) {
+        route.routings.north.forEach((routing) => {
+          if (routing.includes(station.id + "N")) {
+            destinations.push(routing[routing.length - 1]);
+          }
+        })
+      }
+    })
+
+    if (mTrainShuffle.includes(station.id)) {
+      const route = routings["M"];
+      route.routings.south.forEach((routing) => {
+        if (routing.includes(station.id + "S")) {
+          destinations.push(routing[routing.length - 1]);
+        }
+      })
+    }
+
+    return Array.from(new Set(destinations.map((s) => {
+      const st = stations[s.substring(0, 3)];
+      if (st) {
+        return st.name;
+      }
+    }))).sort().join(', ').replace(/ - /g, "–");
+  }
+
   render() {
     const { stations, station, trains, onTrainSelect } = this.props;
     return (
@@ -78,17 +140,7 @@ class StationDetails extends React.Component {
         <div className="details-body">
           <Segment>
             <Header as="h5">
-              To {
-                Array.from(new Set(Array.from(station.southStops).sort().map((trainId) => {
-                  const train = trains.find((t) => {
-                    return t.id === trainId;
-                  });
-                  if (trainId === 'M' & mTrainShuffle.includes(station.id)) {
-                    return train.destinations.north;
-                  }
-                  return train.destinations.south;
-                }).flat())).sort().join(', ').replace(/ - /g, "–")
-              }
+              To { this.southDestinations() }
             </Header>
             <div>
               <List divided relaxed>
@@ -118,17 +170,7 @@ class StationDetails extends React.Component {
           </Segment>
           <Segment>
             <Header as="h5">
-              To {
-                Array.from(new Set(Array.from(station.northStops).sort().map((trainId) => {
-                  const train = trains.find((t) => {
-                    return t.id == trainId;
-                  });
-                  if (trainId === 'M' & mTrainShuffle.includes(station.id)) {
-                    return train.destinations.south;
-                  }
-                  return train.destinations.north;
-                }).flat())).sort().join(', ').replace(/ - /g, "–")
-              }
+              To { this.northDestinations() }
             </Header>
             <div>
               <List divided relaxed>
