@@ -12,6 +12,7 @@ class StationList extends React.Component {
   constructor(props) {
     super(props);
     const { stations } = this.props;
+    // Sort by numbers first before alpha
     this.stations = Object.values(stations).sort((a, b) => {
       const matchA = a.name.match(/^(\d+)/g);
       const matchB = b.name.match(/^(\d+)/g);
@@ -36,6 +37,33 @@ class StationList extends React.Component {
       if (nameA > nameB) {
         return 1;
       }
+
+      if (a.secondary_name && b.secondary_name) {
+        const matchA = a.secondary_name.match(/^(\d+)/g);
+        const matchB = b.secondary_name.match(/^(\d+)/g);
+
+        if (matchA && matchB) {
+          const numA = Number(matchA[0]);
+          const numB = Number(matchB[0]);
+
+          if (numA < numB) {
+            return -1;
+          }
+          if (numA > numB) {
+            return 1;
+          }
+        }
+
+        let secondaryNameA = a.secondary_name.toUpperCase();
+        let secondaryNameB = b.secondary_name.toUpperCase();
+        if (secondaryNameA < secondaryNameB) {
+          return -1;
+        }
+        if (secondaryNameA > secondaryNameB) {
+          return 1;
+        }
+      }
+
       return 0;
     });
     this.state = {stationsDisplayed: this.stations};
@@ -76,11 +104,16 @@ class StationList extends React.Component {
             stationsDisplayed && stationsDisplayed.map((stop) => {
               return(
                 <List.Item key={stop.id} className='station-list-item' onClick={this.handleClick.bind(this, stop)}>
-                  <List.Content floated='left'>
+                  <List.Content floated='left' style={{marginRight: "0.5em"}}>
                     <Header as='h5'>
                       { stop.name.replace(/ - /g, "–") }
                     </Header>
                   </List.Content>
+                  { stop.secondary_name &&
+                    <List.Content floated='left' className="secondary-name">
+                      { stop.secondary_name }
+                    </List.Content>
+                  }
                   <List.Content floated='right'>
                     {
                       Array.from(stop.stops).sort().map((trainId) => {

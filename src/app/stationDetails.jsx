@@ -125,9 +125,16 @@ class StationDetails extends React.Component {
           <Button icon onClick={this.handleBack}>
             <Icon name='arrow left' />
           </Button>
-          <Header as="h3">
+          <Header as="h3" className='header-station-name'>
             { station.name.replace(/ - /g, "–") }
           </Header>
+          { station.secondary_name &&
+            <span className='header-secondary-name'>
+              {
+                station.secondary_name
+              }
+            </span>
+          }
         </Responsive>
         <Responsive {...Responsive.onlyMobile} as='div' className="mobile-details-header">
           <Button icon onClick={this.handleBack}>
@@ -135,6 +142,9 @@ class StationDetails extends React.Component {
           </Button>
           <Header as="h5" style={{margin: 0}}>
             { station.name.replace(/ - /g, "–") }
+            <span className='header-secondary-name'>
+              { station.secondary_name }
+            </span>
           </Header>
         </Responsive>
         <div className="details-body">
@@ -151,7 +161,7 @@ class StationDetails extends React.Component {
                     });
                     return (
                       <List.Item key={trainId}>
-                        <List.Content floated='left'>
+                        <List.Content floated='left' style={{marginRight: "0.5em"}}>
                           <TrainBullet name={train.name} id={trainId} color={train.color}
                             textColor={train.text_color} size='small' onSelect={onTrainSelect} />
                         </List.Content>
@@ -218,6 +228,11 @@ class StationDetails extends React.Component {
                           { stop.name.replace(/ - /g, "–") }
                         </Header>
                       </List.Content>
+                      { stop.secondary_name &&
+                        <List.Content floated='left' className="secondary-name">
+                          { stop.secondary_name }
+                        </List.Content>
+                      }
                       <List.Content floated='right'>
                         {
                           Array.from(stop.stops).sort().map((trainId) => {

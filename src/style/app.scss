@@ -132,6 +132,15 @@
 
 .station-list-item {
   min-height: 28px;
+
+  h5 {
+    line-height: 28px!important;
+  }
+
+  .secondary-name {
+    font-size: 0.9em;
+    line-height: 28px!important;
+  }
 }
 
 .station-search {
@@ -200,6 +209,19 @@
   padding: 0 14px 14px 14px;
 }
 
- .station-details-route-status {
+.station-details-route-status {
   text-align: right;
- }
+}
+
+.header-secondary-name {
+  color: rgba(0,0,0,.4);
+}
+
+.ui.header.header-station-name {
+  margin: calc(2rem - .14285714em) 0 .2rem;
+}
+
+h5 .header-secondary-name {
+  font-weight: 300!important;
+  display: block;
+}
