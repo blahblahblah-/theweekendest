@@ -19,7 +19,7 @@ class TrainMapStop extends React.Component {
     if (northStop) {
       return (
         <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderTopLeftRadius: "10px", 
-          orderTopRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
+          borderTopRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
           top: "20px", cursor: "pointer"}}
           onClick={this.handleClick.bind(this, stop)}>
         </div>
