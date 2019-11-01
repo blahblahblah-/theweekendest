@@ -171,6 +171,7 @@ class TrainMap extends React.Component {
     const { routing, stops, onTrainSelect, onStationSelect } = this.props;
     const segments = this.generateSegments();
     const stopPattern = this.calculateStops();
+
     let currentBranches = [0];
     if (segments) {
       return(
@@ -188,7 +189,7 @@ class TrainMap extends React.Component {
 
                 if (stopId === "") {
                   segments.branches.splice(0, 1);
-                  currentBranches = [0];
+                  currentBranches = [];
                 } else {
                   const potentialBranch = segments.branches.find((obj, index) => {
                     return !currentBranches.includes(index) && obj.includes(stopId);
