@@ -42,7 +42,7 @@ class TrainDetails extends React.Component {
   }
 
   render() {
-    const { routing, stops, train, onTrainSelect, onStationSelect } = this.props;
+    const { routing, stops, train, stations, onTrainSelect, onStationSelect } = this.props;
     return (
       <Segment className="details-pane">
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
@@ -86,7 +86,7 @@ class TrainDetails extends React.Component {
         {
           this.renderSummary()
         }
-        <TrainMap routing={routing} stops={stops} train={train} onTrainSelect={onTrainSelect} onStationSelect={onStationSelect} />
+        <TrainMap routing={routing} stops={stops} train={train} stations={stations} onTrainSelect={onTrainSelect} onStationSelect={onStationSelect} />
       </Segment>
     );
   }

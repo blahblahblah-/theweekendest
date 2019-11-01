@@ -28,7 +28,7 @@ class TrainMap extends React.Component {
   }
 
   generateSegments() {
-    const { routing } = this.props;
+    const { routing, stations } = this.props;
 
     if (!routing ) {
       return;
@@ -50,11 +50,21 @@ class TrainMap extends React.Component {
       return b.length - a.length ;
     });
 
-    const line = allRoutings[0];
+    const longestLine = allRoutings[0];
 
-    if (!line) {
+    if (!longestLine) {
       return;
     }
+
+    const lines = allRoutings.filter((routing) => {
+      return routing.every(station => !longestLine.includes(station));
+    });
+
+    lines.push(longestLine);
+
+    const line = lines.sort((a, b) => {
+      return stations[b[0]].latitude - stations[a[0]].latitude;
+    })[0];
 
     const lineCopy = [...line];
     const branches = [lineCopy];
