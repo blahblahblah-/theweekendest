@@ -306,7 +306,7 @@ class Mapbox extends React.Component {
         return stations[start]["north"][end];
       }
       return [[stations[end].longitude, stations[end].latitude]];
-    } else if (stepsTaken > 8) {
+    } else if (stepsTaken > 12) {
       return;
     }
     let results = [];
