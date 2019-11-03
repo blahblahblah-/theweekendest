@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Responsive, Button, Icon, Header, Segment, List } from "semantic-ui-react";
+import { Responsive, Button, Icon, Header, Segment, List, Popup } from "semantic-ui-react";
 import { withRouter } from "react-router-dom";
 import TrainMap from './trainMap.jsx';
 import TrainBullet from './trainBullet.jsx';
@@ -48,7 +48,7 @@ class TrainDetails extends React.Component {
   handleShare = _ => {
     navigator.share({
       title: `the weekendest - ${this.props.train.alternate_name || this.props.train.name} train`,
-      text: `Real-time arrival times and routing information for ${this.props.train.alternate_name || this.props.train.name} train`,
+      text: `Real-time arrival times and routing information for ${this.props.train.alternate_name || this.props.train.name} train on the Weekendest`,
       url: `https://www.theweekendest.com/trains/${this.props.train.id}`
     })
   }
@@ -87,9 +87,20 @@ class TrainDetails extends React.Component {
           </div>
         </Responsive>
         <Responsive {...Responsive.onlyMobile} as='div' className="mobile-details-header mobile-train-details-header">
-          <Button icon onClick={this.handleBack}>
-            <Icon name='arrow left' />
-          </Button>
+          <Popup trigger={<Button icon='ellipsis horizontal' />} inverted
+            on='click' hideOnScroll position='bottom left'>
+            <Button icon onClick={this.handleBack}>
+              <Icon name='arrow left' />
+            </Button>
+            <Button icon onClick={this.handleHome}>
+              <Icon name='map outline' />
+            </Button>
+            { navigator.share &&
+              <Button icon onClick={this.handleShare}>
+                <Icon name='external share' />
+              </Button>
+            }
+          </Popup>
           <TrainBullet name={train.name} color={train.color} textColor={train.text_color} size='small' style={{display: "inline-block", flexGrow: 0}} />
           { train.alternate_name && 
             <Header as='h5' style={{margin: 0, flexGrow: 0}}>
