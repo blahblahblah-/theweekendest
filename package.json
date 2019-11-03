@@ -41,6 +41,7 @@
     "react": "^16.5.2",
     "react-clipboard.js": "^2.0.16",
     "react-dom": "^16.5.2",
+    "react-helmet": "^5.2.1",
     "react-router-dom": "^5.1.2",
     "semantic-ui-react": "^0.82.5"
   }

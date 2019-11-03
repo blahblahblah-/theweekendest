@@ -5,6 +5,7 @@ import { withRouter } from "react-router-dom";
 import Clipboard from 'react-clipboard.js';
 import TrainMap from './trainMap.jsx';
 import TrainBullet from './trainBullet.jsx';
+import { Helmet } from "react-helmet";
 
 class TrainDetails extends React.Component {
   statusColor(status) {
@@ -56,8 +57,17 @@ class TrainDetails extends React.Component {
 
   render() {
     const { routing, stops, train, stations } = this.props;
+    const title = `the weekendest beta - ${((train.alternate_name) ? ("S - " + train.alternate_name) : train.name)} Train`;
     return (
       <Segment className="details-pane">
+        <Helmet>
+          <title>{title}</title>
+          <meta property="og:title" content={title} />
+          <meta name="twitter:title" content={title} />
+          <meta property="og:url" content={`https://www.theweekendest.com/trains/${train.id}`} />
+          <meta name="twitter:url" content={`https://www.theweekendest.com/trains/${train.id}`} />
+          <link rel="canonical" href={`https://www.theweekendest.com/trains/${train.id}`} />
+        </Helmet>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
           <Button icon onClick={this.handleBack} title="Back">
             <Icon name='arrow left' />

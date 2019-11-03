@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
 import { Responsive, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu } from "semantic-ui-react";
 import { BrowserRouter as Router, Route, Link, Switch, Redirect, withRouter } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { debounce } from 'lodash';
 
 import TrainList from './trainList.jsx';
@@ -602,6 +603,11 @@ class Mapbox extends React.Component {
     const { trains } = this.state;
     return (
       <div>
+        <Helmet>
+          <title>the weekendest beta - real-time new york city subway map</title>
+          <meta property="og:title" content="the weekendest beta - real-time new york city subway map" />
+          <meta name="twitter:title" content="the weekendest beta - real-time new york city subway map" />
+        </Helmet>
         <Responsive {...Responsive.onlyMobile} as={Segment} className="mobile-top-bar">
           <Header as='h4'>
             information

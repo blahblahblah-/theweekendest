@@ -4,6 +4,7 @@ import { Responsive, Button, Icon, Header, Segment, List, Popup } from "semantic
 import { Link, withRouter } from "react-router-dom";
 import Clipboard from 'react-clipboard.js';
 import TrainBullet from './trainBullet.jsx';
+import { Helmet } from "react-helmet";
 
 import Cross from "./icons/cross-15.svg";
 
@@ -127,8 +128,17 @@ class StationDetails extends React.Component {
 
   render() {
     const { stations, station, trains } = this.props;
+    const title = `the weekendest beta - ${ station.name.replace(/ - /g, "–") }${ station.secondary_name ? ` (${station.secondary_name})` : ""} Station`;
     return (
       <Segment className='details-pane'>
+        <Helmet>
+          <title>{title}</title>
+          <meta property="og:title" content={title} />
+          <meta name="twitter:title" content={title} />
+          <meta property="og:url" content={`https://www.theweekendest.com/stations/${station.id}`} />
+          <meta name="twitter:url" content={`https://www.theweekendest.com/stations/${station.id}`} />
+          <link rel="canonical" href={`https://www.theweekendest.com/stations/${station.id}`} />
+        </Helmet>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
           <Button icon onClick={this.handleBack} title="Back">
             <Icon name='arrow left' />
