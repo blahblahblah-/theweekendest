@@ -51,6 +51,9 @@ class Mapbox extends React.Component {
       }
     });
     this.showAll = true;
+    this.props.history.listen((location) => {
+      gtag('config', 'UA-127585516-1', {'page_path': location.pathname});
+    });
   }
   
   componentDidMount() {
