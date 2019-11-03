@@ -39,6 +39,7 @@
     "lodash": "^4.17.15",
     "mapbox-gl": "^1.4.0",
     "react": "^16.5.2",
+    "react-clipboard.js": "^2.0.16",
     "react-dom": "^16.5.2",
     "react-router-dom": "^5.1.2",
     "semantic-ui-react": "^0.82.5"

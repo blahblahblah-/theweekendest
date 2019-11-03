@@ -666,7 +666,9 @@ class Mapbox extends React.Component {
         </div>
         <Segment inverted vertical className="infobox">
           { trains.length > 1 &&
-            <Responsive as={Button} maxWidth={Responsive.onlyMobile.maxWidth} icon className="mobile-pane-control" onClick={this.handleToggleMobilePane}>
+            <Responsive as={Button} maxWidth={Responsive.onlyMobile.maxWidth} icon
+              className="mobile-pane-control" onClick={this.handleToggleMobilePane}
+              title="Expand/Collapse">
               <Icon name='sort'/>
             </Responsive>
           }

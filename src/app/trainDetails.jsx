@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Responsive, Button, Icon, Header, Segment, List, Popup } from "semantic-ui-react";
 import { withRouter } from "react-router-dom";
+import Clipboard from 'react-clipboard.js';
 import TrainMap from './trainMap.jsx';
 import TrainBullet from './trainBullet.jsx';
 
@@ -58,17 +59,20 @@ class TrainDetails extends React.Component {
     return (
       <Segment className="details-pane">
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
-          <Button icon onClick={this.handleBack}>
+          <Button icon onClick={this.handleBack} title="Back">
             <Icon name='arrow left' />
           </Button>
-          <Button icon onClick={this.handleHome}>
+          <Button icon onClick={this.handleHome} title="Home">
             <Icon name='map outline' />
           </Button>
           { navigator.share &&
-            <Button icon onClick={this.handleShare} style={{float: "right"}}>
+            <Button icon onClick={this.handleShare} style={{float: "right"}} title="Share">
               <Icon name='external share' />
             </Button>
           }
+          <Clipboard component={Button} style={{float: "right"}} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${this.props.train.id}`}>
+            <Icon name='linkify' />
+          </Clipboard>
           <div className="train-details-header">
             <div className="train-info">
               <TrainBullet name={train.name} color={train.color} textColor={train.text_color} />
@@ -87,16 +91,19 @@ class TrainDetails extends React.Component {
           </div>
         </Responsive>
         <Responsive {...Responsive.onlyMobile} as='div' className="mobile-details-header mobile-train-details-header">
-          <Popup trigger={<Button icon='ellipsis horizontal' />} inverted
+          <Popup trigger={<Button icon='ellipsis horizontal' title="More Options" />} inverted
             on='click' hideOnScroll position='bottom left'>
-            <Button icon onClick={this.handleBack}>
+            <Button icon onClick={this.handleBack} title="Back">
               <Icon name='arrow left' />
             </Button>
-            <Button icon onClick={this.handleHome}>
+            <Button icon onClick={this.handleHome} title="Home">
               <Icon name='map outline' />
             </Button>
+            <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${this.props.train.id}`}>
+              <Icon name='linkify' />
+            </Clipboard>
             { navigator.share &&
-              <Button icon onClick={this.handleShare}>
+              <Button icon onClick={this.handleShare} title="Share">
                 <Icon name='external share' />
               </Button>
             }
