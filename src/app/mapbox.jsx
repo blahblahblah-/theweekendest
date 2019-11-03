@@ -50,6 +50,7 @@ class Mapbox extends React.Component {
         stations[transfer['from']]["transfers"].add(transfer['to']);
       }
     });
+    this.showAll = true;
   }
   
   componentDidMount() {
@@ -501,6 +502,7 @@ class Mapbox extends React.Component {
 
     this.closeMobilePane();
     this.infoBox.scrollTop = 0;
+    this.showAll = false;
   }
 
   selectTrain(train) {
@@ -539,9 +541,14 @@ class Mapbox extends React.Component {
     });
     this.openMobilePane();
     this.infoBox.scrollTop = 0;
+    this.showAll = false;
   }
 
   resetView() {
+    if (this.showAll) {
+      return;
+    }
+
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
@@ -556,6 +563,7 @@ class Mapbox extends React.Component {
     this.infoBox.scrollTop = 0;
     this.openMobilePane();
     this.renderStops(null);
+    this.showAll = true;
   }
 
   handleToggleMobilePane = _ => {
