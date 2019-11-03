@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Responsive, Button, Icon, Header, Segment, List } from "semantic-ui-react";
+import { withRouter } from "react-router-dom";
 import TrainMap from './trainMap.jsx';
 import TrainBullet from './trainBullet.jsx';
 
@@ -37,18 +38,37 @@ class TrainDetails extends React.Component {
   }
 
   handleBack = _ => {
-    const { onReset } = this.props;
-    onReset();
+    this.props.history.goBack();
+  }
+
+  handleHome = _ => {
+    this.props.history.push("/");
+  }
+
+  handleShare = _ => {
+    navigator.share({
+      title: `the weekendest - ${this.props.train.alternate_name || this.props.train.name} train`,
+      text: `Real-time arrival times and routing information for ${this.props.train.alternate_name || this.props.train.name} train`,
+      url: `https://www.theweekendest.com/trains/${this.props.train.id}`
+    })
   }
 
   render() {
-    const { routing, stops, train, stations, onTrainSelect, onStationSelect } = this.props;
+    const { routing, stops, train, stations } = this.props;
     return (
       <Segment className="details-pane">
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
           <Button icon onClick={this.handleBack}>
             <Icon name='arrow left' />
           </Button>
+          <Button icon onClick={this.handleHome}>
+            <Icon name='map outline' />
+          </Button>
+          { navigator.share &&
+            <Button icon onClick={this.handleShare} style={{float: "right"}}>
+              <Icon name='external share' />
+            </Button>
+          }
           <div className="train-details-header">
             <div className="train-info">
               <TrainBullet name={train.name} color={train.color} textColor={train.text_color} />
@@ -86,10 +106,10 @@ class TrainDetails extends React.Component {
         {
           this.renderSummary()
         }
-        <TrainMap routing={routing} stops={stops} train={train} stations={stations} onTrainSelect={onTrainSelect} onStationSelect={onStationSelect} />
+        <TrainMap routing={routing} stops={stops} train={train} stations={stations} />
       </Segment>
     );
   }
 }
 
-export default TrainDetails
+export default withRouter(TrainDetails)

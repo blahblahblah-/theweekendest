@@ -1,5 +1,6 @@
 import React from 'react';
 import { Segment, Header } from "semantic-ui-react";
+import { Link } from "react-router-dom";
 
 class TrainBullet extends React.Component {
   name() {
@@ -20,36 +21,29 @@ class TrainBullet extends React.Component {
   }
 
   style() {
-    const { onSelect } = this.props
-    const cursor = !!onSelect ? "pointer" : ""
+    const { link } = this.props
     if (this.props.textColor) {
       return {
         ...this.props.style,
         backgroundColor: `${this.props.color}`,
         color: `${this.props.textColor}`,
-        cursor: cursor
       }
     } else {
       return {
         ...this.props.style,
         backgroundColor: `${this.props.color}`,
-        cursor: cursor
+        color: "#ffffff"
       };
     }
   }
 
-  handleClick = id => {
-    const { onSelect } = this.props;
-    onSelect(id);
-  }
-
   render() {
-    const { id, alternateName, onSelect } = this.props;
-    if (onSelect) {
+    const { id, alternateName, link } = this.props;
+    if (link) {
       return(
-        <div className={this.classNames()} style={this.style()} onClick={this.handleClick.bind(this, id)}>
+        <Link as='div' className={this.classNames()} style={this.style()} to={`/trains/${id}`}>
           <div className={this.innerClassNames()}>{this.name()}<sup>{alternateName}</sup></div>
-        </div>
+        </Link>
       )
     }
     return(

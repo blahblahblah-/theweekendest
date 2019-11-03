@@ -4,6 +4,10 @@
   font-size: 1rem;
 }
 
+h1.yellow a, h3.yellow a {
+  color: #ffe21f!important;
+}
+
 .infobox {
   display: block;
   position: absolute !important;
@@ -224,4 +228,11 @@
 h5 .header-secondary-name {
   font-weight: 300!important;
   display: block;
+}
+
+h5 .station-list-secondary-name {
+  color: rgba(0,0,0,.4);
+  font-weight: 300!important;
+  margin-left: .4rem;
+  font-size: 0.9em;
 }

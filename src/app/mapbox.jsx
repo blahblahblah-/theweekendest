@@ -1,7 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
-import { Responsive, Header, Segment, Statistic, Tab, Button, Loader, Icon } from "semantic-ui-react";
+import { Responsive, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu } from "semantic-ui-react";
+import { BrowserRouter as Router, Route, Link, Switch, Redirect, withRouter } from "react-router-dom";
+import { debounce } from 'lodash';
+
 import TrainList from './trainList.jsx';
 import TrainDetails from './trainDetails.jsx';
 import StationList from './stationList.jsx';
@@ -31,7 +34,7 @@ mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 class Mapbox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {trains: [], arrivals: {}, activeIndex: 0, openMobilePane: true};
+    this.state = {trains: [], arrivals: {}};
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["id"] = key;
@@ -52,12 +55,12 @@ class Mapbox extends React.Component {
   componentDidMount() {
     this.map = new mapboxgl.Map({
       container: this.mapContainer,
-      style: 'mapbox://styles/theweekendest/ck1fhati848311cp6ezdzj5cm',
+      style: 'mapbox://styles/theweekendest/ck1fhati848311cp6ezdzj5cm?optimize=true',
       center: center,
       bearing: 29,
       minZoom: 9,
       zoom: 12,
-      hash: true,
+      hash: false,
       maxBounds: [
         [-74.8113, 40.3797],
         [-73.3584, 41.0247]
@@ -88,7 +91,7 @@ class Mapbox extends React.Component {
         this.setState({routing: data.routes, stops: data.stops, checksum: data.checksum});
       })
       .then(() => {
-        const { selectedTrain } = this.state;
+        const selectedTrain = this.selectedTrain();
         this.renderStops(selectedTrain);
       })
   }
@@ -103,8 +106,30 @@ class Mapbox extends React.Component {
       .then(data => this.setState({ arrivals: data.routes }));
   }
 
+  selectedTrain() {
+    const { location } = this.props;
+    const urlPath = location.pathname.split('/');
+    if (urlPath.length > 2) {
+      if (urlPath[1] === 'trains') {
+        return urlPath[2];
+      }
+    }
+  }
+
+  selectedStation() {
+    const { location } = this.props;
+    const urlPath = location.pathname.split('/');
+    if (urlPath.length > 2) {
+      if (urlPath[1] === 'stations') {
+        return urlPath[2];
+      }
+    }
+  }
+
   renderLines(routes, newChecksum) {
-    const { selectedTrain, selectedStation, checksum } = this.state;
+    const { checksum } = this.state;
+    const selectedTrain = this.selectedTrain();
+    const selectedStation = this.selectedStation();
 
     if (newChecksum === checksum) {
       return;
@@ -256,9 +281,9 @@ class Mapbox extends React.Component {
           this.map.removeSource(layerId);
         }
         this.map.addLayer(routeLayer);
-        this.map.on('click', layerId, () => {
-          this.selectTrain(train);
-        });
+        this.map.on('click', layerId, debounce(() => {
+          this.props.history.push(`/trains/${train}`);
+        }, 300));
         this.map.on('mouseenter', layerId, (() => {
           this.map.getCanvas().style.cursor = 'pointer';
         }).bind(this));
@@ -301,6 +326,10 @@ class Mapbox extends React.Component {
       return;
     }
     stopsVisited.push(start);
+    if (!stations[start] || !stations[start]["north"]) {
+      console.log(start);
+      return;
+    }
     if (stations[start]["north"][end] != undefined) {
       if (stations[start]["north"][end].length) {
         return stations[start]["north"][end];
@@ -361,8 +390,12 @@ class Mapbox extends React.Component {
         "icon-opacity": ['get', 'opacity']
       }
     });
-    this.map.on('click', "Stops", (e) => {
-      this.handleStationSelect(e.features[0].properties.id);
+    this.map.on('click', "Stops", e => {
+      const path = `/stations/${e.features[0].properties.id}`;
+      const { location } = this.props;
+      if (location.pathname !== path) {
+        this.props.history.push(path);
+      }
     });
     this.map.on('mouseenter', 'Stops', (() => {
       this.map.getCanvas().style.cursor = 'pointer';
@@ -445,7 +478,7 @@ class Mapbox extends React.Component {
     return "circle-15";
   }
 
-  handleTrainSelect = (train) => {
+  goToTrain(train) {
     const { width } = this.state;
     this.selectTrain(train);
 
@@ -471,12 +504,6 @@ class Mapbox extends React.Component {
   }
 
   selectTrain(train) {
-    const { selectedTrain, selectedStation } = this.state;
-    if (selectedTrain || selectedStation) {
-      this.setState({selectedTrain: train, selectedStation: null});
-    } else {
-      this.setState({selectedTrain: train, selectedStation: null, lastView: window.location.hash});
-    }
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
@@ -491,14 +518,9 @@ class Mapbox extends React.Component {
     this.closeMobilePane();
   }
 
-  handleStationSelect = (station) => {
-    const { selectedStation, selectedTrain, width } = this.state;
+  goToStation(station) {
+    const { width } = this.state;
     const stationData = stations[station];
-    if (selectedTrain || selectedStation) {
-      this.setState({selectedStation: station, selectedTrain: null});
-    } else {
-      this.setState({selectedStation: station, selectedTrain: null, lastView: window.location.hash});
-    }
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
@@ -519,74 +541,129 @@ class Mapbox extends React.Component {
     this.infoBox.scrollTop = 0;
   }
 
-  handleResetView = _ => {
-    const { lastView } = this.state;
-    this.setState({selectedTrain: null, selectedStation: null, lastView: null});
+  resetView() {
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
         this.map.setPaintProperty(layerId, 'line-opacity', 1);
       }
     });
+    this.map.easeTo({
+      center: center,
+      zoom: 12,
+      bearing: 29,
+    });
     this.infoBox.scrollTop = 0;
     this.openMobilePane();
     this.renderStops(null);
-    window.location.hash = lastView;
   }
 
-  handleTabChange = (e, { activeIndex }) => this.setState({ activeIndex })
-
   handleToggleMobilePane = _ => {
-    const { openMobilePane } = this.state;
     this.infoBox.scrollTop = 0;
-    if (openMobilePane) {
-      this.infoBox.classList.remove('open');
-    } else {
-      this.infoBox.classList.add('open');
-    }
-    this.setState({openMobilePane: !openMobilePane});
+    this.infoBox.classList.toggle('open');
   };
 
   handleOnUpdate = (e, { width }) => this.setState({ width })
 
   closeMobilePane() {
     this.infoBox.classList.remove('open');
-    this.setState({openMobilePane: false});
   }
 
   openMobilePane() {
     this.infoBox.classList.add('open');
-    this.setState({openMobilePane: true});
   }
 
   panes() {
     const { trains } = this.state;
     return [
       {
-        menuItem: 'Trains',
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><TrainList trains={trains} onTrainSelect={this.handleTrainSelect.bind(this)} /></Tab.Pane>,
+        menuItem: <Menu.Item as={Link} to='/trains' key='train'>Trains</Menu.Item>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><TrainList trains={trains} /></Tab.Pane>,
       },
       {
-        menuItem: 'Stations',
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList onStationSelect={this.handleStationSelect.bind(this)} stations={stations} trains={trains} /></Tab.Pane>,
+        menuItem: <Menu.Item as={Link} to='/stations' key='stations'>Stations</Menu.Item>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} /></Tab.Pane>,
       },
     ];
   }
 
+  renderListings(index) {
+    const { trains } = this.state;
+    return (
+      <div>
+        <Responsive {...Responsive.onlyMobile} as={Segment} className="mobile-top-bar">
+          <Header as='h4'>
+            information
+          </Header>
+          <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
+            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+              <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
+              <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
+            </Statistic>
+            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+              <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
+              <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
+            </Statistic>
+            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+              <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
+              <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some dntwn</Statistic.Label>
+            </Statistic>
+            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+              <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
+              <Statistic.Label style={{fontSize: "0.75em"}}>Some dntwn, no uptown</Statistic.Label>
+            </Statistic>
+          </Statistic.Group>
+        </Responsive>
+        <Responsive minWidth={Responsive.onlyTablet.minWidth} as={Segment}>
+          <Header as='h4'>
+            stops
+          </Header>
+          <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
+            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+              <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
+              <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
+            </Statistic>
+            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+              <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
+              <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
+            </Statistic>
+            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+              <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
+              <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some downtown</Statistic.Label>
+            </Statistic>
+            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
+              <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
+              <Statistic.Label style={{fontSize: "0.75em"}}>Some downtown, no uptown</Statistic.Label>
+            </Statistic>
+          </Statistic.Group>
+        </Responsive>
+        <Segment className="selection-pane">
+          { trains && trains.length > 1 &&
+            <Tab menu={{secondary: true, pointing: true}} panes={this.panes()} activeIndex={index} />
+          }
+        </Segment>
+      </div>
+    )
+  }
+
   render() {
-    const { trains, arrivals, selectedTrain, selectedStation, routing, stops, activeIndex, timestamp, openMobilePane } = this.state;
+    const { trains, arrivals, routing, stops, timestamp } = this.state;
     return (
       <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
         <div ref={el => this.mapContainer = el}
           style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}>
         </div>
         <Segment inverted vertical className="infobox">
-          <Responsive as={Button} maxWidth={Responsive.onlyMobile.maxWidth} icon className="mobile-pane-control" onClick={this.handleToggleMobilePane}>
-            <Icon name={`angle ${openMobilePane ? 'up' : 'down'}`} />
-          </Responsive>
+          { trains.length > 1 &&
+            <Responsive as={Button} maxWidth={Responsive.onlyMobile.maxWidth} icon className="mobile-pane-control" onClick={this.handleToggleMobilePane}>
+              <Icon name='sort'/>
+            </Responsive>
+          }
           <Responsive {...Responsive.onlyMobile} as='div'>
             <Header inverted as='h3' color='yellow' style={{padding: "5px", float: "left"}}>
-            the weekendest<span id="alpha">beta</span>
+            <Link to='/'>
+              the weekendest<span id="alpha">beta</span>
+            </Link>
               <Header.Subheader>
                 real-time new york city subway map
               </Header.Subheader>
@@ -594,83 +671,52 @@ class Mapbox extends React.Component {
           </Responsive>
           <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div'>
             <Header inverted as='h1' color='yellow' style={{padding: "5px"}}>
-            the weekendest<span id="alpha">beta</span>
+            <Link to='/'>
+              the weekendest<span id="alpha">beta</span>
+            </Link>
               <Header.Subheader>
                 real-time new york city subway map
               </Header.Subheader>
             </Header>
           </Responsive>
           <div ref={el => this.infoBox = el} className="inner-infobox open">
-            { !selectedTrain && !selectedStation &&
-              <div>
-                <Responsive {...Responsive.onlyMobile} as={Segment} className="mobile-top-bar">
-                  <Header as='h4'>
-                    information
-                  </Header>
-                  <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
-                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                      <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
-                    </Statistic>
-                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                      <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
-                    </Statistic>
-                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                      <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some dntwn</Statistic.Label>
-                    </Statistic>
-                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                      <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>Some dntwn, no uptown</Statistic.Label>
-                    </Statistic>
-                  </Statistic.Group>
-                </Responsive>
-                <Responsive minWidth={Responsive.onlyTablet.minWidth} as={Segment}>
-                  <Header as='h4'>
-                    stops
-                  </Header>
-                  <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
-                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                      <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
-                    </Statistic>
-                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                      <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
-                    </Statistic>
-                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                      <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some downtown</Statistic.Label>
-                    </Statistic>
-                    <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-                      <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
-                      <Statistic.Label style={{fontSize: "0.75em"}}>Some downtown, no uptown</Statistic.Label>
-                    </Statistic>
-                  </Statistic.Group>
-                </Responsive>
-                <Segment className="selection-pane">
-                  <Loader active={!(trains && trains.length)} />
-                  { trains && trains.length > 1 &&
-                    <Tab menu={{secondary: true, pointing: true}} panes={this.panes()} activeIndex={activeIndex} onTabChange={this.handleTabChange} />
+            <Switch>
+              <Route path="/trains/:id?" render={(props) => {
+                if (trains.length > 1) {
+                  if (props.match.params.id) {
+                    this.goToTrain(props.match.params.id);
+                    this.closeMobilePane();
+                    return (
+                      <TrainDetails routing={routing[props.match.params.id]} stops={stops} stations={stations}
+                        train={trains.find((train) => train.id == props.match.params.id)}
+                      />
+                    );
+                  } else {
+                    this.resetView();
+                    this.openMobilePane();
+                    return this.renderListings(0);
                   }
-                </Segment>
-              </div>
-            }
-            { selectedTrain && !selectedStation && trains.length > 1 &&
-              <TrainDetails routing={routing[selectedTrain]} stops={stops} stations={stations}
-                train={trains.find((train) => train.id == selectedTrain)}
-                onReset={this.handleResetView.bind(this)} onTrainSelect={this.handleTrainSelect.bind(this)}
-                onStationSelect={this.handleStationSelect.bind(this)}
-              />
-            }
-            { selectedStation && !selectedTrain && trains.length > 1 &&
-              <StationDetails routings={routing} trains={trains} station={stations[selectedStation]} stations={stations}
-                arrivals={arrivals}
-                onReset={this.handleResetView.bind(this)} onStationSelect={this.handleStationSelect.bind(this)}
-                onTrainSelect={this.handleTrainSelect.bind(this)}
-              />
-            }
+                }
+              }} />
+              <Route path="/stations/:id?" render={(props) => {
+                if (trains.length > 1) {
+                  this.openMobilePane();
+                  if (props.match.params.id) {
+                    this.goToStation(props.match.params.id);
+                    return (
+                      <StationDetails routings={routing} trains={trains} station={stations[props.match.params.id]} stations={stations}
+                        arrivals={arrivals}
+                      />
+                    )
+                  } else {
+                    this.resetView();
+                    return this.renderListings(1);
+                  }
+                }
+              }} />
+              <Route render={() => <Redirect to="/trains" /> } />
+            </Switch>
+            <Loader active={!(trains && trains.length)} />
             <Header inverted as='h5' floated='left' style={{margin: "10px 5px"}}>
               Last updated {timestamp && (new Date(timestamp)).toLocaleTimeString('en-US')}.<br />
               Powered by <a href='https://www.goodservice.io' target='_blank'>goodservice.io</a>.<br />
@@ -684,4 +730,4 @@ class Mapbox extends React.Component {
   }
 }
 
-export default Mapbox
+export default withRouter(Mapbox)

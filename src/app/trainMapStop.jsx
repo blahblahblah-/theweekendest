@@ -1,6 +1,7 @@
 import React from 'react';
 import { Header } from 'semantic-ui-react';
 import TrainBullet from './trainBullet.jsx';
+import { withRouter, Link } from "react-router-dom";
 
 class TrainMapStop extends React.Component {
 
@@ -105,12 +106,11 @@ class TrainMapStop extends React.Component {
   }
 
   handleClick = stop => {
-    const { onStationSelect } = this.props;
-    onStationSelect(stop.id);
+    this.props.history.push(`/stations/${stop.id}`);
   }
 
   render() {
-    const { stop, transfers, activeBranches, branchStart, branchEnd, onTrainSelect } = this.props;
+    const { stop, transfers, activeBranches, branchStart, branchEnd } = this.props;
     return (
       <li>
         <div style={{minHeight: "50px", display: "flex"}}>
@@ -127,7 +127,7 @@ class TrainMapStop extends React.Component {
               transfers && transfers.map((route) => {
                 return (
                   <TrainBullet link={true} id={route.id} key={route.name} name={route.name} color={route.color}
-                    textColor={route.text_color} size='small' key={route.id} onSelect={onTrainSelect} />
+                    textColor={route.text_color} size='small' key={route.id} />
                 )
               })
             }
@@ -137,4 +137,4 @@ class TrainMapStop extends React.Component {
     )
   }
 }
-export default TrainMapStop;
+export default withRouter(TrainMapStop);

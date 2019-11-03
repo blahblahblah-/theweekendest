@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
 import { Header, Segment, List, Input } from "semantic-ui-react";
+import { Link } from "react-router-dom";
 import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
@@ -69,11 +70,6 @@ class StationList extends React.Component {
     this.state = {stationsDisplayed: this.stations};
   }
 
-  handleClick = stop => {
-    const { onStationSelect } = this.props;
-    onStationSelect(stop.id);
-  }
-
   handleChange = (e, data) => {
     if (data.value.length < 1) {
       return this.setState({stationsDisplayed: this.stations});
@@ -103,23 +99,25 @@ class StationList extends React.Component {
           {
             stationsDisplayed && stationsDisplayed.map((stop) => {
               return(
-                <List.Item key={stop.id} className='station-list-item' onClick={this.handleClick.bind(this, stop)}>
+                <List.Item as={Link} key={stop.id} className='station-list-item' to={`/stations/${stop.id}`}>
                   <List.Content floated='left' style={{marginRight: "0.5em"}}>
                     <Header as='h5'>
                       { stop.name.replace(/ - /g, "–") }
+                      { stop.secondary_name &&
+                        <span className='station-list-secondary-name'>
+                          {
+                            stop.secondary_name
+                          }
+                        </span>
+                      }
                     </Header>
                   </List.Content>
-                  { stop.secondary_name &&
-                    <List.Content floated='left' className="secondary-name">
-                      { stop.secondary_name }
-                    </List.Content>
-                  }
                   <List.Content floated='right'>
                     {
                       Array.from(stop.stops).sort().map((trainId) => {
                         const train = trainMap[trainId];
                         return (
-                          <TrainBullet link={true} id={trainId} key={train.name} name={train.name} color={train.color}
+                          <TrainBullet id={trainId} key={train.name} name={train.name} color={train.color}
                             textColor={train.text_color} size='small' key={train.id} />
                         )
                       })

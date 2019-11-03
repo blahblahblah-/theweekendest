@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Header, Segment, List } from "semantic-ui-react";
+import { Link } from "react-router-dom";
 import TrainBullet from './trainBullet.jsx';
 
 class TrainList extends React.Component {
@@ -16,11 +17,6 @@ class TrainList extends React.Component {
     }
   }
 
-  handleClick = train => {
-    const { onTrainSelect } = this.props;
-    onTrainSelect(train.id);
-  }
-
   render() {
     const { trains } = this.props;
     return (
@@ -28,7 +24,7 @@ class TrainList extends React.Component {
         {
           trains.filter((train) => train.visible || train.status !== 'Not Scheduled').map((train) => {
             return (
-              <List.Item key={train.id} onClick={this.handleClick.bind(this, train)} data-train={train.id}>
+              <List.Item as={Link} key={train.id} to={`/trains/${train.id}`}>
                 <List.Content floated='left'>
                   <TrainBullet name={train.name} color={train.color}
                     textColor={train.text_color} size='small' />

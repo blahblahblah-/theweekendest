@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Responsive, Button, Icon, Header, Segment, List } from "semantic-ui-react";
+import { Responsive, Button, Icon, Header, Segment, List, Popup } from "semantic-ui-react";
+import { Link, withRouter } from "react-router-dom";
 import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
@@ -22,13 +23,19 @@ class StationDetails extends React.Component {
   }
 
   handleBack = _ => {
-    const { onReset } = this.props;
-    onReset();
+    this.props.history.goBack();
   }
 
-  handleClick = stop => {
-    const { onStationSelect } = this.props;
-    onStationSelect(stop.id);
+  handleHome = _ => {
+    this.props.history.push("/");
+  }
+
+  handleShare = _ => {
+    navigator.share({
+      title: `the weekendest - ${this.props.station.name.replace(/ - /g, "–")}`,
+      text: `Real-time arrival times and routing information at ${this.props.station.name.replace(/ - /g, "–")} station`,
+      url: `https://www.theweekendest.com/stations/${this.props.station.id}`
+    })
   }
 
   renderArrivalTimes(trainId, direction) {
@@ -118,13 +125,21 @@ class StationDetails extends React.Component {
   }
 
   render() {
-    const { stations, station, trains, onTrainSelect } = this.props;
+    const { stations, station, trains } = this.props;
     return (
       <Segment className='details-pane'>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
           <Button icon onClick={this.handleBack}>
             <Icon name='arrow left' />
           </Button>
+          <Button icon onClick={this.handleHome}>
+            <Icon name='map outline' />
+          </Button>
+          { navigator.share &&
+            <Button icon onClick={this.handleShare} style={{float: "right"}}>
+              <Icon name='external share' />
+            </Button>
+          }
           <Header as="h3" className='header-station-name'>
             { station.name.replace(/ - /g, "–") }
           </Header>
@@ -137,9 +152,20 @@ class StationDetails extends React.Component {
           }
         </Responsive>
         <Responsive {...Responsive.onlyMobile} as='div' className="mobile-details-header">
-          <Button icon onClick={this.handleBack}>
-            <Icon name='arrow left' />
-          </Button>
+          <Popup trigger={<Button icon='ellipsis horizontal' />} inverted
+            on='click' hideOnScroll position='bottom left'>
+            <Button icon onClick={this.handleBack}>
+              <Icon name='arrow left' />
+            </Button>
+            <Button icon onClick={this.handleHome}>
+              <Icon name='map outline' />
+            </Button>
+            { navigator.share &&
+              <Button icon onClick={this.handleShare}>
+                <Icon name='external share' />
+              </Button>
+            }
+          </Popup>
           <Header as="h5" style={{margin: 0}}>
             { station.name.replace(/ - /g, "–") }
             <span className='header-secondary-name'>
@@ -163,7 +189,7 @@ class StationDetails extends React.Component {
                       <List.Item key={trainId}>
                         <List.Content floated='left' style={{marginRight: "0.5em"}}>
                           <TrainBullet name={train.name} id={trainId} color={train.color}
-                            textColor={train.text_color} size='small' onSelect={onTrainSelect} />
+                            textColor={train.text_color} size='small' link />
                         </List.Content>
                         <List.Content floated='right' className="station-details-route-status">
                           <div>{ this.renderArrivalTimes(trainId, "south") }</div>
@@ -193,7 +219,7 @@ class StationDetails extends React.Component {
                       <List.Item key={trainId}>
                         <List.Content floated='left'>
                           <TrainBullet name={train.name} id={trainId} color={train.color}
-                            textColor={train.text_color} size='small' onSelect={onTrainSelect} />
+                            textColor={train.text_color} size='small' link />
                         </List.Content>
                         <List.Content floated='right' className="station-details-route-status">
                           <div>{ this.renderArrivalTimes(trainId, "north") }</div>
@@ -222,7 +248,7 @@ class StationDetails extends React.Component {
                     return;
                   }
                   return(
-                    <List.Item key={stop.id} className='station-list-item' onClick={this.handleClick.bind(this, stop)}>
+                    <List.Item as={Link} key={stop.id} className='station-list-item' to={`/stations/${stop.id}`}>
                       <List.Content floated='left'>
                         <Header as='h5'>
                           { stop.name.replace(/ - /g, "–") }
@@ -240,7 +266,7 @@ class StationDetails extends React.Component {
                               return t.id == trainId;
                             });
                             return (
-                              <TrainBullet link={true} id={trainId} key={train.name} name={train.name} color={train.color}
+                              <TrainBullet id={trainId} key={train.name} name={train.name} color={train.color}
                                 textColor={train.text_color} size='small' key={train.id} />
                             )
                           })
@@ -263,4 +289,4 @@ class StationDetails extends React.Component {
   }
 }
 
-export default StationDetails
+export default withRouter(StationDetails)

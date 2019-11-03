@@ -1,12 +1,14 @@
 import React from 'react';
-import { Header, Segment, Grid, Button, Icon } from "semantic-ui-react";
+import { BrowserRouter as Router, Route } from 'react-router-dom'
 import Mapbox from './mapbox.jsx';
 // import MapContainer from './map_container';
 
 class App extends React.Component {
   render() {
     return(
-      <Mapbox />
+      <Router>
+        <Mapbox />
+      </Router>
     )
   }
 }
