@@ -33,7 +33,7 @@ class StationDetails extends React.Component {
   handleShare = _ => {
     navigator.share({
       title: `the weekendest - ${this.props.station.name.replace(/ - /g, "–")}`,
-      text: `Real-time arrival times and routing information at ${this.props.station.name.replace(/ - /g, "–")} station`,
+      text: `Real-time arrival times and routing information at ${this.props.station.name.replace(/ - /g, "–")} station on the Weekendest`,
       url: `https://www.theweekendest.com/stations/${this.props.station.id}`
     })
   }
