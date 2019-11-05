@@ -25,6 +25,10 @@ const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
 const stations = {};
 const stationLocations = {}
 const center = [-74.003683, 40.7079445]
+const defaultBounds = [
+  [-74.251961, 40.512764],
+  [-73.755405, 40.903125]
+]
 const trainIds = [
   '2', '3', '1', '4', '5', '6', '6X', '7', '7X', 'A', 'C', 'E', 'F', 'FX',
   'D', 'B', 'M', 'J', 'Z', 'R', 'N', 'Q', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"
@@ -85,6 +89,11 @@ class Mapbox extends React.Component {
       this.fetchData();
       this.routeTimer = setInterval(() => this.fetchRoutes(), 120000);
       this.dataTimer = setInterval(() => this.fetchData(), 60000);
+    });
+
+    this.map.fitBounds(defaultBounds, {
+      bearing: 29,
+      padding: 100
     });
   }
 
@@ -565,11 +574,7 @@ class Mapbox extends React.Component {
         this.map.setPaintProperty(layerId, 'line-opacity', 1);
       }
     });
-    this.map.easeTo({
-      center: center,
-      zoom: 12,
-      bearing: 29,
-    });
+    this.map.fitBounds(defaultBounds, { bearing: 29});
     this.infoBox.scrollTop = 0;
     this.openMobilePane();
     this.renderStops(null);
