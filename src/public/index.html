@@ -21,8 +21,8 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>the weekendest beta - real-time new york city subway map</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="Description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="Description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
   <!-— facebook open graph tags -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.theweekendest.com" />
@@ -40,9 +40,11 @@
   <meta name="twitter:image" content="<%= require('../images/screenshot.png') %>" />
   <meta name="twitter:url" content="https://www.theweekendest.com" />
   <link rel="icon" href="<%= require('../images/favicon.png') %>">
-  <link rel="apple-touch-icon" href="<%= require('../images/apple-touch-icon.png') %>">
+  <link rel="apple-touch-icon" href="<%= require('../images/apple-touch-icon.png') %>" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="<%= require('../images/manifest.webmanifest') %>" />
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="the weekendest">
   <link href="<%= require('../images/iphone5_splash.png') %>" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
   <link href="<%= require('../images/iphone6_splash.png') %>" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />

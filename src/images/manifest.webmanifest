@@ -1,0 +1,14 @@
+{
+  "name": "the weekendest",
+  "short_name": "the weekendest",
+  "start_url": "https://www.theweekendest.com",
+  "display": "fullscreen",
+  "background_color": "#000000",
+  "description": "real time new york city subway map",
+  "icons": [{
+    "src": "apple-touch-icon.png",
+    "sizes": "180x180",
+    "type": "image/png"
+  }],
+  "scope": "https://www.theweekendest.com/"
+}

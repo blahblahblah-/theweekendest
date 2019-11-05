@@ -34,7 +34,7 @@ const config = {
   module: {  // where we defined file patterns and their loaders
       rules: [
           {
-            test: /\.jpe?g$|\.ico$|\.gif$|\.png$|\.woff$|\.ttf$|\.wav$|\.mp3$/,
+            test: /\.jpe?g$|\.ico$|\.gif$|\.png$|\.woff$|\.ttf$|\.wav$|\.mp3$|\.webmanifest$/,
             loader: 'file-loader?name=[name].[ext]'  // <-- retain original file name
           },
           {
