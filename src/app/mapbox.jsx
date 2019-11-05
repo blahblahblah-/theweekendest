@@ -286,9 +286,9 @@ class Mapbox extends React.Component {
           this.map.removeSource(layerId);
         }
         this.map.addLayer(routeLayer);
-        this.map.on('click', layerId, debounce(() => {
-          this.props.history.push(`/trains/${train}`);
-        }, 300));
+        this.map.on('click', layerId,() => {
+          this.debounceNavigate(`/trains/${train}`);
+        });
         this.map.on('mouseenter', layerId, (() => {
           this.map.getCanvas().style.cursor = 'pointer';
         }).bind(this));
@@ -298,6 +298,15 @@ class Mapbox extends React.Component {
       }
     });
   }
+
+  navigate(path) {
+    this.props.history.push(path);
+  }
+
+  debounceNavigate = _.debounce(this.navigate, 100, {
+    'leading': true,
+    'trailing': false
+  });
 
   routingGeoJson(routing) {
     let path = []
@@ -397,10 +406,7 @@ class Mapbox extends React.Component {
     });
     this.map.on('click', "Stops", e => {
       const path = `/stations/${e.features[0].properties.id}`;
-      const { location } = this.props;
-      if (location.pathname !== path) {
-        this.props.history.push(path);
-      }
+      this.debounceNavigate(path);
     });
     this.map.on('mouseenter', 'Stops', (() => {
       this.map.getCanvas().style.cursor = 'pointer';
