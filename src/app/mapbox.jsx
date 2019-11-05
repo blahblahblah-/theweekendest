@@ -511,9 +511,9 @@ class Mapbox extends React.Component {
 
       this.map.fitBounds(bounds, {
         padding: {
-          top: (width > Responsive.onlyTablet.minWidth) ? 20 : 140,
+          top: (width >= Responsive.onlyTablet.minWidth) ? 20 : 140,
           right: 20,
-          left: (width > Responsive.onlyTablet.minWidth) ? 400 : 20,
+          left: (width >= Responsive.onlyTablet.minWidth) ? 400 : 20,
           bottom: 20,
         },
       });
@@ -553,8 +553,14 @@ class Mapbox extends React.Component {
       }
     });
     this.renderStops(null);
+    let coords = [stationData.longitude, stationData.latitude];
+    if (width < Responsive.onlyTablet.minWidth) {
+      coords = [coords[0] + 0.002, coords[1] + 0.004];
+    } else if (width <= Responsive.onlyTablet.maxWidth) {
+      coords = [coords[0] - 0.005, coords[1] + 0.001];
+    }
     this.map.easeTo({
-      center: [stationData.longitude + ((width > Responsive.onlyTablet.minWidth) ? 0 : 0.002), stationData.latitude + ((width > Responsive.onlyTablet.minWidth) ? 0 : 0.004)],
+      center: coords,
       zoom: 15,
       bearing: 29,
     });
