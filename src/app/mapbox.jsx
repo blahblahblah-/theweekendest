@@ -68,7 +68,7 @@ class Mapbox extends React.Component {
       center: center,
       bearing: 29,
       minZoom: 9,
-      zoom: 12,
+      zoom: 10,
       hash: false,
       maxBounds: [
         [-74.8113, 40.3797],
@@ -613,6 +613,14 @@ class Mapbox extends React.Component {
         menuItem: <Menu.Item as={Link} to='/stations' key='stations'>Stations</Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} /></Tab.Pane>,
       },
+      {
+        menuItem: <Menu.Item as={Link} to='/starred' key='starred'><Icon name='star' /></Menu.Item>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} starred={true} /></Tab.Pane>,
+      },
+      {
+        menuItem: <Menu.Item as={Link} to='/advisories' key='advisories'><Icon name='warning sign' /></Menu.Item>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} advisories={true} /></Tab.Pane>,
+      },
     ];
   }
 
@@ -749,6 +757,14 @@ class Mapbox extends React.Component {
                     return this.renderListings(1);
                   }
                 }
+              }} />
+              <Route path="/starred" render={() => {
+                this.resetView();
+                return this.renderListings(2);
+              }} />
+              <Route path="/advisories" render={() => {
+                this.resetView();
+                return this.renderListings(3);
               }} />
               <Route render={() => <Redirect to="/trains" /> } />
             </Switch>

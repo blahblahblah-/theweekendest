@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom';
 import { Responsive, Button, Icon, Header, Segment, List, Popup } from "semantic-ui-react";
 import { Link, withRouter } from "react-router-dom";
 import Clipboard from 'react-clipboard.js';
-import TrainBullet from './trainBullet.jsx';
 import { Helmet } from "react-helmet";
+import * as Cookies from 'es-cookie';
+
+import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
 
@@ -12,6 +14,22 @@ import Cross from "./icons/cross-15.svg";
 const mTrainShuffle = ["M18", "M16", "M14", "M13", "M12", "M11"];
 
 class StationDetails extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { fav: false };
+  }
+
+  componentDidMount() {
+    const { station } = this.props;
+    const favs = Cookies.get('favs') && Cookies.get('favs').split(",");
+
+    if (!favs || !favs.includes(station.id)) {
+      this.setState({ fav: false });
+    } else {
+      this.setState({ fav: true });
+    }
+  }
+
   statusColor(status) {
     if (status == 'Good Service') {
       return 'green';
@@ -38,6 +56,27 @@ class StationDetails extends React.Component {
       text: `Real-time arrival times and routing information at ${this.props.station.name.replace(/ - /g, "–")} station on the Weekendest`,
       url: `https://www.theweekendest.com/stations/${this.props.station.id}`
     })
+  }
+
+  handleStar = _ => {
+    const { station } = this.props;
+    const { fav } = this.state;
+    const newState = !fav;
+    const currentFavs = new Set(Cookies.get('favs') && Cookies.get('favs').split(","));
+
+    if (newState) {
+      currentFavs.add(station.id);
+    } else {
+      currentFavs.delete(station.id);
+    }
+
+    this.setState({ fav: newState });
+    Cookies.set('favs', [...currentFavs].join(","), {expires: 365});
+
+    gtag('event', 'stars', {
+      'event_category': newState ? 'add' : 'remove',
+      'event_label': station.id
+    });
   }
 
   renderArrivalTimes(trainId, direction) {
@@ -128,6 +167,7 @@ class StationDetails extends React.Component {
 
   render() {
     const { stations, station, trains } = this.props;
+    const { fav } = this.state;
     const title = `the weekendest beta - ${ station.name.replace(/ - /g, "–") }${ station.secondary_name ? ` (${station.secondary_name})` : ""} Station`;
     return (
       <Segment className='details-pane'>
@@ -145,6 +185,9 @@ class StationDetails extends React.Component {
           </Button>
           <Button icon onClick={this.handleHome} title="Home">
             <Icon name='map outline' />
+          </Button>
+          <Button icon onClick={this.handleStar} title={ fav ? 'Remove station from favorites' : 'Add station to favorites'}>
+            <Icon name={ fav ? 'star' : 'star outline'} />
           </Button>
           { navigator.share &&
             <Button icon onClick={this.handleShare} style={{float: "right"}} title="Share">
@@ -173,6 +216,9 @@ class StationDetails extends React.Component {
             </Button>
             <Button icon onClick={this.handleHome} title="Home">
               <Icon name='map outline' />
+            </Button>
+            <Button icon onClick={this.handleStar} title={ fav ? 'Remove station from favorites' : 'Add station to favorites'}>
+              <Icon name={ fav ? 'star' : 'star outline'} />
             </Button>
             <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/stations/${this.props.station.id}`}>
               <Icon name='linkify' />
