@@ -195,7 +195,7 @@ class StationList extends React.Component {
             {
               stationsWithoutService &&
               <div>
-                <Header as='h4' attached='top' className='advisories-header'>
+                <Header as='h4' attached='top' inverted className='advisories-header'>
                   Stations with no service
                 </Header>
                 <List divided relaxed selection attached="true" style={{marginTop: 0}}>
@@ -210,8 +210,8 @@ class StationList extends React.Component {
             {
               stationsWithOneWayService &&
               <div>
-                <Header as='h4' attached='top' className='advisories-header'>
-                  Stations with only one-way service
+                <Header as='h4' attached='top' inverted className='advisories-header'>
+                  Stations with one-way service only
                 </Header>
                 <List divided relaxed selection attached="true" style={{marginTop: 0}}>
                   {

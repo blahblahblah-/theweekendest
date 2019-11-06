@@ -243,5 +243,12 @@ h5 .station-list-secondary-name {
 
 h4.ui.top.attached.header.advisories-header {
   border-radius: 0;
-  padding: 1em 0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+@media only screen and (max-width: 767px) {
+  .ui.secondary.pointing.menu .item {
+    padding: .85714286em 1em;
+  }
 }
