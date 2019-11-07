@@ -47,12 +47,12 @@ class TrainMapStop extends React.Component {
   }
 
   renderLine(isActiveBranch, index, branchStart, branchEnd) {
-    const { color, branchStops} = this.props;
+    const { color, branchStops } = this.props;
     const stopExists = branchStops[index];
-    const branchStartHere = (branchStart && (branchStart == index + 1));
-    const branchEndHere = (branchEnd && (branchEnd == index + 1));
+    const branchStartHere = branchStart !== null && branchStart == index;
+    const branchEndHere = branchEnd !== null && branchEnd == index;
     const marginValue = "20px";
-    const branching = (branchStartHere !== null || branchEndHere !== null);
+    const branching = branchStartHere || branchEndHere;
     const margin = branching ? ("0 0 0 " + marginValue) : ("0 " + marginValue);
     let background;
 
@@ -88,14 +88,14 @@ class TrainMapStop extends React.Component {
           </div>
         }
         {
-          branchStartHere !== null &&
+          branchStartHere &&
           <div style={{height: "100%"}} className="branch-corner">
             <div style={{boxShadow: "0 0 0 20px " + color, transform: "translate(-10px, 35px)"}} className="branch-start">
             </div>
           </div>
         }
         {
-          branchEndHere !== null &&
+          branchEndHere &&
           <div style={{height: "50px"}} className="branch-corner">
             <div style={{boxShadow: "0 0 0 20px " + color, transform: "translate(-9px, -35px)"}} className="branch-end">
             </div>
