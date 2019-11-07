@@ -295,8 +295,8 @@ class Mapbox extends React.Component {
           this.map.removeSource(layerId);
         }
         this.map.addLayer(routeLayer);
-        this.map.on('click', layerId,() => {
-          this.debounceNavigate(`/trains/${train}`);
+        this.map.on('click', layerId, (e) => {
+          this.debounceNavigate(`/trains/${train}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
         });
         this.map.on('mouseenter', layerId, (() => {
           this.map.getCanvas().style.cursor = 'pointer';
@@ -498,25 +498,34 @@ class Mapbox extends React.Component {
     return "circle-15";
   }
 
-  goToTrain(train) {
+  goToTrain(train, coords, zoom) {
     const { width } = this.state;
     this.selectTrain(train);
 
-    const data = this.map.getSource(`${train}-train`)._data;
-    const coordinatesArray = data.features.map((feature) => feature.geometry.coordinates);
-    if (coordinatesArray[0]) {
-      const bounds = coordinatesArray.flat().reduce((bounds, coord) => {
-        return bounds.extend(coord);
-      }, new mapboxgl.LngLatBounds(coordinatesArray[0][0], coordinatesArray[0][0]));
-
-      this.map.fitBounds(bounds, {
-        padding: {
-          top: (width >= Responsive.onlyTablet.minWidth) ? 20 : 140,
-          right: 20,
-          left: (width >= Responsive.onlyTablet.minWidth) ? 400 : 20,
-          bottom: 20,
-        },
+    if (coords && zoom) {
+      debugger;
+      this.map.easeTo({
+        center: coords,
+        zoom: zoom,
+        bearing: 29,
       });
+    } else {
+      const data = this.map.getSource(`${train}-train`)._data;
+      const coordinatesArray = data.features.map((feature) => feature.geometry.coordinates);
+      if (coordinatesArray[0]) {
+        const bounds = coordinatesArray.flat().reduce((bounds, coord) => {
+          return bounds.extend(coord);
+        }, new mapboxgl.LngLatBounds(coordinatesArray[0][0], coordinatesArray[0][0]));
+
+        this.map.fitBounds(bounds, {
+          padding: {
+            top: (width >= Responsive.onlyTablet.minWidth) ? 20 : 140,
+            right: 20,
+            left: (width >= Responsive.onlyTablet.minWidth) ? 400 : 20,
+            bottom: 20,
+          },
+        });
+      }
     }
 
     this.closeMobilePane();
@@ -728,7 +737,19 @@ class Mapbox extends React.Component {
               <Route path="/trains/:id?" render={(props) => {
                 if (trains.length > 1) {
                   if (props.match.params.id) {
-                    this.goToTrain(props.match.params.id);
+                    const hash = location.hash.substr(1).split('/');
+                    let coords = null;
+                    let zoom = null;
+
+                    if (hash.length > 1) {
+                      const coordsArray = hash[0].split(',');
+                      if (coordsArray.length > 1) {
+                        coords = [coordsArray[1], coordsArray[0]];
+                        zoom = hash[1];
+                      }
+                    }
+
+                    this.goToTrain(props.match.params.id, coords, zoom);
                     this.closeMobilePane();
                     return (
                       <TrainDetails routing={routing[props.match.params.id]} stops={stops} stations={stations}
