@@ -105,8 +105,9 @@ class Mapbox extends React.Component {
         this.setState({routing: data.routes, stops: data.stops, checksum: data.checksum});
       })
       .then(() => {
-        const selectedTrain = this.selectedTrain();
-        this.renderStops(selectedTrain);
+        const selectedTrains = this.selectedTrains();
+        const selectedStations = this.selectedStations();
+        this.renderStops(selectedTrains, selectedStations);
       })
   }
 
@@ -120,30 +121,37 @@ class Mapbox extends React.Component {
       .then(data => this.setState({ arrivals: data.routes }));
   }
 
-  selectedTrain() {
+  selectedTrains() {
     const { location } = this.props;
     const urlPath = location.pathname.split('/');
     if (urlPath.length > 2) {
       if (urlPath[1] === 'trains') {
-        return urlPath[2];
+        return [urlPath[2]];
+      } else if (urlPath[1] === 'stations') {
+        const station = urlPath[2];
+        const stationData = stations[station];
+
+        return trainIds.filter((t) => stationData.stops.has(t));
       }
     }
+    return [];
   }
 
-  selectedStation() {
+  selectedStations() {
     const { location } = this.props;
     const urlPath = location.pathname.split('/');
     if (urlPath.length > 2) {
       if (urlPath[1] === 'stations') {
-        return urlPath[2];
+        return [urlPath[2]];
       }
     }
+    return [];
   }
 
   renderLines(routes, newChecksum) {
     const { checksum } = this.state;
-    const selectedTrain = this.selectedTrain();
-    const selectedStation = this.selectedStation();
+    const selectedTrains = this.selectedTrains();
+    const selectedStations = this.selectedStations();
 
     if (newChecksum === checksum) {
       return;
@@ -270,16 +278,16 @@ class Mapbox extends React.Component {
         routeLayer.paint["line-offset"] = {
           "stops": offsetMap[offset]
         };
-        if (selectedTrain) {
-          if (selectedTrain === train) {
+        if (selectedTrains.length > 0) {
+          if (selectedTrains.includes(train)) {
             routeLayer.paint["line-opacity"] = 1;
           } else {
             routeLayer.paint["line-opacity"] = 0.1;
           }
-        } else if (selectedStation) {
-          const stationData = stations[selectedStation];
+        } else if (selectedStations.length > 0) {
+          const stationsData = selectedStations.map((s) => stations[s]);
 
-          if (!stationData.stops.has(train)) {
+          if (!stationsData.some((s) => s.stops.has(train))) {
             routeLayer.paint["line-opacity"] = 0.1;
           } else {
             routeLayer.paint["line-opacity"] = 1;
@@ -374,7 +382,7 @@ class Mapbox extends React.Component {
     return results;
   }
 
-  renderStops(selectedTrain) {
+  renderStops(selectedTrains, selectedStations) {
     if (this.map.getLayer("Stops")) {
       this.map.removeLayer("Stops")
     }
@@ -383,7 +391,7 @@ class Mapbox extends React.Component {
     }
     this.map.addSource("Stops", {
       "type": "geojson",
-      "data": this.stopsGeoJson(selectedTrain)
+      "data": this.stopsGeoJson(selectedTrains, selectedStations)
     });
     this.map.addLayer({
       "id": "Stops",
@@ -425,20 +433,22 @@ class Mapbox extends React.Component {
     }).bind(this));
   }
 
-  stopsGeoJson(selectedTrain) {
+  stopsGeoJson(selectedTrains, selectedStations) {
     return {
       "type": "FeatureCollection",
       "features": Object.keys(stations).map((key) => {
         let opacity = 1;
-        if (selectedTrain && !stations[key].stops.has(selectedTrain)) {
-          opacity = 0.3;
+        if (selectedTrains.length > 0 && !selectedTrains.some((train) => stations[key].stops.has(train))) {
+          opacity = 0.1;
+        } else if (selectedStations.length > 0 && !selectedStations.includes(key)) {
+          opacity = 0.5;
         }
         return {
           "type": "Feature",
           "properties": {
             "id": stations[key].id,
             "name": stations[key].name.replace(/ - /g, "–"),
-            "stopType": this.stopTypeIcon(key, selectedTrain),
+            "stopType": this.stopTypeIcon(key, selectedTrains),
             "opacity": opacity
           },
           "geometry": {
@@ -450,8 +460,10 @@ class Mapbox extends React.Component {
     };
   }
 
-  stopTypeIcon(stopId, selectedTrain) {
-    if (selectedTrain) {
+  stopTypeIcon(stopId, selectedTrains) {
+    if (selectedTrains.length == 1) {
+      const selectedTrain = selectedTrains[0];
+
       if (stations[stopId]["southStops"].has(selectedTrain) && stations[stopId]["northStops"].has(selectedTrain)) {
         return "express-stop";
       }
@@ -503,7 +515,6 @@ class Mapbox extends React.Component {
     this.selectTrain(train);
 
     if (coords && zoom) {
-      debugger;
       this.map.easeTo({
         center: coords,
         zoom: zoom,
@@ -544,7 +555,7 @@ class Mapbox extends React.Component {
         }
       }
     });
-    this.renderStops(train);
+    this.renderStops([train], []);
     this.closeMobilePane();
   }
 
@@ -561,7 +572,7 @@ class Mapbox extends React.Component {
         }
       }
     });
-    this.renderStops(null);
+    this.renderStops(trainIds.filter((t) => stationData.stops.has(t)), [station]);
     let coords = [stationData.longitude, stationData.latitude];
     if (width < Responsive.onlyTablet.minWidth) {
       coords = [coords[0] + 0.002, coords[1] + 0.004];
@@ -592,7 +603,7 @@ class Mapbox extends React.Component {
     this.map.fitBounds(defaultBounds, { bearing: 29});
     this.infoBox.scrollTop = 0;
     this.openMobilePane();
-    this.renderStops(null);
+    this.renderStops([], []);
     this.showAll = true;
   }
 
