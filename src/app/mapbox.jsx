@@ -35,8 +35,8 @@ const trainIds = [
   'D', 'B', 'M', 'J', 'Z', 'R', 'N', 'Q', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"
 ];
 const prioritizedStations = ['101', '201', '501', '401', 'D01', '601', '213', '608', '112', '116', 'A02',
-  'A09', 'R16', '726', 'Q05', 'R01', '701', 'G14', 'G22', 'F01', 'G05', '418', 'L10', 'M01', 'L22', 'A65',
-  'H15', 'H11', '257', '250', '247', 'R31', 'R36', 'R41', 'R45', 'D43', 'S31', 'S19', 'S09'];
+  'A09', 'R16', '726', 'Q05', 'R01', '701', 'G14', 'G22', 'F01', 'G05', '418', 'L10', 'M01', 'L22', 'L29', 'A65',
+  'H15', 'H11', '257', '250', '247', 'R31', 'R36', 'R41', 'R45', 'D43', 'S31', 'S19', 'S09', 'M23', '142', 'A55'];
 
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
@@ -508,9 +508,9 @@ class Mapbox extends React.Component {
         this.map.fitBounds(bounds, {
           padding: {
             top: (width >= Responsive.onlyTablet.minWidth) ? 20 : 140,
-            right: 20,
-            left: (width >= Responsive.onlyTablet.minWidth) ? 400 : 20,
-            bottom: 20,
+            right: (width >= Responsive.onlyTablet.minWidth) ? 20 : 60,
+            left: (width >= Responsive.onlyTablet.minWidth) ? 480 : 100,
+            bottom: 30,
           },
         });
       }
