@@ -498,7 +498,11 @@ class Mapbox extends React.Component {
         bearing: 29,
       });
     } else {
-      const data = this.map.getSource(`${train}-train`)._data;
+      const source = this.map.getSource(`${train}-train`);
+      if (!source) {
+        return;
+      }
+      const data = source._data;
       const coordinatesArray = data.features.map((feature) => feature.geometry.coordinates);
       if (coordinatesArray[0]) {
         const bounds = coordinatesArray.flat().reduce((bounds, coord) => {
