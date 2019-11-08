@@ -34,6 +34,9 @@ const trainIds = [
   '2', '3', '1', '4', '5', '6', '6X', '7', '7X', 'A', 'C', 'E', 'F', 'FX',
   'D', 'B', 'M', 'J', 'Z', 'R', 'N', 'Q', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"
 ];
+const prioritizedStations = ['101', '201', '501', '401', 'D01', '601', '213', '608', '112', '116', 'A02',
+  'A09', 'R16', '726', 'Q05', 'R01', '701', 'G14', 'G22', 'F01', 'G05', '418', 'L10', 'M01', 'L22', 'A65',
+  'H15', 'H11', '257', '250', '247', 'R31', 'R36', 'R41', 'R45', 'D43', 'S31', 'S19', 'S09'];
 
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
@@ -367,22 +370,24 @@ class Mapbox extends React.Component {
           "stops": [[8, 10], [13, 14]]
         },
         "text-font": ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"],
-        "text-anchor": "right",
         "text-optional": true,
-        "text-justify": "left",
-        "text-padding": 10,
+        "text-justify": "auto",
+        "text-padding": 5,
+        "text-variable-anchor": ["right", "bottom-right", "bottom", "left", "bottom-left"],
         "icon-image": ['get', 'stopType'],
         "icon-size": {
-          "stops": [[8, 0.25], [12, 0.75], [14, 1]]
+          "stops": [[9, 0.25], [12, 0.75], [14, 1]]
         },
         "icon-allow-overlap": true,
+        "symbol-sort-key": ['get', 'priority'],
       },
       "paint": {
         "text-translate": {
           "stops": [[8, [-5, 0]], [14, [-12, -15]]]
         },
         "text-color": "#aaaaaa",
-        "icon-opacity": ['get', 'opacity']
+        "icon-opacity": ['get', 'opacity'],
+        "text-opacity": ['get', 'opacity'],
       }
     });
     this.map.on('click', "Stops", e => {
@@ -402,11 +407,17 @@ class Mapbox extends React.Component {
       "type": "FeatureCollection",
       "features": Object.keys(stations).map((key) => {
         let opacity = 1;
+        let priority = 2;
         if (!selectedTrains.some((train) => stations[key].stops.has(train)) &&
-            !selectedStations.includes(key)) {
+            !selectedStations.includes(key) && (selectedTrains.length === 1 || stations[key].stops.size > 0)) {
           opacity = 0.1;
+          priority = 10;
         } else if (selectedStations.length > 0 && !selectedStations.includes(key)) {
           opacity = 0.5;
+          priority = 5;
+        } else if (selectedTrains.length > 0 &&
+          ((train) => stations[key].stops.has(train)) && prioritizedStations.includes(key)) {
+          priority = 1;
         }
         return {
           "type": "Feature",
@@ -414,7 +425,8 @@ class Mapbox extends React.Component {
             "id": stations[key].id,
             "name": stations[key].name.replace(/ - /g, "–"),
             "stopType": this.stopTypeIcon(key, selectedTrains),
-            "opacity": opacity
+            "opacity": opacity,
+            "priority": priority
           },
           "geometry": {
             "type": "Point",
