@@ -24,7 +24,7 @@ const apiUrl = 'https://www.goodservice.io/api/routes';
 const statusUrl = 'https://www.goodservice.io/api/info'
 const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
 const stations = {};
-const stationLocations = {}
+const stationLocations = {};
 const center = [-74.003683, 40.7079445]
 const defaultBounds = [
   [-74.251961, 40.512764],
@@ -56,7 +56,10 @@ class Mapbox extends React.Component {
         stations[transfer['from']]["transfers"].add(transfer['to']);
       }
     });
-    this.showAll = true;
+    this.showAll = false;
+    this.routings = [];
+    this.routeStops = {};
+    this.checksum = null;
     this.props.history.listen((location) => {
       gtag('config', 'UA-127585516-1', {'page_path': location.pathname});
     });
@@ -102,13 +105,11 @@ class Mapbox extends React.Component {
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
-        this.renderLines(data.routes, data.checksum);
-        this.setState({routing: data.routes, stops: data.stops, checksum: data.checksum});
-      })
-      .then(() => {
-        const selectedTrains = this.selectedTrains();
-        const selectedStations = this.selectedStations();
-        this.renderStops(selectedTrains, selectedStations);
+        if (this.checksum !== data.checksum) {
+          this.setState({routing: data.routes, stops: data.stops});
+          this.processRoutings(data.routes);
+        }
+        this.checksum = data.checksum;
       })
   }
 
@@ -122,53 +123,7 @@ class Mapbox extends React.Component {
       .then(data => this.setState({ arrivals: data.routes }));
   }
 
-  selectedTrains() {
-    const { location } = this.props;
-    const urlPath = location.pathname.split('/');
-    if (urlPath.length > 2) {
-      if (urlPath[1] === 'trains') {
-        return [urlPath[2]];
-      } else if (urlPath[1] === 'stations') {
-        const station = urlPath[2];
-        const stationData = stations[station];
-
-        return trainIds.filter((t) => stationData.stops.has(t));
-      }
-    } else if (urlPath.length > 1) {
-      if (urlPath[1] === 'starred') {
-        const selectedStations = Cookies.get('favs') && Cookies.get('favs').split(",") || [];
-        const stationsData = selectedStations.map((s) => stations[s]);
-
-        return trainIds.filter((t) => stationsData.some((station) => station.stops.has(t)));
-      }
-    }
-    return [];
-  }
-
-  selectedStations() {
-    const { location } = this.props;
-    const urlPath = location.pathname.split('/');
-    if (urlPath.length > 2) {
-      if (urlPath[1] === 'stations') {
-        return [urlPath[2]];
-      }
-    } else if (urlPath.length > 1) {
-      if (urlPath[1] === 'starred') {
-        return Cookies.get('favs') && Cookies.get('favs').split(",") || [];
-      }
-    }
-    return [];
-  }
-
-  renderLines(routes, newChecksum) {
-    const { checksum } = this.state;
-    const selectedTrains = this.selectedTrains();
-    const selectedStations = this.selectedStations();
-
-    if (newChecksum === checksum) {
-      return;
-    }
-
+  processRoutings(routes) {
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["northStops"] = new Set();
@@ -177,15 +132,14 @@ class Mapbox extends React.Component {
       stations[key]["stops"] = new Set();
     });
 
-    const routeLayers = {};
-    const routeStops = {}
+    this.routings = [];
+    this.routeStops = {};
 
     Object.keys(routes).forEach((key) => {
       const northStops = new Set();
       const southStops = new Set();
       const route = routes[key];
-      const layerId = `${key}-train`;
-      routeStops[key] = new Set();
+      this.routeStops[key] = new Set();
       const northRoutings = route.routings.north.filter((routing) => {
         return routing.every((stopId) => {
           return stopId.substr(3, 1) == 'N';
@@ -196,7 +150,7 @@ class Mapbox extends React.Component {
           if (stations[stopIdPrefix]) {
             stations[stopIdPrefix].northStops.add(key);
             stations[stopIdPrefix].stops.add(key);
-            routeStops[key].add(stopIdPrefix);
+            this.routeStops[key].add(stopIdPrefix);
             northStops.add(stopIdPrefix);
           }
           return stopIdPrefix;
@@ -214,7 +168,7 @@ class Mapbox extends React.Component {
           if (stations[stopIdPrefix]) {
             stations[stopIdPrefix].southStops.add(key);
             stations[stopIdPrefix].stops.add(key);
-            routeStops[key].add(stopIdPrefix);
+            this.routeStops[key].add(stopIdPrefix);
             southStops.add(stopIdPrefix);
           }
           return stopIdPrefix;
@@ -223,24 +177,33 @@ class Mapbox extends React.Component {
         }).reverse();
       });
       const allRoutings = northRoutings.concat(southRoutings);
-      const routings = Array.from(new Set(allRoutings.map(JSON.stringify)), JSON.parse);
+      this.routings[key] = Array.from(new Set(allRoutings.map(JSON.stringify)), JSON.parse);
+    });
+  }
 
+  renderLines(selectedTrains, selectedStations) {
+    const { routing } = this.state;
+    const routeLayers = {};
+
+    Object.keys(routing).forEach((key) => {
+      const route = routing[key];
+      const layerId = `${key}-train`;
       const geojson = {
         "type": "FeatureCollection",
-        "features": routings.map((routing) => {
-          return this.routingGeoJson(routing)
+        "features": this.routings[key].map((r) => {
+          return this.routingGeoJson(r)
         })
       };
 
-      geojson.features.forEach((routing) => {
-        routing.geometry.coordinates.forEach((coord) => {
+      geojson.features.forEach((r) => {
+        r.geometry.coordinates.forEach((coord) => {
           if (stationLocations[`${coord[0]}-${coord[1]}`]) {
             const stationId = stationLocations[`${coord[0]}-${coord[1]}`];
             stations[stationId]["passed"].add(key);
           }
         })
       });
-      
+
       routeLayers[layerId] = {
         "id": layerId,
         "type": "line",
@@ -272,7 +235,7 @@ class Mapbox extends React.Component {
       if (routeLayer) {
         let offset = 0;
         let conflictingOffsets = new Set();
-        const stops = routeStops[train];
+        const stops = this.routeStops[train];
 
         stops.forEach((stop) => {
           stations[stop]["stops"].forEach((route) => {
@@ -290,22 +253,10 @@ class Mapbox extends React.Component {
         routeLayer.paint["line-offset"] = {
           "stops": offsetMap[offset]
         };
-        if (selectedTrains.length > 0) {
-          if (selectedTrains.includes(train)) {
-            routeLayer.paint["line-opacity"] = 1;
-          } else {
-            routeLayer.paint["line-opacity"] = 0.1;
-          }
-        } else if (selectedStations.length > 0) {
-          const stationsData = selectedStations.map((s) => stations[s]);
-
-          if (!stationsData.some((s) => s.stops.has(train))) {
-            routeLayer.paint["line-opacity"] = 0.1;
-          } else {
-            routeLayer.paint["line-opacity"] = 1;
-          }
-        } else {
+        if (selectedTrains.includes(train)) {
           routeLayer.paint["line-opacity"] = 1;
+        } else {
+          routeLayer.paint["line-opacity"] = 0.1;
         }
 
         if (this.map.getLayer(layerId)) {
@@ -338,9 +289,10 @@ class Mapbox extends React.Component {
   });
 
   routingGeoJson(routing) {
+    const r = routing.slice(0);
     let path = []
-    let prev = routing.splice(0, 1);
-    routing.forEach((stopId) => {
+    let prev = r.splice(0, 1);
+    r.forEach((stopId) => {
       path.push([stations[prev].longitude, stations[prev].latitude]);
       let potentialPath = this.findPath(prev, stopId, 0, []);
       if (potentialPath) {
@@ -450,8 +402,7 @@ class Mapbox extends React.Component {
       "type": "FeatureCollection",
       "features": Object.keys(stations).map((key) => {
         let opacity = 1;
-        if (selectedTrains.length > 0 &&
-          !selectedTrains.some((train) => stations[key].stops.has(train)) &&
+        if (!selectedTrains.some((train) => stations[key].stops.has(train)) &&
             !selectedStations.includes(key)) {
           opacity = 0.1;
         } else if (selectedStations.length > 0 && !selectedStations.includes(key)) {
@@ -569,13 +520,15 @@ class Mapbox extends React.Component {
         }
       }
     });
+    this.renderLines([train], []);
     this.renderStops([train], []);
     this.closeMobilePane();
   }
 
-  goToStations(selectedStations) {
+  goToStations(selectedStations, includeTrains) {
     const { width } = this.state;
     const stationsData = selectedStations.map((s) => stations[s]);
+    const selectedTrains = includeTrains ? trainIds.filter((t) => stationsData.some((station) => station.stops.has(t))) : [];
 
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
@@ -587,7 +540,8 @@ class Mapbox extends React.Component {
         }
       }
     });
-    this.renderStops(trainIds.filter((t) => stationsData.some((station) => station.stops.has(t))), selectedStations);
+    this.renderLines(selectedTrains, selectedStations);
+    this.renderStops(selectedTrains, selectedStations);
 
     if (selectedStations.length === 1) {
       const stationData = stations[selectedStations[0]];
@@ -628,16 +582,11 @@ class Mapbox extends React.Component {
       return;
     }
 
-    trainIds.forEach((t) => {
-      const layerId = `${t}-train`;
-      if (this.map.getLayer(layerId)) {
-        this.map.setPaintProperty(layerId, 'line-opacity', 1);
-      }
-    });
     this.map.fitBounds(defaultBounds, { bearing: 29});
     this.infoBox.scrollTop = 0;
     this.openMobilePane();
-    this.renderStops([], []);
+    this.renderLines(trainIds, []);
+    this.renderStops(trainIds, []);
     this.showAll = true;
   }
 
@@ -812,7 +761,7 @@ class Mapbox extends React.Component {
                 if (trains.length > 1) {
                   this.openMobilePane();
                   if (props.match.params.id) {
-                    this.goToStations([props.match.params.id]);
+                    this.goToStations([props.match.params.id], true);
                     return (
                       <StationDetails routings={routing} trains={trains} station={stations[props.match.params.id]} stations={stations}
                         arrivals={arrivals}
@@ -829,7 +778,7 @@ class Mapbox extends React.Component {
                   const favs = Cookies.get('favs') && Cookies.get('favs').split(",") || [];
 
                   if (favs.length > 0) {
-                    this.goToStations(favs);
+                    this.goToStations(favs, true);
                   } else {
                     this.resetView();
                   }
@@ -846,9 +795,7 @@ class Mapbox extends React.Component {
                   const selectedStations = stationsWithoutService.concat(stationsWithOneWayService).map((s) => s.id);
 
                   if (selectedStations.length > 1) {
-                    this.goToStations(selectedStations);
-                  } else {
-                    this.resetView();
+                    this.goToStations(selectedStations, false);
                   }
                   return this.renderListings(3);
                 }
