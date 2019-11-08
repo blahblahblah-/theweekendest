@@ -4,7 +4,8 @@ import mapboxgl from 'mapbox-gl';
 import { Responsive, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu } from "semantic-ui-react";
 import { BrowserRouter as Router, Route, Link, Switch, Redirect, withRouter } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { debounce } from 'lodash';
+import { debounce, filter } from 'lodash';
+import * as Cookies from 'es-cookie';
 
 import TrainList from './trainList.jsx';
 import TrainDetails from './trainDetails.jsx';
@@ -133,6 +134,13 @@ class Mapbox extends React.Component {
 
         return trainIds.filter((t) => stationData.stops.has(t));
       }
+    } else if (urlPath.length > 1) {
+      if (urlPath[1] === 'starred') {
+        const selectedStations = Cookies.get('favs') && Cookies.get('favs').split(",") || [];
+        const stationsData = selectedStations.map((s) => stations[s]);
+
+        return trainIds.filter((t) => stationsData.some((station) => station.stops.has(t)));
+      }
     }
     return [];
   }
@@ -143,6 +151,10 @@ class Mapbox extends React.Component {
     if (urlPath.length > 2) {
       if (urlPath[1] === 'stations') {
         return [urlPath[2]];
+      }
+    } else if (urlPath.length > 1) {
+      if (urlPath[1] === 'starred') {
+        return Cookies.get('favs') && Cookies.get('favs').split(",") || [];
       }
     }
     return [];
@@ -438,7 +450,9 @@ class Mapbox extends React.Component {
       "type": "FeatureCollection",
       "features": Object.keys(stations).map((key) => {
         let opacity = 1;
-        if (selectedTrains.length > 0 && !selectedTrains.some((train) => stations[key].stops.has(train))) {
+        if (selectedTrains.length > 0 &&
+          !selectedTrains.some((train) => stations[key].stops.has(train)) &&
+            !selectedStations.includes(key)) {
           opacity = 0.1;
         } else if (selectedStations.length > 0 && !selectedStations.includes(key)) {
           opacity = 0.5;
@@ -559,31 +573,51 @@ class Mapbox extends React.Component {
     this.closeMobilePane();
   }
 
-  goToStation(station) {
+  goToStations(selectedStations) {
     const { width } = this.state;
-    const stationData = stations[station];
+    const stationsData = selectedStations.map((s) => stations[s]);
+
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
-        if (!stationData.stops.has(t)) {
+        if (!stationsData.some((station) => station.stops.has(t))) {
           this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
         } else {
           this.map.setPaintProperty(layerId, 'line-opacity', 1);
         }
       }
     });
-    this.renderStops(trainIds.filter((t) => stationData.stops.has(t)), [station]);
-    let coords = [stationData.longitude, stationData.latitude];
-    if (width < Responsive.onlyTablet.minWidth) {
-      coords = [coords[0] + 0.002, coords[1] + 0.004];
-    } else if (width <= Responsive.onlyTablet.maxWidth) {
-      coords = [coords[0] - 0.005, coords[1] + 0.001];
+    this.renderStops(trainIds.filter((t) => stationsData.some((station) => station.stops.has(t))), selectedStations);
+
+    if (selectedStations.length === 1) {
+      const stationData = stations[selectedStations[0]];
+      let coords = [stationData.longitude, stationData.latitude];
+      if (width < Responsive.onlyTablet.minWidth) {
+        coords = [coords[0] + 0.002, coords[1] + 0.004];
+      } else if (width <= Responsive.onlyTablet.maxWidth) {
+        coords = [coords[0] - 0.005, coords[1] + 0.001];
+      }
+      this.map.easeTo({
+        center: coords,
+        zoom: 15,
+        bearing: 29,
+      });
+    } else {
+      const coordinatesArray = selectedStations.map((s) => [stations[s].longitude, stations[s].latitude]);
+      const bounds = coordinatesArray.reduce((bounds, coord) => {
+        return bounds.extend(coord);
+      }, new mapboxgl.LngLatBounds(coordinatesArray[0], coordinatesArray[0]));
+
+      this.map.fitBounds(bounds, {
+        padding: {
+          top: (width >= Responsive.onlyTablet.minWidth) ? 20 : 140,
+          right: 20,
+          left: (width >= Responsive.onlyTablet.minWidth) ? 400 : 20,
+          bottom: 20,
+        },
+      });
     }
-    this.map.easeTo({
-      center: coords,
-      zoom: 15,
-      bearing: 29,
-    });
+
     this.openMobilePane();
     this.infoBox.scrollTop = 0;
     this.showAll = false;
@@ -778,7 +812,7 @@ class Mapbox extends React.Component {
                 if (trains.length > 1) {
                   this.openMobilePane();
                   if (props.match.params.id) {
-                    this.goToStation(props.match.params.id);
+                    this.goToStations([props.match.params.id]);
                     return (
                       <StationDetails routings={routing} trains={trains} station={stations[props.match.params.id]} stations={stations}
                         arrivals={arrivals}
@@ -791,12 +825,33 @@ class Mapbox extends React.Component {
                 }
               }} />
               <Route path="/starred" render={() => {
-                this.resetView();
-                return this.renderListings(2);
+                if (trains.length > 1) {
+                  const favs = Cookies.get('favs') && Cookies.get('favs').split(",") || [];
+
+                  if (favs.length > 0) {
+                    this.goToStations(favs);
+                  } else {
+                    this.resetView();
+                  }
+                  return this.renderListings(2);
+                }
               }} />
               <Route path="/advisories" render={() => {
-                this.resetView();
-                return this.renderListings(3);
+                if (trains.length > 1) {
+                  const stationsWithoutService = filter(stations, (result) => result.stops.size === 0);
+                  const stationsWithOneWayService = filter(stations, (result) => {
+                    return result.stops.size > 0 &&
+                      (result.northStops.size === 0 || result.southStops.size === 0 && result.id !== 'H01');
+                  });
+                  const selectedStations = stationsWithoutService.concat(stationsWithOneWayService).map((s) => s.id);
+
+                  if (selectedStations.length > 1) {
+                    this.goToStations(selectedStations);
+                  } else {
+                    this.resetView();
+                  }
+                  return this.renderListings(3);
+                }
               }} />
               <Route render={() => <Redirect to="/trains" /> } />
             </Switch>
