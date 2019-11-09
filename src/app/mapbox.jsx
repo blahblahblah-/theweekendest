@@ -189,6 +189,10 @@ class Mapbox extends React.Component {
     const routeLayers = {};
 
     Object.keys(routing).forEach((key) => {
+      if (!this.routings[key]) {
+        return;
+      }
+
       const route = routing[key];
       const layerId = `${key}-train`;
       const geojson = {
@@ -581,9 +585,9 @@ class Mapbox extends React.Component {
       this.map.fitBounds(bounds, {
         padding: {
           top: (width >= Responsive.onlyTablet.minWidth) ? 20 : 140,
-          right: 20,
-          left: (width >= Responsive.onlyTablet.minWidth) ? 400 : 20,
-          bottom: 20,
+          right: (width >= Responsive.onlyTablet.minWidth) ? 20 : 60,
+          left: (width >= Responsive.onlyTablet.minWidth) ? 480 : 100,
+          bottom: 30,
         },
       });
     }
