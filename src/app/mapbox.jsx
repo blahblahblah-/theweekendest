@@ -36,7 +36,11 @@ const trainIds = [
 ];
 const prioritizedStations = ['101', '201', '501', '401', 'D01', '601', '213', '608', '112', '116', 'A02',
   'A09', 'R16', '726', 'Q05', 'R01', '701', 'G14', 'G22', 'F01', 'G05', '418', 'L10', 'M01', 'L22', 'L29', 'A65',
-  'H15', 'H11', '257', '250', '247', 'R31', 'R36', 'R41', 'R45', 'D43', 'S31', 'S19', 'S09', 'M23', '142', 'A55'];
+  'H15', 'H11', '257', '250', '247', 'R36', 'R41', 'R45', 'D43', 'S31', 'S19', 'A55'];
+
+const majorStations = ['G29', 'L03', '635', 'R20', 'R23', 'Q01', 'F15', 'M18', 'A31', 'A32', 'D20', 'A41', 'A42', 'R29',
+  'R31', 'D24', '235', '120', 'R11', 'B08', '629', '631', '640', 'R15', '725', 'R16', '127', 'A27', 'A28', '128', '132',
+  'R17', 'D17', 'F23', 'F35', 'G08', '420', '712', '718', 'R09'];
 
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
@@ -411,18 +415,25 @@ class Mapbox extends React.Component {
       "type": "FeatureCollection",
       "features": Object.keys(stations).map((key) => {
         let opacity = 1;
-        let priority = 2;
+        let priority = 5;
         if (!selectedTrains.some((train) => stations[key].stops.has(train)) &&
             !selectedStations.includes(key) && (selectedTrains.length === 1 || stations[key].stops.size > 0)) {
           opacity = 0.1;
           priority = 10;
         } else if (selectedStations.length > 0 && !selectedStations.includes(key)) {
           opacity = 0.5;
-          priority = 5;
-        } else if (selectedTrains.length > 0 &&
-          ((train) => stations[key].stops.has(train)) && prioritizedStations.includes(key)) {
+          priority = 7;
+        } else if (selectedTrains.length == 1 && this.routings[selectedTrains[0]] &&
+          (this.routings[selectedTrains[0]].some((routing) => routing[0] === key || routing[routing.length - 1] === key))) {
           priority = 1;
+        } else if (selectedTrains.length > 0 && selectedTrains.some((train) => stations[key].stops.has(train))
+          && prioritizedStations.includes(key)) {
+          priority = 3;
+        } else if (selectedTrains.length === 1 && selectedTrains.some((train) => stations[key].stops.has(train))
+          && majorStations.includes(key)) {
+          priority = 4;
         }
+
         return {
           "type": "Feature",
           "properties": {
