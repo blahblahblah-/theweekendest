@@ -39,8 +39,8 @@ const prioritizedStations = ['101', '201', '501', '401', 'D01', '601', '213', '6
   'H15', 'H11', '257', '250', '247', 'R36', 'R41', 'R45', 'D43', 'S31', 'S19', 'A55'];
 
 const majorStations = ['G29', 'L03', '635', 'R20', 'R23', 'Q01', 'F15', 'M18', 'A31', 'A32', 'D20', 'A41', 'A42', 'R29',
-  'R31', 'D24', '235', '120', 'R11', 'B08', '629', '631', '640', 'R15', '725', 'R16', '127', 'A27', 'A28', '128', '132',
-  'R17', 'D17', 'F23', 'F35', 'G08', '420', '712', '718', 'R09'];
+  'R31', 'D24', '235', '120', 'R11', 'B08', '621', '631', '640', 'R15', '725', 'R16', '127', 'A27', 'A28', '128', '132',
+  'R17', 'D17', 'F23', 'F35', 'G08', '420', '712', '718', 'R09', '723', 'J27', 'L22', 'A51', 'M16', 'M11', 'M08', 'L17'];
 
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
@@ -381,7 +381,7 @@ class Mapbox extends React.Component {
         "text-optional": true,
         "text-justify": "auto",
         "text-padding": 5,
-        "text-variable-anchor": ["right", "bottom-right", "bottom", "left", "bottom-left"],
+        "text-variable-anchor": ["right", "bottom-right", "bottom", "left", "bottom-left", "top-left"],
         "icon-image": ['get', 'stopType'],
         "icon-size": {
           "stops": [[9, 0.25], [12, 0.75], [14, 1]]
