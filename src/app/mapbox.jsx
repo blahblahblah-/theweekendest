@@ -80,7 +80,7 @@ class Mapbox extends React.Component {
       bearing: 29,
       minZoom: 9,
       zoom: 10,
-      hash: true,
+      hash: false,
       maxBounds: [
         [-74.8113, 40.3797],
         [-73.3584, 41.0247]
