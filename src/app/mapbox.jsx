@@ -80,7 +80,7 @@ class Mapbox extends React.Component {
       bearing: 29,
       minZoom: 9,
       zoom: 10,
-      hash: false,
+      hash: true,
       maxBounds: [
         [-74.8113, 40.3797],
         [-73.3584, 41.0247]
@@ -228,7 +228,7 @@ class Mapbox extends React.Component {
         },
         "paint": {
           'line-width': {
-            'stops': [[8, 1], [14, 3], [16, 5]]
+            'stops': [[8, 1], [14, 3]]
           },
           'line-color': route.color,
         }
@@ -236,7 +236,15 @@ class Mapbox extends React.Component {
     });
 
     const offsets = {};
-    const offsetMap = [[[8, 0], [14, 0], [16, 0]], [[8, -2], [14, -4], [16, -6]], [[8, 2], [14, 4], [16, 6]], [[8, -4], [14, -8], [16, -12]], [[8, 4], [14, 8], [16, 12]], [[8, -6], [14, -12], [16, -18]], [[8, 6], [14, 12], [16, 18]]];
+    const offsetMap = [
+      [[8, 0], [14, 0]],
+      [[8, -2], [14, -4]],
+      [[8, 2], [14, 4]],
+      [[8, -4], [14, -8]],
+      [[8, 4], [14, 8]],
+      [[8, -6], [14, -12]],
+      [[8, 6], [14, 12]]
+    ];
     const textOffsetMap = [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [-3, 0], [3, 0]];
 
     trainIds.forEach((train) => {
@@ -375,7 +383,7 @@ class Mapbox extends React.Component {
       "layout": {
         "text-field": ['get', 'name'],
         "text-size": {
-          "stops": [[8, 10], [13, 14]]
+          "stops": [[8, 10], [12, 14]]
         },
         "text-font": ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"],
         "text-optional": true,
@@ -384,7 +392,7 @@ class Mapbox extends React.Component {
         "text-variable-anchor": ["right", "bottom-right", "bottom", "left", "bottom-left", "top-left"],
         "icon-image": ['get', 'stopType'],
         "icon-size": {
-          "stops": [[9, 0.25], [12, 0.75], [14, 1]]
+          "stops": [[8, 0.25], [12, 0.75]]
         },
         "icon-allow-overlap": true,
         "symbol-sort-key": ['get', 'priority'],
