@@ -67,6 +67,7 @@ class Mapbox extends React.Component {
     this.routings = [];
     this.routeStops = {};
     this.checksum = null;
+    this.calculatedPaths = {};
     this.props.history.listen((location) => {
       gtag('config', 'UA-127585516-1', {'page_path': location.pathname});
     });
@@ -336,16 +337,18 @@ class Mapbox extends React.Component {
   }
 
   findPath(start, end, stepsTaken, stopsVisited) {
+    if (this.calculatedPaths[`${start}-${end}`]) {
+      return this.calculatedPaths[`${start}-${end}`];
+    }
     if (stopsVisited.includes(start)) {
       return;
     }
     stopsVisited.push(start);
     if (!stations[start] || !stations[start]["north"]) {
-      console.log(start);
       return;
     }
     if (stations[start]["north"][end] != undefined) {
-      if (stations[start]["north"][end].length) {
+      if (stations[start]["north"][end].length > 0) {
         return stations[start]["north"][end];
       }
       return [[stations[end].longitude, stations[end].latitude]];
@@ -357,11 +360,13 @@ class Mapbox extends React.Component {
       const path = this.findPath(key, end, stepsTaken + 1, stopsVisited);
       if (path && path.length) {
         if (stations[start]["north"][key].length) {
-          return results = stations[start]["north"][key].concat([[stations[key].longitude, stations[key].latitude]]).concat(path);
+          results = stations[start]["north"][key].concat([[stations[key].longitude, stations[key].latitude]]).concat(path);
+        } else {
+          results = [[stations[key].longitude, stations[key].latitude]].concat(path);
         }
-        return results = [[stations[key].longitude, stations[key].latitude]].concat(path);
       }
     });
+    this.calculatedPaths[`${start}-${end}`] = results;
     return results;
   }
 
