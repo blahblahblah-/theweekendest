@@ -34,13 +34,13 @@ const trainIds = [
   '2', '3', '1', '4', '5', '6', '6X', '7', '7X', 'A', 'C', 'E', 'F', 'FX',
   'D', 'B', 'M', 'J', 'Z', 'R', 'N', 'Q', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"
 ];
-const prioritizedStations = ['101', '201', '501', '401', 'D01', '601', '213', '608', '112', '116', 'A02',
+const prioritizedStations = new Set(['101', '201', '501', '401', 'D01', '601', '213', '608', '112', '116', 'A02',
   'A09', 'R16', '726', 'Q05', 'R01', '701', 'G14', 'G22', 'F01', 'G05', '418', 'L10', 'M01', 'L22', 'L29', 'A65',
-  'H15', 'H11', '257', '250', '247', 'R36', 'R41', 'R45', 'D43', 'S31', 'S19', 'A55'];
+  'H15', 'H11', '257', '250', '247', 'R36', 'R41', 'R45', 'D43', 'S31', 'S19', 'A55']);
 
-const majorStations = ['G29', 'L03', '635', 'R20', 'R23', 'Q01', 'F15', 'M18', 'A31', 'A32', 'D20', 'A41', 'A42', 'R29',
+const majorStations = new Set(['G29', 'L03', '635', 'R20', 'R23', 'Q01', 'F15', 'M18', 'A31', 'A32', 'D20', 'A41', 'A42', 'R29',
   'R31', 'D24', '235', '120', 'R11', 'B08', '621', '631', '640', 'R15', '725', 'R16', '127', 'A27', 'A28', '128', '132',
-  'R17', 'D17', 'F23', 'F35', 'G08', '420', '712', '718', 'R09', '723', 'J27', 'L22', 'A51', 'M16', 'M11', 'M08', 'L17'];
+  'R17', 'D17', 'F23', 'F35', 'G08', '420', '712', '718', 'R09', '723', 'J27', 'L22', 'A51', 'M16', 'M11', 'M08', 'L17']);
 
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
@@ -224,7 +224,7 @@ class Mapbox extends React.Component {
         },
         "layout": {
           "line-join": "round",
-          "line-cap": "round"
+          "line-cap": "round",
         },
         "paint": {
           'line-width': {
@@ -427,10 +427,10 @@ class Mapbox extends React.Component {
           (this.routings[selectedTrains[0]].some((routing) => routing[0] === key || routing[routing.length - 1] === key))) {
           priority = 1;
         } else if (selectedTrains.length > 0 && selectedTrains.some((train) => stations[key].stops.has(train))
-          && prioritizedStations.includes(key)) {
+          && prioritizedStations.has(key)) {
           priority = 3;
         } else if (selectedTrains.length === 1 && selectedTrains.some((train) => stations[key].stops.has(train))
-          && majorStations.includes(key)) {
+          && majorStations.has(key)) {
           priority = 4;
         }
 
