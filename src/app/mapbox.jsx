@@ -872,6 +872,7 @@ class Mapbox extends React.Component {
               <Statistic.Label style={{fontSize: "0.75em"}}>Some dntwn, no uptown</Statistic.Label>
             </Statistic>
           </Statistic.Group>
+          <Checkbox toggle onChange={this.handleToggleChange} label={<label className="toggle-label" title="May cause performance issues">Highlight issues (experimental)</label>} />
         </Responsive>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as={Segment}>
           <Header as='h4'>
