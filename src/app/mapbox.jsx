@@ -301,7 +301,7 @@ class Mapbox extends React.Component {
           'line-width': {
             'stops': [[8, 1], [14, 3]]
           },
-          'line-color': '#8c104a',
+          'line-color': '#ff8093',
           'line-dasharray': [2, 7]
         }
       };
