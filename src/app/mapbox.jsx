@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
-import { Responsive, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu } from "semantic-ui-react";
+import { Responsive, Checkbox, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu } from "semantic-ui-react";
 import { BrowserRouter as Router, Route, Link, Switch, Redirect, withRouter } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { debounce, filter } from 'lodash';
@@ -47,7 +47,7 @@ mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 class Mapbox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {trains: [], arrivals: {}};
+    this.state = {trains: [], arrivals: {}, routing: {}, displayProblems: false};
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["id"] = key;
@@ -190,8 +190,9 @@ class Mapbox extends React.Component {
   }
 
   renderLines(selectedTrains, selectedStations) {
-    const { routing } = this.state;
+    const { routing, displayProblems } = this.state;
     const routeLayers = {};
+    const serviceLayers = {}
 
     Object.keys(routing).forEach((key) => {
       if (!this.routings[key]) {
@@ -200,15 +201,15 @@ class Mapbox extends React.Component {
 
       const route = routing[key];
       const layerId = `${key}-train`;
-      const geojson = {
-        "type": "FeatureCollection",
-        "features": this.routings[key].map((r) => {
-          return this.routingGeoJson(r)
-        })
-      };
+      const problemSections = displayProblems ? this.calculateProblemSections(route.id) : [];
+      const geojsons = this.routings[key].map((r) => {
+        return this.routingGeoJson(r, problemSections)
+      });
 
-      geojson.features.forEach((r) => {
-        r.geometry.coordinates.forEach((coord) => {
+      const routeGeoJson = geojsons.map((g) => g.route);
+
+      routeGeoJson.forEach((r) => {
+        r.forEach((coord) => {
           if (stationLocations[`${coord[0]}-${coord[1]}`]) {
             const stationId = stationLocations[`${coord[0]}-${coord[1]}`];
             stations[stationId]["passed"].add(key);
@@ -221,7 +222,17 @@ class Mapbox extends React.Component {
         "type": "line",
         "source": {
           "type": "geojson",
-          "data": geojson
+          "data": {
+            "type": "Feature",
+            "properties": {
+              "active": true,
+              "offset": 0,
+            },
+            "geometry": {
+              "type": "MultiLineString",
+              "coordinates": routeGeoJson
+            }
+          }
         },
         "layout": {
           "line-join": "round",
@@ -232,6 +243,66 @@ class Mapbox extends React.Component {
             'stops': [[8, 1], [14, 3]]
           },
           'line-color': route.color,
+        }
+      };
+
+      serviceLayers[`${layerId}-notgood`] = {
+        "id": `${layerId}-notgood`,
+        "type": "line",
+        "source": {
+          "type": "geojson",
+          "data": {
+            "type": "Feature",
+            "properties": {
+              "active": true,
+              "offset": 0,
+            },
+            "geometry": {
+              "type": "MultiLineString",
+              "coordinates": geojsons.map((g) => g.not_good).flat()
+            }
+          }
+        },
+        "layout": {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        "paint": {
+          'line-width': {
+            'stops': [[8, 1], [14, 3]]
+          },
+          'line-color': '#fbfb08',
+          'line-dasharray': [2, 7]
+        }
+      };
+
+      serviceLayers[`${layerId}-delay`] = {
+        "id": `${layerId}-delay`,
+        "type": "line",
+        "source": {
+          "type": "geojson",
+          "data": {
+            "type": "Feature",
+            "properties": {
+              "active": true,
+              "offset": 0,
+            },
+            "geometry": {
+              "type": "MultiLineString",
+              "coordinates": geojsons.map((g) => g.delay).flat()
+            }
+          }
+        },
+        "layout": {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        "paint": {
+          'line-width': {
+            'stops': [[8, 1], [14, 3]]
+          },
+          'line-color': '#8c104a',
+          'line-dasharray': [2, 7]
         }
       };
     });
@@ -251,6 +322,8 @@ class Mapbox extends React.Component {
     trainIds.forEach((train) => {
       const layerId = `${train}-train`;
       const routeLayer = routeLayers[layerId];
+      const notGoodLayer = serviceLayers[`${layerId}-notgood`];
+      const delayLayer = serviceLayers[`${layerId}-delay`];
 
       if (routeLayer) {
         let offset = 0;
@@ -270,31 +343,37 @@ class Mapbox extends React.Component {
         }
 
         offsets[train] = offset;
-        routeLayer.paint["line-offset"] = {
-          "stops": offsetMap[offset]
-        };
-        if (selectedTrains.includes(train)) {
-          routeLayer.paint["line-opacity"] = 1;
-        } else {
-          routeLayer.paint["line-opacity"] = 0.1;
-        }
+        [routeLayer, notGoodLayer, delayLayer].forEach((layer) => {
+          layer.paint["line-offset"] = {
+            "stops": offsetMap[offset]
+          };
+          if (selectedTrains.includes(train)) {
+            layer.paint["line-opacity"] = 1;
+          } else {
+            layer.paint["line-opacity"] = 0.1;
+          }
 
-        if (this.map.getLayer(layerId)) {
-          this.map.removeLayer(layerId)
-        }
-        if (this.map.getSource(layerId)) {
-          this.map.removeSource(layerId);
-        }
-        this.map.addLayer(routeLayer);
-        this.map.on('click', layerId, (e) => {
-          this.debounceNavigate(`/trains/${train}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
+          if (this.map.getLayer(layer.id)) {
+            this.map.removeLayer(layer.id)
+          }
+          if (this.map.getSource(layer.id)) {
+            this.map.removeSource(layer.id);
+          }
         });
-        this.map.on('mouseenter', layerId, (() => {
-          this.map.getCanvas().style.cursor = 'pointer';
-        }).bind(this));
-        this.map.on('mouseleave', layerId, (() => {
-          this.map.getCanvas().style.cursor = '';
-        }).bind(this));
+
+        const layersToDisplay = displayProblems ? [routeLayer, notGoodLayer, delayLayer] : [routeLayer];
+        layersToDisplay.forEach((layer) => {
+          this.map.addLayer(layer);
+          this.map.on('click', layer.id, (e) => {
+            this.debounceNavigate(`/trains/${train}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
+          });
+          this.map.on('mouseenter', layer.id, (() => {
+            this.map.getCanvas().style.cursor = 'pointer';
+          }).bind(this));
+          this.map.on('mouseleave', layer.id, (() => {
+            this.map.getCanvas().style.cursor = '';
+          }).bind(this));
+        });
       }
     });
   }
@@ -308,32 +387,116 @@ class Mapbox extends React.Component {
     'trailing': false
   });
 
-  routingGeoJson(routing) {
+  routingGeoJson(routing, problemSections) {
+    const relevantProblemSections =
+      problemSections.filter((ps) => routing.some((s) => ps.first_stops.includes(s)) && routing.some((s) => ps.last_stops.includes(s)));
     const r = routing.slice(0);
+
     let path = []
+    let notGoodPaths = [];
+    let delayedPaths = [];
+    let cumulativePath = [];
     let prev = r.splice(0, 1);
+    let currentProblemSection = null;
+
     r.forEach((stopId) => {
-      path.push([stations[prev].longitude, stations[prev].latitude]);
+      let tempPath = [];
+      if (!currentProblemSection) {
+        currentProblemSection = problemSections.find((ps) => ps.first_stops.includes(prev));
+      }
+      tempPath.push([stations[prev].longitude, stations[prev].latitude]);
       let potentialPath = this.findPath(prev, stopId, 0, []);
       if (potentialPath) {
         potentialPath.forEach((coord) => {
-          path.push(coord);
+          tempPath.push(coord);
         });
       }
-      path.push([stations[stopId].longitude, stations[stopId].latitude]);
+      tempPath.push([stations[stopId].longitude, stations[stopId].latitude]);
+      path = path.concat(tempPath);
+      if (currentProblemSection) {
+        cumulativePath = cumulativePath.concat(tempPath);
+      }
+
       prev = stopId;
+      if (currentProblemSection && currentProblemSection.last_stops.includes(stopId)) {
+        if (currentProblemSection.problem === 'not good') {
+          notGoodPaths.push(cumulativePath);
+        } else {
+          delayedPaths.push(cumulativePath);
+        }
+        cumulativePath = [];
+        currentProblemSection = null;
+      }
     });
     return {
-      "type": "Feature",
-      "properties": {
-        "active": true,
-        "offset": 0,
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": path
-      }
+      "route": path,
+      "not_good": notGoodPaths,
+      "delay": delayedPaths,
     }
+  }
+
+  calculateProblemSections(routeId) {
+    const { trains } = this.state;
+    const train = trains.find((t) => t.id === routeId);
+    const delays = [];
+    const notGoods = [];
+
+    const northLinesDirections = train.north.map((obj) => {
+      return {
+        name: obj.name,
+        parent_name: obj.parent_name,
+        max_actual_headway: obj.max_actual_headway,
+        max_scheduled_headway: obj.max_scheduled_headway,
+        delay: obj.delay,
+        travel_time: obj.travel_time,
+        first_stops: obj.first_stops.map((s) => s.substr(0, 3)),
+        last_stops: obj.last_stops.map((s) => s.substr(0, 3))
+      };
+    });
+
+    const southLineDirections = train.south.map((obj) => {
+      return {
+        name: obj.name,
+        parent_name: obj.parent_name,
+        max_actual_headway: obj.max_actual_headway,
+        max_scheduled_headway: obj.max_scheduled_headway,
+        delay: obj.delay,
+        travel_time: obj.travel_time,
+        first_stops: obj.last_stops.map((s) => s.substr(0, 3)),
+        last_stops: obj.first_stops.map((s) => s.substr(0, 3))
+      };
+    });
+
+    northLinesDirections.forEach((obj) => {
+      if (obj.delay >= 5) {
+        delays.push(obj);
+      } else if (obj.max_scheduled_headway && (obj.max_actual_headway - obj.max_scheduled_headway > 2) || obj.travel_time >= 0.25) {
+        notGoods.push(obj);
+      }
+    });
+
+    southLineDirections.forEach((obj) => {
+      if (obj.delay >= 5) {
+        delays.push(obj);
+      } else if (obj.max_scheduled_headway && (obj.max_actual_headway - obj.max_scheduled_headway > 2) || obj.travel_time >= 0.25) {
+        notGoods.push(obj);
+      }
+    });
+
+    delays.forEach((obj) => {
+      let toBeRemoved;
+      if (toBeRemoved = notGoods.find((o) => obj.parent_name === o.parent_name)) {
+        notGoods.splice(notGoods.indexOf(toBeRemoved), 1);
+      }
+    });
+
+    return delays.map((obj) => {
+      obj["problem"] = "delay";
+      return obj;
+    }).concat(notGoods.map((obj) => {
+      obj["problem"] = "not good";
+      return obj;
+    }));
   }
 
   findPath(start, end, stepsTaken, stopsVisited) {
@@ -531,7 +694,7 @@ class Mapbox extends React.Component {
         return;
       }
       const data = source._data;
-      const coordinatesArray = data.features.map((feature) => feature.geometry.coordinates);
+      const coordinatesArray = data.geometry.coordinates;
       if (coordinatesArray[0]) {
         const bounds = coordinatesArray.flat().reduce((bounds, coord) => {
           return bounds.extend(coord);
@@ -641,6 +804,13 @@ class Mapbox extends React.Component {
 
   handleOnUpdate = (e, { width }) => this.setState({ width })
 
+  handleToggleChange = (e, {checked}) => {
+    this.setState({displayProblems: checked}, () => {
+      this.renderLines(trainIds, []);
+      this.renderStops(trainIds, []);
+    });
+  }
+
   closeMobilePane() {
     this.infoBox.classList.remove('open');
   }
@@ -725,6 +895,7 @@ class Mapbox extends React.Component {
               <Statistic.Label style={{fontSize: "0.75em"}}>Some downtown, no uptown</Statistic.Label>
             </Statistic>
           </Statistic.Group>
+          <Checkbox toggle onChange={this.handleToggleChange} label={<label className="toggle-label" title="May cause performance issues">Highlight issues (experimental)</label>} />
         </Responsive>
         <Segment className="selection-pane">
           { trains && trains.length > 1 &&
