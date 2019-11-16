@@ -968,14 +968,12 @@ class Mapbox extends React.Component {
                     );
                   } else {
                     this.resetView();
-                    this.openMobilePane();
                     return this.renderListings(0);
                   }
                 }
               }} />
               <Route path="/stations/:id?" render={(props) => {
                 if (trains.length > 1) {
-                  this.openMobilePane();
                   if (props.match.params.id) {
                     this.goToStations([props.match.params.id], true);
                     return (
