@@ -42,12 +42,26 @@ const majorStations = new Set(['G29', 'L03', '635', 'R20', 'R23', 'Q01', 'F15', 
   'R31', 'D24', '235', '120', 'R11', 'B08', '621', '631', '640', 'R15', '725', 'R16', '127', 'A27', 'A28', '128', '132',
   'R17', 'D17', 'F23', 'F35', 'G08', '420', '712', '718', 'R09', '723', 'J27', 'L22', 'A51', 'M16', 'M11', 'M08', 'L17']);
 
+const statusColors = {
+  'long-headway': '#ff934b',
+  'slow': '#fbfb08',
+  'delay': '#ff8093'
+}
+
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
 class Mapbox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {trains: [], arrivals: {}, routing: {}, displayProblems: false};
+    this.state = {
+      trains: [],
+      arrivals: {},
+      routing: {},
+      displayProblems: false,
+      processedRoutings: [],
+      routeStops: {},
+      offsets: {}
+    };
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["id"] = key;
@@ -64,13 +78,13 @@ class Mapbox extends React.Component {
       }
     });
     this.showAll = false;
-    this.routings = [];
-    this.routeStops = {};
     this.checksum = null;
     this.calculatedPaths = {};
     this.props.history.listen((location) => {
       gtag('config', 'UA-127585516-1', {'page_path': location.pathname});
     });
+    this.selectedTrains = trainIds;
+    this.selectedStations = [];
   }
   
   componentDidMount() {
@@ -114,8 +128,7 @@ class Mapbox extends React.Component {
       .then(response => response.json())
       .then(data => {
         if (this.checksum !== data.checksum) {
-          this.setState({routing: data.routes, stops: data.stops});
-          this.processRoutings(data.routes);
+          this.setState({routing: data.routes, stops: data.stops}, this.processRoutings);
         }
         this.checksum = data.checksum;
       })
@@ -124,14 +137,15 @@ class Mapbox extends React.Component {
   fetchData() {
     fetch(statusUrl)
       .then(response => response.json())
-      .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }));
+      .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }, this.renderOverlays));
 
     fetch(arrivalsUrl)
       .then(response => response.json())
       .then(data => this.setState({ arrivals: data.routes }));
   }
 
-  processRoutings(routes) {
+  processRoutings() {
+    const { routing } = this.state;
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["northStops"] = new Set();
@@ -140,25 +154,25 @@ class Mapbox extends React.Component {
       stations[key]["stops"] = new Set();
     });
 
-    this.routings = [];
-    this.routeStops = {};
+    const processedRoutings = [];
+    const routeStops = {};
 
-    Object.keys(routes).forEach((key) => {
+    Object.keys(routing).forEach((key) => {
       const northStops = new Set();
       const southStops = new Set();
-      const route = routes[key];
-      this.routeStops[key] = new Set();
-      const northRoutings = route.routings.north.filter((routing) => {
-        return routing.every((stopId) => {
+      const route = routing[key];
+      routeStops[key] = new Set();
+      const northRoutings = route.routings.north.filter((r) => {
+        return r.every((stopId) => {
           return stopId.substr(3, 1) == 'N';
         })
-      }).map((routing) => {
-        return routing.map((stopId) => {
+      }).map((r) => {
+        return r.map((stopId) => {
           const stopIdPrefix = stopId.substr(0, 3);
           if (stations[stopIdPrefix]) {
             stations[stopIdPrefix].northStops.add(key);
             stations[stopIdPrefix].stops.add(key);
-            this.routeStops[key].add(stopIdPrefix);
+            routeStops[key].add(stopIdPrefix);
             northStops.add(stopIdPrefix);
           }
           return stopIdPrefix;
@@ -166,17 +180,17 @@ class Mapbox extends React.Component {
           return stations[stopId];
         });
       });
-      const southRoutings = route.routings.south.filter((routing) => {
-        return routing.every((stopId) => {
+      const southRoutings = route.routings.south.filter((r) => {
+        return r.every((stopId) => {
           return stopId.substr(3, 1) == 'S';
         })
-      }).map((routing) => {
-        return routing.map((stopId) => {
+      }).map((r) => {
+        return r.map((stopId) => {
           const stopIdPrefix = stopId.substr(0, 3);
           if (stations[stopIdPrefix]) {
             stations[stopIdPrefix].southStops.add(key);
             stations[stopIdPrefix].stops.add(key);
-            this.routeStops[key].add(stopIdPrefix);
+            routeStops[key].add(stopIdPrefix);
             southStops.add(stopIdPrefix);
           }
           return stopIdPrefix;
@@ -185,30 +199,62 @@ class Mapbox extends React.Component {
         }).reverse();
       });
       const allRoutings = northRoutings.concat(southRoutings);
-      this.routings[key] = Array.from(new Set(allRoutings.map(JSON.stringify)), JSON.parse);
+      processedRoutings[key] = Array.from(new Set(allRoutings.map(JSON.stringify)), JSON.parse);
     });
+    this.setState({processedRoutings: processedRoutings, routeStops: routeStops}, this.calculateOffsets);
   }
 
-  renderLines(selectedTrains, selectedStations) {
-    const { routing, displayProblems } = this.state;
-    const routeLayers = {};
-    const serviceLayers = {}
+  calculateOffsets() {
+    const { routeStops } = this.state;
+    const offsets = {};
+    const results = {};
+    const offsetsMap = [0, -2, 2, -4, 4, -6, 6];
+
+    trainIds.forEach((train) => {
+      let offset = 0;
+      let conflictingOffsets = new Set();
+      const stops = routeStops[train];
+
+      if (!stops) {
+        return;
+      }
+
+      stops.forEach((stop) => {
+        stations[stop]["stops"].forEach((route) => {
+          if (offsets[route] != undefined) {
+            conflictingOffsets.add(offsets[route]);
+          }
+        });
+      });
+
+      while(conflictingOffsets.has(offset)) {
+        offset++;
+      }
+
+      offsets[train] = offset;
+    });
+
+    Object.keys(offsets).forEach((key) => {
+      results[key] = offsetsMap[offsets[key]];
+    });
+    this.setState({offsets: results}, this.renderLines);
+  }
+
+  renderLines() {
+    const { routing, processedRoutings, offsets } = this.state;
 
     Object.keys(routing).forEach((key) => {
-      if (!this.routings[key]) {
+      if (!processedRoutings[key]) {
         return;
       }
 
       const route = routing[key];
       const layerId = `${key}-train`;
-      const problemSections = displayProblems ? this.calculateProblemSections(route.id) : [];
-      const geojsons = this.routings[key].map((r) => {
-        return this.routingGeoJson(r, problemSections)
+      const coordinates = processedRoutings[key].map((r) => {
+        return this.routingGeoJson(r, [], false)
       });
 
-      const routeGeoJson = geojsons.map((g) => g.route);
-
-      routeGeoJson.forEach((r) => {
+      coordinates.forEach((r) => {
         r.forEach((coord) => {
           if (stationLocations[`${coord[0]}-${coord[1]}`]) {
             const stationId = stationLocations[`${coord[0]}-${coord[1]}`];
@@ -217,165 +263,159 @@ class Mapbox extends React.Component {
         })
       });
 
-      routeLayers[layerId] = {
-        "id": layerId,
-        "type": "line",
-        "source": {
+      const geojson = {
+        "type": "Feature",
+        "properties": {
+          "color": route.color,
+          "offset": offsets[key],
+          "opacity": this.selectedTrains.includes(key) ? 1 : 0.1
+        },
+        "geometry": {
+          "type": "MultiLineString",
+          "coordinates": coordinates
+        }
+      }
+
+      if (this.map.getSource(layerId)) {
+        this.map.getSource(layerId).setData(geojson);
+      } else {
+        this.map.addSource(layerId, {
           "type": "geojson",
-          "data": {
-            "type": "Feature",
-            "properties": {
-              "active": true,
-              "offset": 0,
-            },
-            "geometry": {
-              "type": "MultiLineString",
-              "coordinates": routeGeoJson
-            }
-          }
-        },
-        "layout": {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        "paint": {
-          'line-width': {
-            'stops': [[8, 1], [14, 3]]
-          },
-          'line-color': route.color,
-        }
-      };
-
-      serviceLayers[`${layerId}-notgood`] = {
-        "id": `${layerId}-notgood`,
-        "type": "line",
-        "source": {
-          "type": "geojson",
-          "data": {
-            "type": "Feature",
-            "properties": {
-              "active": true,
-              "offset": 0,
-            },
-            "geometry": {
-              "type": "MultiLineString",
-              "coordinates": geojsons.map((g) => g.not_good).flat()
-            }
-          }
-        },
-        "layout": {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        "paint": {
-          'line-width': {
-            'stops': [[8, 1], [14, 3]]
-          },
-          'line-color': '#fbfb08',
-          'line-dasharray': [2, 7]
-        }
-      };
-
-      serviceLayers[`${layerId}-delay`] = {
-        "id": `${layerId}-delay`,
-        "type": "line",
-        "source": {
-          "type": "geojson",
-          "data": {
-            "type": "Feature",
-            "properties": {
-              "active": true,
-              "offset": 0,
-            },
-            "geometry": {
-              "type": "MultiLineString",
-              "coordinates": geojsons.map((g) => g.delay).flat()
-            }
-          }
-        },
-        "layout": {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        "paint": {
-          'line-width': {
-            'stops': [[8, 1], [14, 3]]
-          },
-          'line-color': '#ff8093',
-          'line-dasharray': [2, 7]
-        }
-      };
-    });
-
-    const offsets = {};
-    const offsetMap = [
-      [[8, 0], [14, 0]],
-      [[8, -2], [14, -4]],
-      [[8, 2], [14, 4]],
-      [[8, -4], [14, -8]],
-      [[8, 4], [14, 8]],
-      [[8, -6], [14, -12]],
-      [[8, 6], [14, 12]]
-    ];
-    const textOffsetMap = [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [-3, 0], [3, 0]];
-
-    trainIds.forEach((train) => {
-      const layerId = `${train}-train`;
-      const routeLayer = routeLayers[layerId];
-      const notGoodLayer = serviceLayers[`${layerId}-notgood`];
-      const delayLayer = serviceLayers[`${layerId}-delay`];
-
-      if (routeLayer) {
-        let offset = 0;
-        let conflictingOffsets = new Set();
-        const stops = this.routeStops[train];
-
-        stops.forEach((stop) => {
-          stations[stop]["stops"].forEach((route) => {
-            if (offsets[route] != undefined) {
-              conflictingOffsets.add(offsets[route]);
-            }
-          });
-        });
-
-        while(conflictingOffsets.has(offset)) {
-          offset++;
-        }
-
-        offsets[train] = offset;
-        [routeLayer, notGoodLayer, delayLayer].forEach((layer) => {
-          layer.paint["line-offset"] = {
-            "stops": offsetMap[offset]
-          };
-          if (selectedTrains.includes(train)) {
-            layer.paint["line-opacity"] = 1;
-          } else {
-            layer.paint["line-opacity"] = 0.1;
-          }
-
-          if (this.map.getLayer(layer.id)) {
-            this.map.removeLayer(layer.id)
-          }
-          if (this.map.getSource(layer.id)) {
-            this.map.removeSource(layer.id);
-          }
-        });
-
-        const layersToDisplay = displayProblems ? [routeLayer, notGoodLayer, delayLayer] : [routeLayer];
-        layersToDisplay.forEach((layer) => {
-          this.map.addLayer(layer);
-          this.map.on('click', layer.id, (e) => {
-            this.debounceNavigate(`/trains/${train}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
-          });
-          this.map.on('mouseenter', layer.id, (() => {
-            this.map.getCanvas().style.cursor = 'pointer';
-          }).bind(this));
-          this.map.on('mouseleave', layer.id, (() => {
-            this.map.getCanvas().style.cursor = '';
-          }).bind(this));
+          "data": geojson
         });
       }
+
+      if (!this.map.getLayer(layerId)) {
+        const layer = {
+          "id": layerId,
+          "type": "line",
+          "source": layerId,
+          "layout": {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          "paint": {
+            "line-width": {
+              "stops": [[8, 1], [14, 3]]
+            },
+            "line-color": ["get", "color"],
+            "line-offset": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              8, ["get", "offset"],
+              14, ["*", ["get", "offset"], 2],
+            ],
+            "line-opacity": ["get", "opacity"]
+          }
+        };
+
+        this.map.addLayer(layer);
+        this.map.on('click', layerId, (e) => {
+          this.debounceNavigate(`/trains/${key}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
+        });
+        this.map.on('mouseenter', layerId, (() => {
+          this.map.getCanvas().style.cursor = 'pointer';
+        }).bind(this));
+        this.map.on('mouseleave', layerId, (() => {
+          this.map.getCanvas().style.cursor = '';
+        }).bind(this));
+      }
     });
+    this.renderOverlays();
+    this.renderStops();
+  }
+
+  renderOverlays() {
+    const { routing, displayProblems, processedRoutings, offsets } = this.state;
+    const statusSpacing = {
+      'long-headway': 11,
+      'slow': 7,
+      'delay': 5
+    }
+
+    Object.keys(routing).forEach((key) => {
+      if (!processedRoutings[key]) {
+        return;
+      }
+
+      const route = routing[key];
+      const layerIdPrefix = `${key}-train`;
+
+      Object.keys(statusColors).forEach((status) => {
+        const layerId = `${layerIdPrefix}-${status}`;
+        const problemSections = this.calculateProblemSections(route.id, status);
+        const coordinates = processedRoutings[key].map((r) => {
+          return this.routingGeoJson(r, problemSections, true)
+        }).flat();
+
+        const geojson = {
+        "type": "Feature",
+          "properties": {
+            "offset": offsets[key],
+            "opacity": this.selectedTrains.includes(key) ? 1 : 0.1
+          },
+          "geometry": {
+            "type": "MultiLineString",
+            "coordinates": coordinates
+          }
+        }
+
+        if (this.map.getSource(layerId)) {
+          this.map.getSource(layerId).setData(geojson);
+        } else {
+          this.map.addSource(layerId, {
+            "type": "geojson",
+            "data": geojson
+          });
+        }
+
+        if (!this.map.getLayer(layerId)) {
+          const layer = {
+            "id": layerId,
+            "type": "line",
+            "source": layerId,
+            "layout": {
+              "visibility": displayProblems ? 'visible' : 'none',
+              "line-join": "round",
+              "line-cap": "round",
+            },
+            "paint": {
+              "line-width": {
+                "stops": [[8, 1], [14, 3]]
+              },
+              "line-color": statusColors[status],
+              "line-dasharray": [2, statusSpacing[status]],
+              "line-offset": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                8, ["get", "offset"],
+                14, ["*", ["get", "offset"], 2],
+              ],
+              "line-opacity": ["get", "opacity"]
+            }
+          };
+
+          this.map.addLayer(layer);
+          this.map.on('click', layerId, (e) => {
+            this.debounceNavigate(`/trains/${key}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
+          });
+          this.map.on('mouseenter', layerId, (() => {
+            this.map.getCanvas().style.cursor = 'pointer';
+          }).bind(this));
+          this.map.on('mouseleave', layerId, (() => {
+            this.map.getCanvas().style.cursor = '';
+          }).bind(this));
+        } else {
+          this.map.setLayoutProperty(layerId, "visibility", displayProblems ? "visible" : "none");
+        }
+      });
+    });
+
+    if (this.map.getLayer("Stops")) {
+      this.map.moveLayer("Stops")
+    }
   }
 
   navigate(path) {
@@ -387,14 +427,17 @@ class Mapbox extends React.Component {
     'trailing': false
   });
 
-  routingGeoJson(routing, problemSections) {
+  routingGeoJson(routing, problemSections, filterByProblems) {
     const relevantProblemSections =
       problemSections.filter((ps) => routing.some((s) => ps.first_stops.includes(s)) && routing.some((s) => ps.last_stops.includes(s)));
     const r = routing.slice(0);
 
+    if (filterByProblems && relevantProblemSections.length === 0) {
+      return [];
+    }
+
     let path = []
-    let notGoodPaths = [];
-    let delayedPaths = [];
+    let filteredPaths = [];
     let cumulativePath = [];
     let prev = r.splice(0, 1);
     let currentProblemSection = null;
@@ -402,7 +445,7 @@ class Mapbox extends React.Component {
     r.forEach((stopId) => {
       let tempPath = [];
       if (!currentProblemSection) {
-        currentProblemSection = problemSections.find((ps) => ps.first_stops.includes(prev));
+        currentProblemSection = relevantProblemSections.find((ps) => ps.first_stops.includes(prev));
       }
       tempPath.push([stations[prev].longitude, stations[prev].latitude]);
       let potentialPath = this.findPath(prev, stopId, 0, []);
@@ -419,27 +462,26 @@ class Mapbox extends React.Component {
 
       prev = stopId;
       if (currentProblemSection && currentProblemSection.last_stops.includes(stopId)) {
-        if (currentProblemSection.problem === 'not good') {
-          notGoodPaths.push(cumulativePath);
-        } else {
-          delayedPaths.push(cumulativePath);
-        }
+        filteredPaths.push(cumulativePath);
         cumulativePath = [];
         currentProblemSection = null;
       }
     });
-    return {
-      "route": path,
-      "not_good": notGoodPaths,
-      "delay": delayedPaths,
+
+    if (filterByProblems) {
+      return filteredPaths;
     }
+    return path;
   }
 
-  calculateProblemSections(routeId) {
+  calculateProblemSections(routeId, status) {
     const { trains } = this.state;
     const train = trains.find((t) => t.id === routeId);
-    const delays = [];
-    const notGoods = [];
+    const results = [];
+
+    if (!train) {
+      return [];
+    }
 
     const northLinesDirections = train.north.map((obj) => {
       return {
@@ -449,6 +491,9 @@ class Mapbox extends React.Component {
         max_scheduled_headway: obj.max_scheduled_headway,
         delay: obj.delay,
         travel_time: obj.travel_time,
+        headway_gap: obj.headway_gap,
+        slow: obj.slow,
+        delayed: obj.delayed,
         first_stops: obj.first_stops.map((s) => s.substr(0, 3)),
         last_stops: obj.last_stops.map((s) => s.substr(0, 3))
       };
@@ -462,41 +507,35 @@ class Mapbox extends React.Component {
         max_scheduled_headway: obj.max_scheduled_headway,
         delay: obj.delay,
         travel_time: obj.travel_time,
+        headway_gap: obj.headway_gap,
+        slow: obj.slow,
+        delayed: obj.delayed,
         first_stops: obj.last_stops.map((s) => s.substr(0, 3)),
         last_stops: obj.first_stops.map((s) => s.substr(0, 3))
       };
     });
 
     northLinesDirections.forEach((obj) => {
-      if (obj.delay >= 5) {
-        delays.push(obj);
-      } else if (obj.max_scheduled_headway && (obj.max_actual_headway - obj.max_scheduled_headway > 2) || obj.travel_time >= 0.25) {
-        notGoods.push(obj);
+      if (
+        (status === 'long-headway' && obj.headway_gap) ||
+        (status === 'slow' && obj.slow) ||
+        (status === 'delay' && obj.delayed)
+      ) {
+        results.push(obj);
       }
     });
 
     southLineDirections.forEach((obj) => {
-      if (obj.delay >= 5) {
-        delays.push(obj);
-      } else if (obj.max_scheduled_headway && (obj.max_actual_headway - obj.max_scheduled_headway > 2) || obj.travel_time >= 0.25) {
-        notGoods.push(obj);
+      if (
+        (status === 'long-headway' && obj.headway_gap) ||
+        (status === 'slow' && obj.slow) ||
+        (status === 'delay' && obj.delayed)
+      ) {
+        results.push(obj);
       }
     });
 
-    delays.forEach((obj) => {
-      let toBeRemoved;
-      if (toBeRemoved = notGoods.find((o) => obj.parent_name === o.parent_name)) {
-        notGoods.splice(notGoods.indexOf(toBeRemoved), 1);
-      }
-    });
-
-    return delays.map((obj) => {
-      obj["problem"] = "delay";
-      return obj;
-    }).concat(notGoods.map((obj) => {
-      obj["problem"] = "not good";
-      return obj;
-    }));
+    return results;
   }
 
   findPath(start, end, stepsTaken, stopsVisited) {
@@ -533,79 +572,80 @@ class Mapbox extends React.Component {
     return results;
   }
 
-  renderStops(selectedTrains, selectedStations) {
-    if (this.map.getLayer("Stops")) {
-      this.map.removeLayer("Stops")
-    }
+  renderStops() {
     if (this.map.getSource("Stops")) {
-      this.map.removeSource("Stops");
+      this.map.getSource("Stops").setData(this.stopsGeoJson());
+    } else {
+      this.map.addSource("Stops", {
+        "type": "geojson",
+        "data": this.stopsGeoJson()
+      });
     }
-    this.map.addSource("Stops", {
-      "type": "geojson",
-      "data": this.stopsGeoJson(selectedTrains, selectedStations)
-    });
-    this.map.addLayer({
-      "id": "Stops",
-      "type": "symbol",
-      "source": "Stops",
-      "layout": {
-        "text-field": ['get', 'name'],
-        "text-size": {
-          "stops": [[8, 10], [12, 14]]
+    if (!this.map.getLayer("Stops")) {
+      this.map.addLayer({
+        "id": "Stops",
+        "type": "symbol",
+        "source": "Stops",
+        "layout": {
+          "text-field": ['get', 'name'],
+          "text-size": {
+            "stops": [[8, 10], [12, 14]]
+          },
+          "text-font": ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"],
+          "text-optional": true,
+          "text-justify": "auto",
+          "text-padding": 5,
+          "text-variable-anchor": ["right", "bottom-right", "bottom", "left", "bottom-left", "top-left"],
+          "icon-image": ['get', 'stopType'],
+          "icon-size": {
+            "stops": [[8, 0.25], [12, 0.75]]
+          },
+          "icon-allow-overlap": true,
+          "symbol-sort-key": ['get', 'priority'],
         },
-        "text-font": ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"],
-        "text-optional": true,
-        "text-justify": "auto",
-        "text-padding": 5,
-        "text-variable-anchor": ["right", "bottom-right", "bottom", "left", "bottom-left", "top-left"],
-        "icon-image": ['get', 'stopType'],
-        "icon-size": {
-          "stops": [[8, 0.25], [12, 0.75]]
-        },
-        "icon-allow-overlap": true,
-        "symbol-sort-key": ['get', 'priority'],
-      },
-      "paint": {
-        "text-translate": {
-          "stops": [[8, [-5, 0]], [14, [-12, -15]]]
-        },
-        "text-color": "#aaaaaa",
-        "icon-opacity": ['get', 'opacity'],
-        "text-opacity": ['get', 'opacity'],
-      }
-    });
-    this.map.on('click', "Stops", e => {
-      const path = `/stations/${e.features[0].properties.id}`;
-      this.debounceNavigate(path);
-    });
-    this.map.on('mouseenter', 'Stops', (() => {
-      this.map.getCanvas().style.cursor = 'pointer';
-    }).bind(this));
-    this.map.on('mouseleave', 'Stops', (() => {
-      this.map.getCanvas().style.cursor = '';
-    }).bind(this));
+        "paint": {
+          "text-translate": {
+            "stops": [[8, [-5, 0]], [14, [-12, -15]]]
+          },
+          "text-color": "#aaaaaa",
+          "icon-opacity": ['get', 'opacity'],
+          "text-opacity": ['get', 'opacity'],
+        }
+      });
+      this.map.on('click', "Stops", e => {
+        const path = `/stations/${e.features[0].properties.id}`;
+        this.debounceNavigate(path);
+      });
+      this.map.on('mouseenter', 'Stops', (() => {
+        this.map.getCanvas().style.cursor = 'pointer';
+      }).bind(this));
+      this.map.on('mouseleave', 'Stops', (() => {
+        this.map.getCanvas().style.cursor = '';
+      }).bind(this));
+    }
   }
 
-  stopsGeoJson(selectedTrains, selectedStations) {
+  stopsGeoJson() {
+    const { processedRoutings } = this.state;
     return {
       "type": "FeatureCollection",
       "features": Object.keys(stations).map((key) => {
         let opacity = 1;
         let priority = 5;
-        if (!selectedTrains.some((train) => stations[key].stops.has(train)) &&
-            !selectedStations.includes(key) && (selectedTrains.length === 1 || stations[key].stops.size > 0)) {
+        if (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
+            !this.selectedStations.includes(key) && (this.selectedTrains.length === 1 || stations[key].stops.size > 0)) {
           opacity = 0.1;
           priority = 10;
-        } else if (selectedStations.length > 0 && !selectedStations.includes(key)) {
+        } else if (this.selectedStations.length > 0 && !this.selectedStations.includes(key)) {
           opacity = 0.5;
           priority = 7;
-        } else if (selectedTrains.length == 1 && this.routings[selectedTrains[0]] &&
-          (this.routings[selectedTrains[0]].some((routing) => routing[0] === key || routing[routing.length - 1] === key))) {
+        } else if (this.selectedTrains.length == 1 && processedRoutings[this.selectedTrains[0]] &&
+          (processedRoutings[this.selectedTrains[0]].some((routing) => routing[0] === key || routing[routing.length - 1] === key))) {
           priority = 1;
-        } else if (selectedTrains.length > 0 && selectedTrains.some((train) => stations[key].stops.has(train))
+        } else if (this.selectedTrains.length > 0 && this.selectedTrains.some((train) => stations[key].stops.has(train))
           && prioritizedStations.has(key)) {
           priority = 3;
-        } else if (selectedTrains.length === 1 && selectedTrains.some((train) => stations[key].stops.has(train))
+        } else if (this.selectedTrains.length === 1 && this.selectedTrains.some((train) => stations[key].stops.has(train))
           && majorStations.has(key)) {
           priority = 4;
         }
@@ -615,7 +655,7 @@ class Mapbox extends React.Component {
           "properties": {
             "id": stations[key].id,
             "name": stations[key].name.replace(/ - /g, "–"),
-            "stopType": this.stopTypeIcon(key, selectedTrains),
+            "stopType": this.stopTypeIcon(key),
             "opacity": opacity,
             "priority": priority
           },
@@ -628,9 +668,9 @@ class Mapbox extends React.Component {
     };
   }
 
-  stopTypeIcon(stopId, selectedTrains) {
-    if (selectedTrains.length == 1) {
-      const selectedTrain = selectedTrains[0];
+  stopTypeIcon(stopId) {
+    if (this.selectedTrains.length == 1) {
+      const selectedTrain = this.selectedTrains[0];
 
       if (stations[stopId]["southStops"].has(selectedTrain) && stations[stopId]["northStops"].has(selectedTrain)) {
         return "express-stop";
@@ -717,6 +757,9 @@ class Mapbox extends React.Component {
   }
 
   selectTrain(train) {
+    this.selectedTrains = [train];
+    this.selectedStations = [];
+    this.renderStops();
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
@@ -726,9 +769,18 @@ class Mapbox extends React.Component {
           this.map.setPaintProperty(layerId, 'line-opacity', 1);
         }
       }
+
+      Object.keys(statusColors).forEach((status) => {
+        const l = `${layerId}-${status}`;
+        if (this.map.getLayer(l)) {
+          if (t !== train) {
+            this.map.setPaintProperty(l, 'line-opacity', 0.1);
+          } else {
+            this.map.setPaintProperty(l, 'line-opacity', 1);
+          }
+        }
+      });
     });
-    this.renderLines([train], []);
-    this.renderStops([train], []);
     this.closeMobilePane();
   }
 
@@ -737,18 +789,30 @@ class Mapbox extends React.Component {
     const stationsData = selectedStations.map((s) => stations[s]);
     const selectedTrains = includeTrains ? trainIds.filter((t) => stationsData.some((station) => station.stops.has(t))) : [];
 
+    this.selectedTrains = selectedTrains;
+    this.selectedStations = selectedStations;
+    this.renderStops();
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
-        if (!stationsData.some((station) => station.stops.has(t))) {
+        if (!includeTrains || !stationsData.some((station) => station.stops.has(t))) {
           this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
         } else {
           this.map.setPaintProperty(layerId, 'line-opacity', 1);
         }
       }
+
+      Object.keys(statusColors).forEach((status) => {
+        const l = `${layerId}-${status}`;
+        if (this.map.getLayer(l)) {
+          if (!includeTrains || !stationsData.some((station) => station.stops.has(t))) {
+            this.map.setPaintProperty(l, 'line-opacity', 0.1);
+          } else {
+            this.map.setPaintProperty(l, 'line-opacity', 1);
+          }
+        }
+      });
     });
-    this.renderLines(selectedTrains, selectedStations);
-    this.renderStops(selectedTrains, selectedStations);
 
     if (selectedStations.length === 1) {
       const stationData = stations[selectedStations[0]];
@@ -792,8 +856,24 @@ class Mapbox extends React.Component {
     this.map.fitBounds(defaultBounds, { bearing: 29});
     this.infoBox.scrollTop = 0;
     this.openMobilePane();
-    this.renderLines(trainIds, []);
-    this.renderStops(trainIds, []);
+    this.selectedTrains = trainIds;
+    this.selectedStations = [];
+
+    trainIds.forEach((t) => {
+      const layerId = `${t}-train`;
+      if (this.map.getLayer(layerId)) {
+        this.map.setPaintProperty(layerId, 'line-opacity', 1);
+      }
+
+      Object.keys(statusColors).forEach((status) => {
+        const l = `${layerId}-${status}`;
+        if (this.map.getLayer(l)) {
+          this.map.setPaintProperty(l, 'line-opacity', 1);
+        }
+      });
+    });
+
+    this.renderStops();
     this.showAll = true;
   }
 
@@ -806,8 +886,8 @@ class Mapbox extends React.Component {
 
   handleToggleChange = (e, {checked}) => {
     this.setState({displayProblems: checked}, () => {
-      this.renderLines(trainIds, []);
-      this.renderStops(trainIds, []);
+      this.renderOverlays();
+      this.map.moveLayer('Stops');
     });
   }
 
