@@ -62,7 +62,7 @@ class TrainDetails extends React.Component {
       handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle } = this.props;
     return (
       <Popup trigger={<Button icon='sliders horizontal' title="Configure issues overlay (experimental)" />}
-            on='click' hideOnScroll position='bottom center' style={{maxWidth: "180px"}}>
+            on='click' hideOnScroll position='bottom center' style={{maxWidth: "195px"}}>
         <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
             displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={handleDisplayProblemsToggle}
             handleDisplayDelaysToggle={handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={handleDisplaySlowSpeedsToggle}
@@ -118,7 +118,7 @@ class TrainDetails extends React.Component {
           </div>
         </Responsive>
         <Responsive {...Responsive.onlyMobile} as='div' className="mobile-details-header mobile-train-details-header">
-          <Popup trigger={<Button icon='ellipsis horizontal' title="More Options" />} inverted
+          <Popup trigger={<Button icon='ellipsis horizontal' title="More Options" />} inverted flowing
             on='click' hideOnScroll position='bottom left'>
             <Button icon onClick={this.handleBack} title="Back">
               <Icon name='arrow left' />

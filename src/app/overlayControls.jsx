@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { List, Checkbox } from "semantic-ui-react";
+import { List, Checkbox, Header } from "semantic-ui-react";
 
 class OverlayControls extends React.Component {
 
@@ -21,6 +21,11 @@ class OverlayControls extends React.Component {
             </List.Item>
             <List.Item>
               <Checkbox className="long-headway" toggle onChange={handleDisplayLongHeadwaysToggle} checked={displayLongHeadways} disabled={!displayProblems} label={<label>long headways</label>} />
+            </List.Item>
+            <List.Item>
+              <Header as='h6'>
+                Powered by <a href="https://www.goodservice.io/" target="_blank">goodservice.io</a>
+              </Header>
             </List.Item>
           </List.List>
         </List.Item>
