@@ -1008,16 +1008,16 @@ class Mapbox extends React.Component {
     return (
       <List>
         <List.Item>
-          <Checkbox toggle onChange={this.handleDisplayProblemsToggle} checked={displayProblems} label={<label title="May cause performance issues">Display issues (experimental)</label>} />
+          <Checkbox toggle onChange={this.handleDisplayProblemsToggle} checked={displayProblems} label={<label title="May cause performance issues">display issues (experimental)</label>} />
           <List.List style={{"display": (displayProblems ? "block" : "none")}}>
             <List.Item>
-              <Checkbox toggle onChange={this.handleDisplayDelaysToggle} checked={displayDelays} disabled={!displayProblems} label={<label>Delays</label>} />
+              <Checkbox toggle onChange={this.handleDisplayDelaysToggle} checked={displayDelays} disabled={!displayProblems} label={<label>delays</label>} />
             </List.Item>
             <List.Item>
-              <Checkbox toggle onChange={this.handleDisplaySlowSpeedsToggle} checked={displaySlowSpeeds} disabled={!displayProblems} label={<label>Slow Speeds</label>} />
+              <Checkbox toggle onChange={this.handleDisplaySlowSpeedsToggle} checked={displaySlowSpeeds} disabled={!displayProblems} label={<label>slow speeds</label>} />
             </List.Item>
             <List.Item>
-              <Checkbox toggle onChange={this.handleDisplayLongHeadwaysToggle} checked={displayLongHeadways} disabled={!displayProblems} label={<label>Long Headway</label>} />
+              <Checkbox toggle onChange={this.handleDisplayLongHeadwaysToggle} checked={displayLongHeadways} disabled={!displayProblems} label={<label>long headways</label>} />
             </List.Item>
           </List.List>
         </List.Item>

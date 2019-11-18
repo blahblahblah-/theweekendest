@@ -19,7 +19,7 @@ class Legend extends React.Component {
           </List.Content>
           <List.Content floated='left'>
             <Header as='h5'>
-              All trains stop
+              all trains stop
             </Header>
           </List.Content>
        </List.Item>
@@ -29,7 +29,7 @@ class Legend extends React.Component {
           </List.Content>
           <List.Content floated='left'>
             <Header as='h5'>
-              Some trains stop
+              some trains stop
             </Header>
           </List.Content>
        </List.Item>
@@ -39,7 +39,7 @@ class Legend extends React.Component {
           </List.Content>
           <List.Content floated='left'>
             <Header as='h5'>
-              All uptown, some downtown
+              all uptown, some downtown
             </Header>
           </List.Content>
        </List.Item>
@@ -49,7 +49,7 @@ class Legend extends React.Component {
           </List.Content>
           <List.Content floated='left'>
             <Header as='h5'>
-              Some downtown, no uptown
+              some downtown, no uptown
             </Header>
           </List.Content>
        </List.Item>
@@ -59,7 +59,7 @@ class Legend extends React.Component {
           </List.Content>
           <List.Content floated='left'>
             <Header as='h5'>
-              No trains stop
+              no trains stop
             </Header>
           </List.Content>
        </List.Item>
