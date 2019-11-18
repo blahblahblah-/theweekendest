@@ -1,12 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
-import { Responsive, Checkbox, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu } from "semantic-ui-react";
+import { Responsive, Checkbox, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu, List } from "semantic-ui-react";
 import { BrowserRouter as Router, Route, Link, Switch, Redirect, withRouter } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { debounce, filter } from 'lodash';
 import * as Cookies from 'es-cookie';
 
+import Legend from './legend.jsx';
 import TrainList from './trainList.jsx';
 import TrainDetails from './trainDetails.jsx';
 import StationList from './stationList.jsx';
@@ -14,11 +15,6 @@ import StationDetails from './stationDetails.jsx';
 
 import stationData from '../data/station_details.json';
 import transfers from '../data/transfers.json';
-
-import Circle from "./icons/circle-15.svg";
-import ExpressStop from "./icons/express-stop.svg";
-import UptownAllTrains from "./icons/uptown-all-trains.svg";
-import DowntownOnly from "./icons/downtown-only.svg";
 
 const apiUrl = 'https://www.goodservice.io/api/routes';
 const statusUrl = 'https://www.goodservice.io/api/info'
@@ -58,6 +54,9 @@ class Mapbox extends React.Component {
       arrivals: {},
       routing: {},
       displayProblems: false,
+      displayDelays: false,
+      displaySlowSpeeds: false,
+      displayLongHeadways: false,
       processedRoutings: [],
       routeStops: {},
       offsets: {}
@@ -327,11 +326,16 @@ class Mapbox extends React.Component {
   }
 
   renderOverlays() {
-    const { routing, displayProblems, processedRoutings, offsets } = this.state;
+    const { routing, displayDelays, displaySlowSpeeds, displayLongHeadways, processedRoutings, offsets } = this.state;
     const statusSpacing = {
       'long-headway': 11,
       'slow': 7,
       'delay': 5
+    }
+    const statusVisability = {
+      'long-headway': displayLongHeadways,
+      'slow': displaySlowSpeeds,
+      'delay': displayDelays
     }
 
     Object.keys(routing).forEach((key) => {
@@ -376,7 +380,7 @@ class Mapbox extends React.Component {
             "type": "line",
             "source": layerId,
             "layout": {
-              "visibility": displayProblems ? 'visible' : 'none',
+              "visibility": statusVisability[status] ? 'visible' : 'none',
               "line-join": "round",
               "line-cap": "round",
             },
@@ -408,7 +412,7 @@ class Mapbox extends React.Component {
             this.map.getCanvas().style.cursor = '';
           }).bind(this));
         } else {
-          this.map.setLayoutProperty(layerId, "visibility", displayProblems ? "visible" : "none");
+          this.map.setLayoutProperty(layerId, "visibility", statusVisability[status] ? "visible" : "none");
         }
       });
     });
@@ -884,8 +888,34 @@ class Mapbox extends React.Component {
 
   handleOnUpdate = (e, { width }) => this.setState({ width })
 
-  handleToggleChange = (e, {checked}) => {
-    this.setState({displayProblems: checked}, () => {
+  handleDisplayProblemsToggle = (e, {checked}) => {
+    this.setState({
+      displayProblems: checked,
+      displayDelays: checked,
+      displaySlowSpeeds: checked,
+      displayLongHeadways: checked
+    }, () => {
+      this.renderOverlays();
+      this.map.moveLayer('Stops');
+    });
+  }
+
+  handleDisplayDelaysToggle = (e, {checked}) => {
+    this.setState({displayDelays: checked}, () => {
+      this.renderOverlays();
+      this.map.moveLayer('Stops');
+    });
+  }
+
+  handleDisplaySlowSpeedsToggle = (e, {checked}) => {
+    this.setState({displaySlowSpeeds: checked}, () => {
+      this.renderOverlays();
+      this.map.moveLayer('Stops');
+    });
+  }
+
+  handleDisplayLongHeadwaysToggle = (e, {checked}) => {
+    this.setState({displayLongHeadways: checked}, () => {
       this.renderOverlays();
       this.map.moveLayer('Stops');
     });
@@ -922,7 +952,7 @@ class Mapbox extends React.Component {
   }
 
   renderListings(index) {
-    const { trains, displayProblems } = this.state;
+    const { trains } = this.state;
     return (
       <div>
         <Helmet>
@@ -934,49 +964,19 @@ class Mapbox extends React.Component {
           <Header as='h4'>
             information
           </Header>
-          <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
-            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-              <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
-              <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
-            </Statistic>
-            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-              <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
-              <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
-            </Statistic>
-            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-              <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
-              <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some dntwn</Statistic.Label>
-            </Statistic>
-            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-              <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
-              <Statistic.Label style={{fontSize: "0.75em"}}>Some dntwn, no uptown</Statistic.Label>
-            </Statistic>
-          </Statistic.Group>
-          <Checkbox toggle onChange={this.handleToggleChange} checked={displayProblems} label={<label className="toggle-label" title="May cause performance issues">Highlight issues (experimental)</label>} />
+          <Legend />
+          {
+            this.renderOverlayControls()
+          }
         </Responsive>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as={Segment}>
           <Header as='h4'>
-            stops
+            legend
           </Header>
-          <Statistic.Group size='mini' style={{flexWrap: "nowrap", justifyContent: "space-around"}}>
-            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-              <Statistic.Value><ExpressStop style={{height: "15px", width: "15px"}} /></Statistic.Value>
-              <Statistic.Label style={{fontSize: "0.75em"}}>All trains</Statistic.Label>
-            </Statistic>
-            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-              <Statistic.Value><Circle style={{height: "15px", width: "15px"}} /></Statistic.Value>
-              <Statistic.Label style={{fontSize: "0.75em"}}>Some trains</Statistic.Label>
-            </Statistic>
-            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-              <Statistic.Value><UptownAllTrains style={{height: "15px", width: "15px"}} /></Statistic.Value>
-              <Statistic.Label style={{fontSize: "0.75em"}}>All uptown, some downtown</Statistic.Label>
-            </Statistic>
-            <Statistic style={{flex: "1 1 0px", margin: "0 1em 1em"}}>
-              <Statistic.Value><DowntownOnly style={{height: "15px", width: "15px"}} /></Statistic.Value>
-              <Statistic.Label style={{fontSize: "0.75em"}}>Some downtown, no uptown</Statistic.Label>
-            </Statistic>
-          </Statistic.Group>
-          <Checkbox toggle onChange={this.handleToggleChange} checked={displayProblems} label={<label className="toggle-label" title="May cause performance issues">Highlight issues (experimental)</label>} />
+          <Legend />
+          {
+            this.renderOverlayControls()
+          }
         </Responsive>
         <Segment className="selection-pane">
           { trains && trains.length > 1 &&
@@ -984,6 +984,28 @@ class Mapbox extends React.Component {
           }
         </Segment>
       </div>
+    )
+  }
+
+  renderOverlayControls() {
+    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways } = this.state;
+    return (
+      <List>
+        <List.Item>
+          <Checkbox toggle onChange={this.handleDisplayProblemsToggle} checked={displayProblems} label={<label title="May cause performance issues">Display issues (experimental)</label>} />
+          <List.List style={{"display": (displayProblems ? "block" : "none")}}>
+            <List.Item>
+              <Checkbox toggle onChange={this.handleDisplayDelaysToggle} checked={displayDelays} disabled={!displayProblems} label={<label>Delays</label>} />
+            </List.Item>
+            <List.Item>
+              <Checkbox toggle onChange={this.handleDisplaySlowSpeedsToggle} checked={displaySlowSpeeds} disabled={!displayProblems} label={<label>Slow Speeds</label>} />
+            </List.Item>
+            <List.Item>
+              <Checkbox toggle onChange={this.handleDisplayLongHeadwaysToggle} checked={displayLongHeadways} disabled={!displayProblems} label={<label>Long Headway</label>} />
+            </List.Item>
+          </List.List>
+        </List.Item>
+      </List>
     )
   }
 
