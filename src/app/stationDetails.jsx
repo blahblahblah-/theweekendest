@@ -6,6 +6,7 @@ import Clipboard from 'react-clipboard.js';
 import { Helmet } from "react-helmet";
 import * as Cookies from 'es-cookie';
 
+import OverlayControls from './overlayControls.jsx';
 import TrainBullet from './trainBullet.jsx';
 
 import Cross from "./icons/cross-15.svg";
@@ -165,6 +166,20 @@ class StationDetails extends React.Component {
     }))).sort().join(', ').replace(/ - /g, "–");
   }
 
+  renderOverlayControls() {
+    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways,
+      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle } = this.props;
+    return (
+      <Popup trigger={<Button icon='sliders horizontal' title="Configure issues overlay (experimental)" />}
+            on='click' hideOnScroll position='bottom center' style={{maxWidth: "180px"}}>
+        <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+            displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={handleDisplayProblemsToggle}
+            handleDisplayDelaysToggle={handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={handleDisplaySlowSpeedsToggle}
+            handleDisplayLongHeadwaysToggle={handleDisplayLongHeadwaysToggle} alwaysExpand={true} />
+      </Popup>
+    )
+  }
+
   render() {
     const { stations, station, trains } = this.props;
     const { fav } = this.state;
@@ -186,6 +201,9 @@ class StationDetails extends React.Component {
           <Button icon onClick={this.handleHome} title="Home">
             <Icon name='map outline' />
           </Button>
+          {
+            this.renderOverlayControls()
+          }
           <Button icon onClick={this.handleStar} title={ fav ? 'Remove station from favorites' : 'Add station to favorites'}>
             <Icon name={ fav ? 'star' : 'star outline'} />
           </Button>
@@ -217,6 +235,9 @@ class StationDetails extends React.Component {
             <Button icon onClick={this.handleHome} title="Home">
               <Icon name='map outline' />
             </Button>
+            {
+              this.renderOverlayControls()
+            }
             <Button icon onClick={this.handleStar} title={ fav ? 'Remove station from favorites' : 'Add station to favorites'}>
               <Icon name={ fav ? 'star' : 'star outline'} />
             </Button>

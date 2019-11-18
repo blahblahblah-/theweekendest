@@ -49,7 +49,7 @@ class Legend extends React.Component {
           </List.Content>
           <List.Content floated='left'>
             <Header as='h5'>
-              some downtown, no uptown
+              no uptown, some downtown
             </Header>
           </List.Content>
        </List.Item>

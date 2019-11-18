@@ -252,3 +252,21 @@ h4.ui.top.attached.header.advisories-header {
     padding: .85714286em 1em;
   }
 }
+
+.infobox .inner-infobox .ui.toggle.checkbox input:checked~.box:before, .ui.toggle.checkbox input:checked~label:before, .infobox .inner-infobox .ui.toggle.checkbox input:focus:checked~.box:before, .ui.toggle.checkbox input:focus:checked~label:before {
+  background-color: #666666!important;
+}
+
+.infobox .inner-infobox .ui.toggle.checkbox.delay input:checked~.box:before, .ui.toggle.checkbox.delay input:checked~label:before, .infobox .inner-infobox .ui.toggle.checkbox.delay input:focus:checked~.box:before, .ui.toggle.checkbox.delay input:focus:checked~label:before {
+  background-color: #ff8093!important;
+}
+
+
+.infobox .inner-infobox .ui.toggle.checkbox.slow input:checked~.box:before, .ui.toggle.checkbox.slow input:checked~label:before, .infobox .inner-infobox .ui.toggle.checkbox.slow input:focus:checked~.box:before, .ui.toggle.checkbox.slow input:focus:checked~label:before {
+  background-color: #fbfb08!important;
+}
+
+
+.infobox .inner-infobox .ui.toggle.checkbox.long-headway input:checked~.box:before, .ui.toggle.checkbox.long-headway input:checked~label:before, .infobox .inner-infobox.long-headway .ui.toggle.checkbox input:focus:checked~.box:before, .ui.toggle.checkbox.long-headway input:focus:checked~label:before {
+  background-color: #ff934b!important;
+}

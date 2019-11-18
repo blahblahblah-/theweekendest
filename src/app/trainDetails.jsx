@@ -2,10 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Responsive, Button, Icon, Header, Segment, List, Popup } from "semantic-ui-react";
 import { withRouter } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import Clipboard from 'react-clipboard.js';
+
+import OverlayControls from './overlayControls.jsx';
 import TrainMap from './trainMap.jsx';
 import TrainBullet from './trainBullet.jsx';
-import { Helmet } from "react-helmet";
 
 class TrainDetails extends React.Component {
   statusColor(status) {
@@ -55,6 +57,20 @@ class TrainDetails extends React.Component {
     })
   }
 
+  renderOverlayControls() {
+    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways,
+      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle } = this.props;
+    return (
+      <Popup trigger={<Button icon='sliders horizontal' title="Configure issues overlay (experimental)" />}
+            on='click' hideOnScroll position='bottom center' style={{maxWidth: "180px"}}>
+        <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+            displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={handleDisplayProblemsToggle}
+            handleDisplayDelaysToggle={handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={handleDisplaySlowSpeedsToggle}
+            handleDisplayLongHeadwaysToggle={handleDisplayLongHeadwaysToggle} alwaysExpand={true} />
+      </Popup>
+    )
+  }
+
   render() {
     const { routing, stops, train, stations } = this.props;
     const title = `the weekendest beta - ${((train.alternate_name) ? ("S - " + train.alternate_name) : train.name)} Train`;
@@ -75,6 +91,7 @@ class TrainDetails extends React.Component {
           <Button icon onClick={this.handleHome} title="Home">
             <Icon name='map outline' />
           </Button>
+          { this.renderOverlayControls() }
           { navigator.share &&
             <Button icon onClick={this.handleShare} style={{float: "right"}} title="Share">
               <Icon name='external share' />
@@ -109,6 +126,7 @@ class TrainDetails extends React.Component {
             <Button icon onClick={this.handleHome} title="Home">
               <Icon name='map outline' />
             </Button>
+            { this.renderOverlayControls() }
             <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${this.props.train.id}`}>
               <Icon name='linkify' />
             </Clipboard>

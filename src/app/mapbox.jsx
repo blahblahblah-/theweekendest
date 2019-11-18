@@ -8,6 +8,7 @@ import { debounce, filter } from 'lodash';
 import * as Cookies from 'es-cookie';
 
 import Legend from './legend.jsx';
+import OverlayControls from './overlayControls.jsx';
 import TrainList from './trainList.jsx';
 import TrainDetails from './trainDetails.jsx';
 import StationList from './stationList.jsx';
@@ -968,7 +969,7 @@ class Mapbox extends React.Component {
   }
 
   renderListings(index) {
-    const { trains } = this.state;
+    const { trains, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways } = this.state;
     return (
       <div>
         <Helmet>
@@ -981,18 +982,20 @@ class Mapbox extends React.Component {
             information
           </Header>
           <Legend />
-          {
-            this.renderOverlayControls()
-          }
+          <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+            displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+            handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
+            handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} />
         </Responsive>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as={Segment}>
           <Header as='h4'>
             legend
           </Header>
           <Legend />
-          {
-            this.renderOverlayControls()
-          }
+          <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+            displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+            handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
+            handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} />
         </Responsive>
         <Segment className="selection-pane">
           { trains && trains.length > 1 &&
@@ -1003,30 +1006,9 @@ class Mapbox extends React.Component {
     )
   }
 
-  renderOverlayControls() {
-    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways } = this.state;
-    return (
-      <List>
-        <List.Item>
-          <Checkbox toggle onChange={this.handleDisplayProblemsToggle} checked={displayProblems} label={<label title="May cause performance issues">display issues (experimental)</label>} />
-          <List.List style={{"display": (displayProblems ? "block" : "none")}}>
-            <List.Item>
-              <Checkbox toggle onChange={this.handleDisplayDelaysToggle} checked={displayDelays} disabled={!displayProblems} label={<label>delays</label>} />
-            </List.Item>
-            <List.Item>
-              <Checkbox toggle onChange={this.handleDisplaySlowSpeedsToggle} checked={displaySlowSpeeds} disabled={!displayProblems} label={<label>slow speeds</label>} />
-            </List.Item>
-            <List.Item>
-              <Checkbox toggle onChange={this.handleDisplayLongHeadwaysToggle} checked={displayLongHeadways} disabled={!displayProblems} label={<label>long headways</label>} />
-            </List.Item>
-          </List.List>
-        </List.Item>
-      </List>
-    )
-  }
-
   render() {
-    const { trains, arrivals, routing, stops, timestamp } = this.state;
+    const { trains, arrivals, routing, stops, timestamp,
+      displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways} = this.state;
     return (
       <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
         <div ref={el => this.mapContainer = el}
@@ -1082,6 +1064,10 @@ class Mapbox extends React.Component {
                     return (
                       <TrainDetails routing={routing[props.match.params.id]} stops={stops} stations={stations}
                         train={trains.find((train) => train.id == props.match.params.id)}
+                        displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+                        displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                        handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
+                        handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
                       />
                     );
                   } else {
@@ -1097,6 +1083,10 @@ class Mapbox extends React.Component {
                     return (
                       <StationDetails routings={routing} trains={trains} station={stations[props.match.params.id]} stations={stations}
                         arrivals={arrivals}
+                        displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+                        displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                        handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
+                        handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
                       />
                     )
                   } else {
