@@ -96,7 +96,7 @@ class Mapbox extends React.Component {
       zoom: 10,
       hash: false,
       maxBounds: [
-        [-74.8113, 40.3797],
+        [-74.8113, 40.2797],
         [-73.3584, 41.0247]
       ]
     });
