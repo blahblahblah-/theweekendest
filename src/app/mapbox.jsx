@@ -898,12 +898,20 @@ class Mapbox extends React.Component {
       this.renderOverlays();
       this.map.moveLayer('Stops');
     });
+    gtag('event', 'toggle', {
+      'event_category': 'displayProblems',
+      'event_label': checked.toString()
+    });
   }
 
   handleDisplayDelaysToggle = (e, {checked}) => {
     this.setState({displayDelays: checked}, () => {
       this.renderOverlays();
       this.map.moveLayer('Stops');
+    });
+    gtag('event', 'toggle', {
+      'event_category': 'displayDelays',
+      'event_label': checked.toString()
     });
   }
 
@@ -912,12 +920,20 @@ class Mapbox extends React.Component {
       this.renderOverlays();
       this.map.moveLayer('Stops');
     });
+    gtag('event', 'toggle', {
+      'event_category': 'displaySlowSpeeds',
+      'event_label': checked.toString()
+    });
   }
 
   handleDisplayLongHeadwaysToggle = (e, {checked}) => {
     this.setState({displayLongHeadways: checked}, () => {
       this.renderOverlays();
       this.map.moveLayer('Stops');
+    });
+    gtag('event', 'toggle', {
+      'event_category': 'displayLongHeadways',
+      'event_label': checked.toString()
     });
   }
 
