@@ -40,7 +40,7 @@ const majorStations = new Set(['G29', 'L03', '635', 'R20', 'R23', 'Q01', 'F15', 
   'R17', 'D17', 'F23', 'F35', 'G08', '420', '712', '718', 'R09', '723', 'J27', 'L22', 'A51', 'M16', 'M11', 'M08', 'L17']);
 
 const statusColors = {
-  'long-headway': '#ff934b',
+  'long-headway': '#dddddd',
   'slow': '#fbfb08',
   'delay': '#ff8093'
 }
@@ -600,7 +600,8 @@ class Mapbox extends React.Component {
           "text-optional": true,
           "text-justify": "auto",
           "text-padding": 5,
-          "text-variable-anchor": ["right", "bottom-right", "bottom", "left", "bottom-left", "top-left"],
+          "text-variable-anchor": ["right", "bottom-right", "left", "bottom-left", "top-left", "bottom"],
+          "text-radial-offset": 0.2,
           "icon-image": ['get', 'stopType'],
           "icon-size": {
             "stops": [[8, 0.25], [12, 0.75]]
@@ -609,9 +610,6 @@ class Mapbox extends React.Component {
           "symbol-sort-key": ['get', 'priority'],
         },
         "paint": {
-          "text-translate": {
-            "stops": [[8, [-5, 0]], [14, [-12, -15]]]
-          },
           "text-color": "#aaaaaa",
           "icon-opacity": ['get', 'opacity'],
           "text-opacity": ['get', 'opacity'],
