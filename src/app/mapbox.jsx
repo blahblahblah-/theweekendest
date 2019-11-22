@@ -444,10 +444,10 @@ class Mapbox extends React.Component {
     let path = []
     let filteredPaths = [];
     let cumulativePath = [];
-    let prev = r.splice(0, 1);
+    let prev = r.splice(0, 1)[0];
     let currentProblemSection = null;
 
-    r.forEach((stopId) => {
+    r.forEach((stopId, index) => {
       let tempPath = [];
       if (!currentProblemSection) {
         currentProblemSection = relevantProblemSections.find((ps) => ps.first_stops.includes(prev));
@@ -466,7 +466,8 @@ class Mapbox extends React.Component {
       }
 
       prev = stopId;
-      if (currentProblemSection && currentProblemSection.last_stops.includes(stopId)) {
+      if (currentProblemSection && currentProblemSection.last_stops.includes(stopId) &&
+        !r.slice(index + 1).some((s) => currentProblemSection.last_stops.includes(s))) {
         filteredPaths.push(cumulativePath);
         cumulativePath = [];
         currentProblemSection = null;
@@ -600,7 +601,7 @@ class Mapbox extends React.Component {
           "text-optional": true,
           "text-justify": "auto",
           "text-padding": 5,
-          "text-variable-anchor": ["right", "bottom-right", "left", "bottom-left", "top-left", "bottom"],
+          "text-variable-anchor": ["bottom-right", "right", "left", "bottom-left", "top-left", "bottom"],
           "text-radial-offset": 0.2,
           "icon-image": ['get', 'stopType'],
           "icon-size": {
