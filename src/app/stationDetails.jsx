@@ -21,13 +21,26 @@ class StationDetails extends React.Component {
   }
 
   componentDidMount() {
-    const { station } = this.props;
+    const { station, handleOnMount, infoBox } = this.props;
     const favs = Cookies.get('favs') && Cookies.get('favs').split(",");
 
     if (!favs || !favs.includes(station.id)) {
       this.setState({ fav: false });
     } else {
       this.setState({ fav: true });
+    }
+
+    handleOnMount(station.id);
+    infoBox.classList.add('open');
+    infoBox.scrollTop = 0;
+  }
+
+  componentDidUpdate(prevProps) {
+    const { handleOnMount, station, infoBox } = this.props;
+    if (prevProps.station.id !== station.id) {
+      handleOnMount(station.id);
+      infoBox.classList.add('open');
+      infoBox.scrollTop = 0;
     }
   }
 

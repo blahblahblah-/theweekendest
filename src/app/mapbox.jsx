@@ -349,6 +349,11 @@ class Mapbox extends React.Component {
 
       Object.keys(statusColors).forEach((status) => {
         const layerId = `${layerIdPrefix}-${status}`;
+
+        if (!this.map.getLayer(layerId) && !statusVisability[status]) {
+          return;
+        }
+
         const problemSections = this.calculateProblemSections(route.id, status);
         const coordinates = processedRoutings[key].map((r) => {
           return this.routingGeoJson(r, problemSections, true)
@@ -754,9 +759,6 @@ class Mapbox extends React.Component {
         });
       }
     }
-
-    this.closeMobilePane();
-    this.infoBox.scrollTop = 0;
     this.showAll = false;
   }
 
@@ -785,7 +787,6 @@ class Mapbox extends React.Component {
         }
       });
     });
-    this.closeMobilePane();
   }
 
   goToStations(selectedStations, includeTrains) {
@@ -847,8 +848,6 @@ class Mapbox extends React.Component {
       });
     }
 
-    this.openMobilePane();
-    this.infoBox.scrollTop = 0;
     this.showAll = false;
   }
 
@@ -858,8 +857,6 @@ class Mapbox extends React.Component {
     }
 
     this.map.fitBounds(defaultBounds, { bearing: 29});
-    this.infoBox.scrollTop = 0;
-    this.openMobilePane();
     this.selectedTrains = trainIds;
     this.selectedStations = [];
 
@@ -937,12 +934,24 @@ class Mapbox extends React.Component {
     });
   }
 
-  closeMobilePane() {
-    this.infoBox.classList.remove('open');
+  handleMountTrainDetails = (train, coords, zoom) => {
+    this.goToTrain(train, coords, zoom);
   }
 
-  openMobilePane() {
-    this.infoBox.classList.add('open');
+  handleMountStationDetails = (station) => {
+    this.goToStations([station], true);
+  }
+
+  handleTrainList = () => {
+    this.resetView();
+  }
+
+  handleStationList = (stations, includeTrains) => {
+    if (stations && stations.length > 0) {
+      this.goToStations(stations, includeTrains);
+    } else {
+      this.resetView();
+    }
   }
 
   panes() {
@@ -950,19 +959,19 @@ class Mapbox extends React.Component {
     return [
       {
         menuItem: <Menu.Item as={Link} to='/trains' key='train'>Trains</Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><TrainList trains={trains} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><TrainList trains={trains} handleOnMount={this.handleTrainList} infoBox={this.infoBox} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/stations' key='stations'>Stations</Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/starred' key='starred'><Icon name='star' /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} starred={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} starred={true} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/advisories' key='advisories'><Icon name='warning sign' /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} advisories={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} advisories={true} /></Tab.Pane>,
       },
     ];
   }
@@ -1042,9 +1051,10 @@ class Mapbox extends React.Component {
             </Header>
           </Responsive>
           <div ref={el => this.infoBox = el} className="inner-infobox open">
-            <Switch>
-              <Route path="/trains/:id?" render={(props) => {
-                if (trains.length > 1) {
+            {
+              trains.length > 1 &&
+              <Switch>
+                <Route path="/trains/:id?" render={(props) => {
                   if (props.match.params.id) {
                     const hash = location.hash.substr(1).split('/');
                     let coords = null;
@@ -1058,8 +1068,6 @@ class Mapbox extends React.Component {
                       }
                     }
 
-                    this.goToTrain(props.match.params.id, coords, zoom);
-                    this.closeMobilePane();
                     return (
                       <TrainDetails routing={routing[props.match.params.id]} stops={stops} stations={stations}
                         train={trains.find((train) => train.id == props.match.params.id)}
@@ -1067,62 +1075,38 @@ class Mapbox extends React.Component {
                         displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
                         handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
                         handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
+                        handleOnMount={this.handleMountTrainDetails} coords={coords} zoom={zoom} infoBox={this.infoBox}
                       />
                     );
                   } else {
-                    this.resetView();
                     return this.renderListings(0);
                   }
-                }
-              }} />
-              <Route path="/stations/:id?" render={(props) => {
-                if (trains.length > 1) {
+                }} />
+                <Route path="/stations/:id?" render={(props) => {
                   if (props.match.params.id) {
-                    this.goToStations([props.match.params.id], true);
                     return (
                       <StationDetails routings={routing} trains={trains} station={stations[props.match.params.id]} stations={stations}
                         arrivals={arrivals}
                         displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
                         displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
                         handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
-                        handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
+                        handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} handleOnMount={this.handleMountStationDisplay}
+                        handleOnMount={this.handleMountStationDetails} infoBox={this.infoBox}
                       />
                     )
                   } else {
-                    this.resetView();
                     return this.renderListings(1);
                   }
-                }
-              }} />
-              <Route path="/starred" render={() => {
-                if (trains.length > 1) {
-                  const favs = Cookies.get('favs') && Cookies.get('favs').split(",") || [];
-
-                  if (favs.length > 0) {
-                    this.goToStations(favs, true);
-                  } else {
-                    this.resetView();
-                  }
+                }} />
+                <Route path="/starred" render={() => {
                   return this.renderListings(2);
-                }
-              }} />
-              <Route path="/advisories" render={() => {
-                if (trains.length > 1) {
-                  const stationsWithoutService = filter(stations, (result) => result.stops.size === 0);
-                  const stationsWithOneWayService = filter(stations, (result) => {
-                    return result.stops.size > 0 &&
-                      (result.northStops.size === 0 || result.southStops.size === 0 && result.id !== 'H01');
-                  });
-                  const selectedStations = stationsWithoutService.concat(stationsWithOneWayService).map((s) => s.id);
-
-                  if (selectedStations.length > 1) {
-                    this.goToStations(selectedStations, false);
-                  }
+                }} />
+                <Route path="/advisories" render={() => {
                   return this.renderListings(3);
-                }
-              }} />
-              <Route render={() => <Redirect to="/trains" /> } />
-            </Switch>
+                }} />
+                <Route render={() => <Redirect to="/trains" /> } />
+              </Switch>
+            }
             <Loader active={!(trains && trains.length)} />
             <Header inverted as='h5' floated='left' style={{margin: "10px 5px"}}>
               Last updated {timestamp && (new Date(timestamp)).toLocaleTimeString('en-US')}.<br />

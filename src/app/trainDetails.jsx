@@ -10,6 +10,22 @@ import TrainMap from './trainMap.jsx';
 import TrainBullet from './trainBullet.jsx';
 
 class TrainDetails extends React.Component {
+  componentDidMount() {
+    const { handleOnMount, train, coords, zoom, infoBox } = this.props;
+    handleOnMount(train.id, coords, zoom);
+    infoBox.classList.remove('open');
+    infoBox.scrollTop = 0;
+  }
+
+  componentDidUpdate(prevProps) {
+    const { handleOnMount, train, coords, zoom, infoBox } = this.props;
+    if (prevProps.train.id !== train.id) {
+      handleOnMount(train.id, coords, zoom);
+      infoBox.classList.remove('open');
+      infoBox.scrollTop = 0;
+    }
+  }
+
   statusColor(status) {
     if (status == 'Good Service') {
       return 'green';

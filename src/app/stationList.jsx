@@ -73,13 +73,26 @@ class StationList extends React.Component {
   }
 
   componentDidMount() {
-    this.filterByStars();
+    this.updateMap();
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.starred !== prevProps.starred) {
-      this.filterByStars();
+    const { advisories, starred } = this.props;
+    if (starred !== prevProps.starred || advisories !== prevProps.advisories) {
+      this.updateMap();
     }
+  }
+
+  updateMap() {
+    const { handleOnMount, advisories, infoBox } = this.props;
+    const starredStations = this.filterByStars();
+    if (advisories) {
+      handleOnMount(this.stationsWithoutService().concat(this.stationsWithOneWayService()).map((s) => s.id), false);
+    } else {
+      handleOnMount(starredStations.map((s) => s.id), true);
+    }
+    infoBox.classList.add('open');
+    infoBox.scrollTop = 0;
   }
 
   stationsWithoutService() {
@@ -98,14 +111,16 @@ class StationList extends React.Component {
 
     if (!starred) {
       this.setState({ stationsDisplayed: this.stations });
-      return;
+      return [];
     }
 
     const favs = Cookies.get('favs') && Cookies.get('favs').split(",") || [];
     const func = (result) => favs.includes(result.id)
+    const filteredStations = _.filter(this.stations, func)
     this.setState({
-      stationsDisplayed: _.filter(this.stations, func),
+      stationsDisplayed: filteredStations,
     })
+    return filteredStations;
   }
 
   handleChange = (e, data) => {

@@ -5,6 +5,13 @@ import { Link } from "react-router-dom";
 import TrainBullet from './trainBullet.jsx';
 
 class TrainList extends React.Component {
+  componentDidMount() {
+    const { handleOnMount, infoBox } = this.props;
+    handleOnMount();
+    infoBox.classList.add('open');
+    infoBox.scrollTop = 0;
+  }
+
   statusColor(status) {
     if (status == 'Good Service') {
       return 'green';
