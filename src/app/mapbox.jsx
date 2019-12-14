@@ -600,7 +600,7 @@ class Mapbox extends React.Component {
         "layout": {
           "text-field": ['get', 'name'],
           "text-size": {
-            "stops": [[8, 10], [12, 14]]
+            "stops": [[10, 8], [11, 12]]
           },
           "text-font": ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"],
           "text-optional": true,
@@ -610,7 +610,7 @@ class Mapbox extends React.Component {
           "text-radial-offset": 0.2,
           "icon-image": ['get', 'stopType'],
           "icon-size": {
-            "stops": [[8, 0.25], [12, 0.75]]
+            "stops": [[9, 0.1], [12, 0.75]]
           },
           "icon-allow-overlap": true,
           "symbol-sort-key": ['get', 'priority'],
