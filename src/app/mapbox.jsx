@@ -1111,7 +1111,7 @@ class Mapbox extends React.Component {
             <Header inverted as='h5' floated='left' style={{margin: "10px 5px"}}>
               Last updated {timestamp && (new Date(timestamp)).toLocaleTimeString('en-US')}.<br />
               Powered by <a href='https://www.goodservice.io' target='_blank'>goodservice.io</a>.<br />
-              Created by <a href='https://twitter.com/_blahblahblah' target='_blank'>Sunny Ng</a>.<br />
+              Created by <a href='https://sunny.ng' target='_blank'>Sunny Ng</a>.<br />
               <a href='https://github.com/blahblahblah-/theweekendest' target='_blank'>Source code</a>.
             </Header>
             </div>
