@@ -125,7 +125,7 @@ class TrainDetails extends React.Component {
             </div>
             <div className="status">
               <Header as='h4' color={this.statusColor(train.status)}>
-                { train.status }
+                { train.secondary_status }
               </Header>
               <Header as='h6'>
                 Powered by <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>
@@ -159,7 +159,7 @@ class TrainDetails extends React.Component {
             </Header>
           }
           <Header as='h4' color={this.statusColor(train.status)} style={{margin: 0, flexGrow: 1, textAlign: "right"}}>
-            { train.status }
+            { train.secondary_status }
           </Header>
         </Responsive>
         <Responsive maxWidth={Responsive.onlyMobile.maxWidth} as='h6' className="mobile-goodservice">

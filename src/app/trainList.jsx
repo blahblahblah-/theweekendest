@@ -44,7 +44,7 @@ class TrainList extends React.Component {
                 }
                 <List.Content floated='right'>
                   <Header as='h4' color={this.statusColor(train.status)}>
-                    { train.status }
+                    { train.secondary_status }
                   </Header>
                 </List.Content>
               </List.Item>

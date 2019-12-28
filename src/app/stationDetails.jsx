@@ -443,7 +443,7 @@ class StationDetails extends React.Component {
                         <List.Content floated='right' className="station-details-route-status">
                           <div dangerouslySetInnerHTML={{__html: this.renderArrivalTimes(trainId, "south")}}></div>
                           <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
-                            { train.direction_statuses.south }
+                            { train.direction_secondary_statuses.south }
                           </Header>
                         </List.Content>
                       </List.Item>
@@ -473,7 +473,7 @@ class StationDetails extends React.Component {
                         <List.Content floated='right' className="station-details-route-status">
                           <div dangerouslySetInnerHTML={{__html: this.renderArrivalTimes(trainId, "north")}}></div>
                           <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
-                            { train.direction_statuses.north }
+                            { train.direction_secondary_statuses.north }
                           </Header>
                         </List.Content>
                       </List.Item>
