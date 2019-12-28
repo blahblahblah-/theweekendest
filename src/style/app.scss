@@ -219,10 +219,14 @@ h1.yellow a, h3.yellow a {
 
 .station-details-route-status {
   text-align: right;
-  max-width: 75%;
+  max-width: 70%;
 
   div {
     margin-left: auto;
+
+    span {
+      display: inline-block;
+    }
   }
 }
 

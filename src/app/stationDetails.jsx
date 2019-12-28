@@ -109,7 +109,7 @@ class StationDetails extends React.Component {
     let destinations = [];
     const trainRoutingInfo = routings[trainId];
 
-    trainRoutingInfo.routings[direction].forEach((routing) => {
+    trainRoutingInfo.routings[actualDirection].forEach((routing) => {
       if (routing.includes(station.id + actualDirection[0].toUpperCase())) {
         destinations.push(routing[routing.length - 1]);
       }
@@ -129,10 +129,10 @@ class StationDetails extends React.Component {
     return times.map((estimate) => {
       if (destinations.length > 1 || estimate.destination !== destinations[0].substr(0, 3)) {
         const runDestination = stations[estimate.destination.substr(0, 3)].name.replace(/ - /g, "–").split('–')[0];
-        return `${estimate.time} min (${runDestination})`;
+        return `<span>${estimate.time} min (${runDestination})</span>`;
       }
-      return `${estimate.time} min`;
-    }).join(',\n')
+      return `<span>${estimate.time} min</span>`;
+    }).join(', ')
   }
 
   southDestinations() {
@@ -307,7 +307,7 @@ class StationDetails extends React.Component {
                             textColor={train.text_color} size='small' link />
                         </List.Content>
                         <List.Content floated='right' className="station-details-route-status">
-                          <div>{ this.renderArrivalTimes(trainId, "south") }</div>
+                          <div dangerouslySetInnerHTML={{__html: this.renderArrivalTimes(trainId, "south")}}></div>
                           <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
                             { train.direction_statuses.south }
                           </Header>
@@ -337,7 +337,7 @@ class StationDetails extends React.Component {
                             textColor={train.text_color} size='small' link />
                         </List.Content>
                         <List.Content floated='right' className="station-details-route-status">
-                          <div>{ this.renderArrivalTimes(trainId, "north") }</div>
+                          <div dangerouslySetInnerHTML={{__html: this.renderArrivalTimes(trainId, "north")}}></div>
                           <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
                             { train.direction_statuses.north }
                           </Header>
