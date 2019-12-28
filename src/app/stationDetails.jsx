@@ -94,7 +94,7 @@ class StationDetails extends React.Component {
   }
 
   renderArrivalTimes(trainId, direction) {
-    const { station, arrivals } = this.props;
+    const { station, arrivals, routings, stations } = this.props;
     const currentTime = Date.now() / 1000;
     let actualDirection = direction;
 
@@ -106,15 +106,33 @@ class StationDetails extends React.Component {
       return;
     }
 
-    const times = arrivals[trainId].arrival_times[actualDirection].flat().filter((estimate) => {
-      return estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= currentTime;
-    }).map((estimate) => {
-      return Math.round((estimate.estimated_time - currentTime) / 60);
-    }).sort((a, b) => a - b).slice(0, 2);
+    let destinations = [];
+    const trainRoutingInfo = routings[trainId];
 
-    return times.map((time) => {
-      return `${time} min`;
-    }).join(', ')
+    trainRoutingInfo.routings[direction].forEach((routing) => {
+      if (routing.includes(station.id + actualDirection[0].toUpperCase())) {
+        destinations.push(routing[routing.length - 1]);
+      }
+    })
+
+    destinations = Array.from(new Set(destinations));
+
+    const times = arrivals[trainId].arrival_times[actualDirection].filter((estimates) => {
+      return estimates.some((estimate) => estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= currentTime)
+    }).map((estimates) => {
+      return {
+        time: Math.round((estimates.find((estimate) => estimate.stop_id.substr(0, 3) === station.id).estimated_time  - currentTime) / 60),
+        destination: estimates[estimates.length - 1].stop_id.substr(0, 3)
+      }
+    }).sort((a, b) => a.time - b.time).slice(0, 2);
+
+    return times.map((estimate) => {
+      if (destinations.length > 1 || estimate.destination !== destinations[0].substr(0, 3)) {
+        const runDestination = stations[estimate.destination.substr(0, 3)].name.replace(/ - /g, "–").split('–')[0];
+        return `${estimate.time} min (${runDestination})`;
+      }
+      return `${estimate.time} min`;
+    }).join(',\n')
   }
 
   southDestinations() {

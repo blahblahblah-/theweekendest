@@ -219,6 +219,11 @@ h1.yellow a, h3.yellow a {
 
 .station-details-route-status {
   text-align: right;
+  max-width: 75%;
+
+  div {
+    margin-left: auto;
+  }
 }
 
 .header-secondary-name {
