@@ -240,7 +240,7 @@ class StationDetails extends React.Component {
     return [
       adjacentBoroughsArray.slice(0, -1).join(', '),
       adjacentBoroughsArray.slice(-1)[0]
-    ].join(adjacentBoroughsArray.length < 2 ? '' : ' & ') + " —\n" ;
+    ].join(adjacentBoroughsArray.length < 2 ? '' : ' & ') + "—\n" ;
   }
 
   northDestinations() {
@@ -328,7 +328,7 @@ class StationDetails extends React.Component {
     return [
       adjacentBoroughsArray.slice(0, -1).join(', '),
       adjacentBoroughsArray.slice(-1)[0]
-    ].join(adjacentBoroughsArray.length < 2 ? '' : ' & ') + " —\n" ;
+    ].join(adjacentBoroughsArray.length < 2 ? '' : ' & ') + "—\n" ;
   }
 
   renderOverlayControls() {
