@@ -12,7 +12,22 @@ import TrainBullet from './trainBullet.jsx';
 import Cross from "./icons/cross-15.svg";
 
 // M train directions are reversed between Essex St and Myrtle Av to match with J/Z trains
-const mTrainShuffle = ["M18", "M16", "M14", "M13", "M12", "M11"];
+const M_TRAIN_SHUFFLE = ["M18", "M16", "M14", "M13", "M12", "M11"];
+
+const STATIONS_EXEMPT_FROM_UPTOWN_DOWNTOWN_DIRECTIONS = new Set(
+  ['901', '902', '723', '724', '725', '726', 'L06', 'L05', 'L03', 'L02', 'L01']
+);
+const STATIONS_EXEMPT_FROM_SOUTH_DIRECTIONS = new Set(
+  ['M18']
+);
+
+const BOROUGHS = {
+  "M": "Manhattan",
+  "Bx": "The Bronx",
+  "Bk": "Brooklyn",
+  "Q": "Queens",
+  "SI": "Staten Island"
+}
 
 class StationDetails extends React.Component {
   constructor(props) {
@@ -98,7 +113,7 @@ class StationDetails extends React.Component {
     const currentTime = Date.now() / 1000;
     let actualDirection = direction;
 
-    if (trainId === 'M' && mTrainShuffle.includes(station.id)) {
+    if (trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id)) {
       actualDirection = direction === "north" ? "south" : "north";
     }
 
@@ -106,16 +121,16 @@ class StationDetails extends React.Component {
       return;
     }
 
-    let destinations = [];
+    const destinations = new Set();
     const trainRoutingInfo = routings[trainId];
 
     trainRoutingInfo.routings[actualDirection].forEach((routing) => {
       if (routing.includes(station.id + actualDirection[0].toUpperCase())) {
-        destinations.push(routing[routing.length - 1]);
+        destinations.add(routing[routing.length - 1]);
       }
     })
 
-    destinations = Array.from(new Set(destinations));
+    const destinationsArray = Array.from(destinations);
 
     const times = arrivals[trainId].arrival_times[actualDirection].filter((estimates) => {
       return estimates.some((estimate) => estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= currentTime)
@@ -127,7 +142,7 @@ class StationDetails extends React.Component {
     }).sort((a, b) => a.time - b.time).slice(0, 2);
 
     return times.map((estimate) => {
-      if (destinations.length > 1 || estimate.destination !== destinations[0].substr(0, 3)) {
+      if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0].substr(0, 3)) {
         const runDestination = stations[estimate.destination.substr(0, 3)].name.replace(/ - /g, "–").split('–')[0];
         return `<span>${estimate.time} min (${runDestination})</span>`;
       }
@@ -140,7 +155,7 @@ class StationDetails extends React.Component {
     let destinations = [];
     Object.keys(routings).forEach((key) => {
       const route = routings[key];
-      if (key !== 'M' || !mTrainShuffle.includes(station.id)) {
+      if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
         route.routings.south.forEach((routing) => {
           if (routing.includes(station.id + "S")) {
             destinations.push(routing[routing.length - 1]);
@@ -149,7 +164,7 @@ class StationDetails extends React.Component {
       }
     })
 
-    if (mTrainShuffle.includes(station.id)) {
+    if (M_TRAIN_SHUFFLE.includes(station.id)) {
       const route = routings["M"];
       route.routings.north.forEach((routing) => {
         if (routing.includes(station.id + "N")) {
@@ -166,12 +181,74 @@ class StationDetails extends React.Component {
     }))).sort().join(', ').replace(/ - /g, "–");
   }
 
+  southDirection() {
+    const { routings, stations, station } = this.props;
+    const currentBorough = station.borough;
+
+    if (STATIONS_EXEMPT_FROM_SOUTH_DIRECTIONS.has(station.id)) {
+      return;
+    }
+
+    let manhattanDirection = null;
+    let adjacentBoroughs = new Set();
+    Object.keys(routings).forEach((key) => {
+      const route = routings[key];
+      if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
+        route.routings.south.forEach((routing) => {
+          if (routing.includes(station.id + "S")) {
+            routing.slice(routing.indexOf(station.id + "S") + 1).forEach((stationId) => {
+              const s = stations[stationId.substr(0, 3)];
+              if (s.borough !== currentBorough) {
+                adjacentBoroughs.add(s.borough);
+              } else {
+                if (['M', 'Bx'].includes(currentBorough) && !STATIONS_EXEMPT_FROM_UPTOWN_DOWNTOWN_DIRECTIONS.has(station.id)) {
+                  if (s.latitude < station.latitude) {
+                    manhattanDirection = "Downtown";
+                  }
+                }
+              }
+            });
+          }
+        })
+      }
+    })
+
+    if (M_TRAIN_SHUFFLE.includes(station.id)) {
+      const route = routings["M"];
+      route.routings.north.forEach((routing) => {
+        if (routing.includes(station.id + "N")) {
+          routing.slice(routing.indexOf(station.id + "N") + 1).forEach((stationId) => {
+            const s = stations[stationId.substr(0, 3)];
+            if (s.borough !== currentBorough) {
+              adjacentBoroughs.add(s.borough);
+            }
+          });
+        }
+      })
+    }
+
+    const adjacentBoroughsArray = Array.from(adjacentBoroughs).map((b) => BOROUGHS[b] || b);
+
+    if (manhattanDirection) {
+      adjacentBoroughsArray.unshift(manhattanDirection);
+    }
+
+    if (adjacentBoroughsArray.length === 0) {
+      return;
+    }
+
+    return [
+      adjacentBoroughsArray.slice(0, -1).join(', '),
+      adjacentBoroughsArray.slice(-1)[0]
+    ].join(adjacentBoroughsArray.length < 2 ? '' : ' & ') + " —\n" ;
+  }
+
   northDestinations() {
     const { routings, stations, station } = this.props;
     let destinations = [];
     Object.keys(routings).forEach((key) => {
       const route = routings[key];
-      if (key !== 'M' || !mTrainShuffle.includes(station.id)) {
+      if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
         route.routings.north.forEach((routing) => {
           if (routing.includes(station.id + "N")) {
             destinations.push(routing[routing.length - 1]);
@@ -180,7 +257,7 @@ class StationDetails extends React.Component {
       }
     })
 
-    if (mTrainShuffle.includes(station.id)) {
+    if (M_TRAIN_SHUFFLE.includes(station.id)) {
       const route = routings["M"];
       route.routings.south.forEach((routing) => {
         if (routing.includes(station.id + "S")) {
@@ -195,6 +272,63 @@ class StationDetails extends React.Component {
         return st.name;
       }
     }))).sort().join(', ').replace(/ - /g, "–");
+  }
+
+  northDirection() {
+    const { routings, stations, station } = this.props;
+    const currentBorough = station.borough;
+    let manhattanDirection = null;
+    let adjacentBoroughs = new Set();
+    Object.keys(routings).forEach((key) => {
+      const route = routings[key];
+      if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
+        route.routings.north.forEach((routing) => {
+          if (routing.includes(station.id + "N")) {
+            routing.slice(routing.indexOf(station.id + "N") + 1).forEach((stationId) => {
+              const s = stations[stationId.substr(0, 3)];
+              if (s.borough !== currentBorough) {
+                adjacentBoroughs.add(s.borough);
+              } else {
+                if (['M', 'Bx'].includes(currentBorough) && !STATIONS_EXEMPT_FROM_UPTOWN_DOWNTOWN_DIRECTIONS.has(station.id)) {
+                  if (s.latitude > station.latitude) {
+                    manhattanDirection = "Uptown";
+                  }
+                }
+              }
+            });
+          }
+        })
+      }
+    })
+
+    if (M_TRAIN_SHUFFLE.includes(station.id)) {
+      const route = routings["M"];
+      route.routings.south.forEach((routing) => {
+        if (routing.includes(station.id + "S")) {
+          routing.slice(routing.indexOf(station.id + "S") + 1).forEach((stationId) => {
+            const s = stations[stationId.substr(0, 3)];
+            if (s.borough !== currentBorough) {
+              adjacentBoroughs.add(s.borough);
+            }
+          });
+        }
+      })
+    }
+
+    const adjacentBoroughsArray = Array.from(adjacentBoroughs).map((b) => BOROUGHS[b] || b);
+
+    if (manhattanDirection) {
+      adjacentBoroughsArray.unshift(manhattanDirection);
+    }
+
+    if (adjacentBoroughsArray.length === 0) {
+      return;
+    }
+
+    return [
+      adjacentBoroughsArray.slice(0, -1).join(', '),
+      adjacentBoroughsArray.slice(-1)[0]
+    ].join(adjacentBoroughsArray.length < 2 ? '' : ' & ') + " —\n" ;
   }
 
   renderOverlayControls() {
@@ -290,8 +424,8 @@ class StationDetails extends React.Component {
         </Responsive>
         <div className="details-body">
           <Segment>
-            <Header as="h5">
-              To { this.southDestinations() }
+            <Header as="h5" style={{whiteSpace: "pre-line"}}>
+              { this.southDirection() }To { this.southDestinations() }
             </Header>
             <div>
               <List divided relaxed>
@@ -320,8 +454,8 @@ class StationDetails extends React.Component {
             </div>
           </Segment>
           <Segment>
-            <Header as="h5">
-              To { this.northDestinations() }
+            <Header as="h5" style={{whiteSpace: "pre-line"}}>
+              { this.northDirection() }To { this.northDestinations() }
             </Header>
             <div>
               <List divided relaxed>
