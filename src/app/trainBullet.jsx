@@ -8,12 +8,14 @@ class TrainBullet extends React.Component {
   }
 
   classNames() {
-    if (this.props.size === 'small') {
-      return this.props.name.endsWith("X") ? 'small route diamond' : 'small route bullet'
-    } else if (this.props.size === 'medium') {
-      return this.props.name.endsWith("X") ? 'medium route diamond' : 'medium route bullet'
+    const { size, name, directions } = this.props;
+    const directionClass = (directions && directions.length === 1) ? (directions[0] === 'north' ? 'uptown-only' : 'downtown-only') : ''
+    if (size === 'small') {
+      return name.endsWith("X") ? 'small route diamond' : 'small route bullet ' + directionClass;
+    } else if (size === 'medium') {
+      return name.endsWith("X") ? 'medium route diamond' : 'medium route bullet ' + directionClass;
     }
-    return this.props.name.endsWith("X") ? 'route diamond' : 'route bullet'
+    return name.endsWith("X") ? 'route diamond' : 'route bullet' + directionClass;
   }
 
   innerClassNames() {
@@ -37,18 +39,24 @@ class TrainBullet extends React.Component {
     }
   }
 
+  innerStyle() {
+    if (this.props.directions && this.props.directions.length === 1) {
+      return { WebkitTextStroke: `0.5px ${this.props.color}` }
+    }
+  }
+
   render() {
     const { id, alternateName, link } = this.props;
     if (link) {
       return(
         <Link as='div' className={this.classNames()} style={this.style()} to={`/trains/${id}`}>
-          <div className={this.innerClassNames()}>{this.name()}<sup>{alternateName}</sup></div>
+          <div className={this.innerClassNames()} style={this.innerStyle()}>{this.name()}<sup>{alternateName}</sup></div>
         </Link>
       )
     }
     return(
       <div className={this.classNames()} style={this.style()}>
-        <div className={this.innerClassNames()}>{this.name()}<sup>{alternateName}</sup></div>
+        <div className={this.innerClassNames()} style={this.innerStyle()}>{this.name()}<sup>{alternateName}</sup></div>
       </div>
     )
   }

@@ -532,9 +532,16 @@ class StationDetails extends React.Component {
                             const train = trains.find((t) => {
                               return t.id == trainId;
                             });
+                            const directions = [];
+                            if (stop.northStops.has(trainId)) {
+                              directions.push("north")
+                            }
+                            if (stop.southStops.has(trainId)) {
+                              directions.push("south")
+                            }
                             return (
                               <TrainBullet id={trainId} key={train.name} name={train.name} color={train.color}
-                                textColor={train.text_color} size='small' key={train.id} />
+                                textColor={train.text_color} size='small' key={train.id} directions={directions} />
                             )
                           })
                         }

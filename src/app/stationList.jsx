@@ -157,9 +157,16 @@ class StationList extends React.Component {
           {
             Array.from(station.stops).sort().map((trainId) => {
               const train = trainMap[trainId];
+              const directions = [];
+              if (station.northStops.has(trainId)) {
+                directions.push("north")
+              }
+              if (station.southStops.has(trainId)) {
+                directions.push("south")
+              }
               return (
                 <TrainBullet id={trainId} key={train.name} name={train.name} color={train.color}
-                  textColor={train.text_color} size='small' key={train.id} />
+                  textColor={train.text_color} size='small' key={train.id} directions={directions} />
               )
             })
           }
