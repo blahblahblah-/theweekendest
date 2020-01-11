@@ -215,7 +215,7 @@ class StationList extends React.Component {
         { advisories &&
           <div>
             {
-              stationsWithoutService &&
+              stationsWithoutService && stationsWithoutService.length > 0 &&
               <div>
                 <Header as='h4' attached='top' inverted className='advisories-header'>
                   Stations with no service
@@ -230,7 +230,7 @@ class StationList extends React.Component {
               </div>
             }
             {
-              stationsWithOneWayService &&
+              stationsWithOneWayService && stationsWithOneWayService.length > 0 &&
               <div>
                 <Header as='h4' attached='top' inverted className='advisories-header'>
                   Stations with one-way service only
