@@ -40,7 +40,7 @@ class TrainBullet extends React.Component {
   }
 
   innerStyle() {
-    if (this.props.directions && this.props.directions.length === 1 && this.props.textColor !== '#000000') {
+    if (!this.props.name.endsWith("X") && this.props.directions && this.props.directions.length === 1 && this.props.textColor !== '#000000') {
       return { WebkitTextStroke: `0.5px ${this.props.color}` }
     }
   }
