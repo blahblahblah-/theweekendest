@@ -79,6 +79,7 @@ class Mapbox extends React.Component {
     });
     this.showAll = false;
     this.checksum = null;
+    this.mapLoaded = false;
     this.calculatedPaths = {};
     this.props.history.listen((location) => {
       gtag('config', 'UA-127585516-1', {'page_path': location.pathname});
@@ -88,6 +89,9 @@ class Mapbox extends React.Component {
   }
   
   componentDidMount() {
+    this.fetchRoutes();
+    this.fetchData();
+
     this.map = new mapboxgl.Map({
       container: this.mapContainer,
       style: 'mapbox://styles/theweekendest/ck1fhati848311cp6ezdzj5cm?optimize=true',
@@ -111,8 +115,7 @@ class Mapbox extends React.Component {
     }), 'bottom-right');
 
     this.map.on('load', () => {
-      this.fetchRoutes();
-      this.fetchData();
+      this.mapLoaded = true;
       this.routeTimer = setInterval(() => this.fetchRoutes(), 120000);
       this.dataTimer = setInterval(() => this.fetchData(), 60000);
     });
@@ -205,6 +208,13 @@ class Mapbox extends React.Component {
   }
 
   calculateOffsets() {
+    if (!this.mapLoaded) {
+      this.map.on('load', () => {
+        this.calculateOffsets();
+      });
+      return;
+    }
+
     const { routeStops } = this.state;
     const offsets = {};
     const results = {};
@@ -935,18 +945,46 @@ class Mapbox extends React.Component {
   }
 
   handleMountTrainDetails = (train, coords, zoom) => {
+    if (!this.mapLoaded) {
+      this.map.on('load', () => {
+        this.goToTrain(train, coords, zoom);
+      });
+      return;
+    }
     this.goToTrain(train, coords, zoom);
   }
 
   handleMountStationDetails = (station) => {
+    if (!this.mapLoaded) {
+      this.map.on('load', () => {
+        this.goToStations([station], true);
+      });
+      return;
+    }
     this.goToStations([station], true);
   }
 
   handleTrainList = () => {
+    if (!this.mapLoaded) {
+      this.map.on('load', () => {
+        this.resetView();
+      });
+      return;
+    }
     this.resetView();
   }
 
   handleStationList = (stations, includeTrains) => {
+    if (!this.mapLoaded) {
+      this.map.on('load', () => {
+        if (stations && stations.length > 0) {
+          this.goToStations(stations, includeTrains);
+        } else {
+          this.resetView();
+        }
+      });
+      return;
+    }
     if (stations && stations.length > 0) {
       this.goToStations(stations, includeTrains);
     } else {
