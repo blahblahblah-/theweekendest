@@ -80,9 +80,9 @@ class StationDetails extends React.Component {
   }
 
   handleShare = _ => {
+    const { station } = this.props;
     navigator.share({
-      title: `the weekendest - ${this.props.station.name.replace(/ - /g, "–")}`,
-      text: `Real-time arrival times and routing information at ${this.props.station.name.replace(/ - /g, "–")} station on the Weekendest`,
+      title: `the weekendest - ${station.name.replace(/ - /g, "–") }${station.secondary_name ? ` (${station.secondary_name})` : ""}`,
       url: `https://www.theweekendest.com/stations/${this.props.station.id}`
     })
   }

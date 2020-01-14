@@ -66,9 +66,9 @@ class TrainDetails extends React.Component {
   }
 
   handleShare = _ => {
+    const { train } = this.props;
     navigator.share({
-      title: `the weekendest - ${this.props.train.alternate_name || this.props.train.name} train`,
-      text: `Real-time arrival times and routing information for ${this.props.train.alternate_name || this.props.train.name} train on the Weekendest`,
+      title: `the weekendest - ${(train.alternate_name) ? ("S - " + train.alternate_name) : train.name} Train`,
       url: `https://www.theweekendest.com/trains/${this.props.train.id}`
     })
   }
