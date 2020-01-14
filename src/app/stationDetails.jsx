@@ -354,7 +354,7 @@ class StationDetails extends React.Component {
       <Segment className='details-pane'>
         <Helmet>
           <title>{title}</title>
-          <meta property="og:title" content={title} />
+          <meta property="og:title" content={`${name} Station`} />
           <meta name="twitter:title" content={title} />
           <meta property="og:url" content={`https://www.theweekendest.com/stations/${station.id}`} />
           <meta name="twitter:url" content={`https://www.theweekendest.com/stations/${station.id}`} />
