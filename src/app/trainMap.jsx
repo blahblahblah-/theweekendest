@@ -1,5 +1,6 @@
 import React from 'react';
 import TrainMapStop from './trainMapStop.jsx';
+import { cloneDeep } from "lodash";
 
 const M_TRAIN_SHUFFLE = ["M18", "M16", "M14", "M13", "M12", "M11"];
 
@@ -196,8 +197,8 @@ class TrainMap extends React.Component {
                 let branchStops = [];
                 let count = 0;
                 const stop = stops[stopId];
-                const transfers = stop && stop.trains.filter(route => route.id != routing.id);
                 const currentMaxBranch = currentBranches[currentBranches.length - 1];
+                let transfers = stop && cloneDeep(stop.trains.filter(route => route.id != routing.id));
 
                 if (stopId === "") {
                   segments.branches.splice(0, 1);
@@ -269,11 +270,22 @@ class TrainMap extends React.Component {
                 const activeBranches = branchStops.map((isStopping, index) => {
                   return isStopping || segments.branches[index].length > 0;
                 });
-                const southStop = (routing.id === 'M' && M_TRAIN_SHUFFLE.includes(stopId)) ? stopPattern.northStops[stopId] : stopPattern.southStops[stopId];
-                const northStop = (routing.id === 'M' && M_TRAIN_SHUFFLE.includes(stopId)) ? stopPattern.southStops[stopId] : stopPattern.northStops[stopId];
+                if (routing.id === 'M' && M_TRAIN_SHUFFLE.includes(stopId)) {
+                  transfers = transfers.map((t) => {
+                    if (t.directions.length === 1) {
+                      if (t.directions[0] === 'north') {
+                        t.directions[0] = 'south';
+                      } else {
+                        t.directions[0] = 'north';
+                      }
+                      return t;
+                    }
+                    return t;
+                  });
+                }
                 return (
-                  <TrainMapStop key={stopId} stop={stop} color={routing.color} southStop={southStop}
-                    northStop={northStop} transfers={transfers} branchStops={branchStops} branchStart={branchStart}
+                  <TrainMapStop key={stopId} stop={stop} color={routing.color} southStop={stopPattern.southStops[stopId]}
+                    northStop={stopPattern.northStops[stopId]} transfers={transfers} branchStops={branchStops} branchStart={branchStart}
                     branchEnd={branchEnd} activeBranches={activeBranches} />
                 )
               })
