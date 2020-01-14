@@ -348,7 +348,8 @@ class StationDetails extends React.Component {
   render() {
     const { stations, station, trains } = this.props;
     const { fav } = this.state;
-    const title = `the weekendest beta - ${ station.name.replace(/ - /g, "–") }${ station.secondary_name ? ` (${station.secondary_name})` : ""} Station`;
+    const name = `${ station.name.replace(/ - /g, "–") }${ station.secondary_name ? ` (${station.secondary_name})` : ""}`;
+    const title = `the weekendest beta - ${name} Station`;
     return (
       <Segment className='details-pane'>
         <Helmet>
@@ -357,7 +358,10 @@ class StationDetails extends React.Component {
           <meta name="twitter:title" content={title} />
           <meta property="og:url" content={`https://www.theweekendest.com/stations/${station.id}`} />
           <meta name="twitter:url" content={`https://www.theweekendest.com/stations/${station.id}`} />
+          <meta property="og:description" content={`Check service status, and real-time train arrival times for ${name} Station on the New York City subway.`} />
+          <meta name="twitter:description" content={`Check service status, and real-time train arrival times for ${name} Station on the New York City subway.`} />
           <link rel="canonical" href={`https://www.theweekendest.com/stations/${station.id}`} />
+          <meta name="Description" content={`Check service status, and real-time train arrival times for ${name} Station on the New York City subway.`} />
         </Helmet>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
           <Button icon onClick={this.handleBack} title="Back">

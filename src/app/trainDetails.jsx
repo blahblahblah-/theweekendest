@@ -89,7 +89,8 @@ class TrainDetails extends React.Component {
 
   render() {
     const { routing, stops, train, stations } = this.props;
-    const title = `the weekendest beta - ${((train.alternate_name) ? ("S - " + train.alternate_name) : train.name)} Train`;
+    const name = (train.alternate_name) ? ("S - " + train.alternate_name) : train.name;
+    const title = `the weekendest beta - ${name} Train`;
     return (
       <Segment className="details-pane">
         <Helmet>
@@ -98,7 +99,10 @@ class TrainDetails extends React.Component {
           <meta name="twitter:title" content={title} />
           <meta property="og:url" content={`https://www.theweekendest.com/trains/${train.id}`} />
           <meta name="twitter:url" content={`https://www.theweekendest.com/trains/${train.id}`} />
+          <meta property="og:description" content={`Check status, route map, service changes, and real-time train arrival times for ${name} train on the New York City subway.`} />
+          <meta name="twitter:description" content={`Check status, route map, service changes, and real-time train arrival times for ${name} train on the New York City subway.`} />
           <link rel="canonical" href={`https://www.theweekendest.com/trains/${train.id}`} />
+          <meta name="Description" content={`Check status, route map, service changes, and real-time train arrival times for ${name} train on the New York City subway.`} />
         </Helmet>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
           <Button icon onClick={this.handleBack} title="Back">
