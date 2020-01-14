@@ -1,6 +1,8 @@
 import React from 'react';
 import TrainMapStop from './trainMapStop.jsx';
 
+const M_TRAIN_SHUFFLE = ["M18", "M16", "M14", "M13", "M12", "M11"];
+
 class TrainMap extends React.Component {
   calculateStops() {
     const { routing } = this.props;
@@ -267,9 +269,11 @@ class TrainMap extends React.Component {
                 const activeBranches = branchStops.map((isStopping, index) => {
                   return isStopping || segments.branches[index].length > 0;
                 });
+                const southStop = (routing.id === 'M' && M_TRAIN_SHUFFLE.includes(stopId)) ? stopPattern.northStops[stopId] : stopPattern.southStops[stopId];
+                const northStop = (routing.id === 'M' && M_TRAIN_SHUFFLE.includes(stopId)) ? stopPattern.southStops[stopId] : stopPattern.northStops[stopId];
                 return (
-                  <TrainMapStop key={stopId} stop={stop} color={routing.color} southStop={stopPattern.southStops[stopId]}
-                    northStop={stopPattern.northStops[stopId]} transfers={transfers} branchStops={branchStops} branchStart={branchStart}
+                  <TrainMapStop key={stopId} stop={stop} color={routing.color} southStop={southStop}
+                    northStop={northStop} transfers={transfers} branchStops={branchStops} branchStart={branchStart}
                     branchEnd={branchEnd} activeBranches={activeBranches} />
                 )
               })
