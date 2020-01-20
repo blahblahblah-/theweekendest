@@ -1020,8 +1020,14 @@ class Mapbox extends React.Component {
       <div>
         <Helmet>
           <title>the weekendest beta - real-time new york city subway map</title>
+          <meta property="og:url" content="https://www.theweekendest.com" />
+          <meta name="twitter:url" content="https://www.theweekendest.com" />
+          <link rel="canonical" href="https://www.theweekendest.com" />
           <meta property="og:title" content="the weekendest beta - real-time new york city subway map" />
           <meta name="twitter:title" content="the weekendest beta - real-time new york city subway map" />
+          <meta name="Description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
+          <meta property="og:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
+          <meta name="twitter:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
         </Helmet>
         <Responsive {...Responsive.onlyMobile} as={Segment} className="mobile-top-bar">
           <Header as='h4'>
