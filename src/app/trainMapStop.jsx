@@ -10,28 +10,32 @@ class TrainMapStop extends React.Component {
 
     if (southStop && northStop) {
       return (
-        <div style={{border: "1px #999 solid", height: "10px", width: "10px", borderRadius: "50%",
-          position: "relative", backgroundColor: "white", left: "5px", top: "20px", cursor: "pointer"}}
-          onClick={this.handleClick.bind(this, stop)}>
-        </div>
+        <Link to={`/stations/${stop.id}`}>
+          <div style={{border: "1px #999 solid", height: "10px", width: "10px", borderRadius: "50%",
+            position: "relative", backgroundColor: "white", left: "5px", top: "20px", cursor: "pointer"}}>
+          </div>
+        </Link>
       )
     }
 
     if (northStop) {
       return (
-        <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderTopLeftRadius: "10px", 
-          borderTopRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
-          top: "20px", cursor: "pointer"}}
-          onClick={this.handleClick.bind(this, stop)}>
-        </div>
+        <Link to={`/stations/${stop.id}`}>
+          <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderTopLeftRadius: "10px", 
+            borderTopRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
+            top: "20px", cursor: "pointer"}}>
+          </div>
+        </Link>
       )
     }
 
     return (
-      <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderBottomLeftRadius: "10px",
-        borderBottomRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
-        top: "25px", cursor: "pointer"}} onClick={this.handleClick.bind(this, stop)}>
-      </div>
+      <Link to={`/stations/${stop.id}`}>
+        <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderBottomLeftRadius: "10px",
+          borderBottomRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
+          top: "25px", cursor: "pointer"}}>
+        </div>
+      </Link>
     )
   }
 
@@ -105,10 +109,6 @@ class TrainMapStop extends React.Component {
     )
   }
 
-  handleClick = stop => {
-    this.props.history.push(`/stations/${stop.id}`);
-  }
-
   render() {
     const { stop, transfers, activeBranches, branchStart, branchEnd } = this.props;
     return (
@@ -119,8 +119,10 @@ class TrainMapStop extends React.Component {
             })
           }
           <Header as='h5'
-            style={{display: "inline", margin: "auto 0", cursor: "pointer"}} onClick={this.handleClick.bind(this, stop)}>
+            style={{display: "inline", margin: "auto 0", cursor: "pointer"}}>
+            <Link to={`/stations/${stop.id}`}>
               {stop && stop.name.replace(/ - /g, "–")}
+            </Link>
           </Header>
           <div style={{display: "inline-block", margin: "auto 0"}}>
             {
