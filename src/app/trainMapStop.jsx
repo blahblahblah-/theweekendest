@@ -120,9 +120,12 @@ class TrainMapStop extends React.Component {
           }
           <Header as='h5'
             style={{display: "inline", margin: "auto 0", cursor: "pointer"}}>
-            <Link to={`/stations/${stop.id}`}>
-              {stop && stop.name.replace(/ - /g, "–")}
-            </Link>
+            {
+              stop &&
+              <Link to={`/stations/${stop.id}`}>
+                {stop.name.replace(/ - /g, "–")}
+              </Link>
+            }
           </Header>
           <div style={{display: "inline-block", margin: "auto 0"}}>
             {
