@@ -173,12 +173,20 @@ class StationDetails extends React.Component {
       })
     }
 
-    return Array.from(new Set(destinations.map((s) => {
+    if (destinations.length === 0) {
+      return;
+    }
+
+    return Array.from(new Set(destinations)).sort(s => s.name).map((s) => {
       const st = stations[s.substring(0, 3)];
       if (st) {
-        return st.name;
+        return (
+          <Link to={`/stations/${st.id}`} key={st.id}>
+            { st.name.replace(/ - /g, "–") }
+          </Link>
+        );
       }
-    }))).sort().join(', ').replace(/ - /g, "–");
+    }).reduce((prev, curr) => [prev, ', ', curr]);
   }
 
   southDirection() {
@@ -266,12 +274,20 @@ class StationDetails extends React.Component {
       })
     }
 
-    return Array.from(new Set(destinations.map((s) => {
+    if (destinations.length === 0) {
+      return;
+    }
+
+    return Array.from(new Set(destinations)).sort(s => s.name).map((s) => {
       const st = stations[s.substring(0, 3)];
       if (st) {
-        return st.name;
+        return (
+          <Link to={`/stations/${st.id}`} key={st.id}>
+            { st.name.replace(/ - /g, "–") }
+          </Link>
+        );
       }
-    }))).sort().join(', ').replace(/ - /g, "–");
+    }).reduce((prev, curr) => [prev, ', ', curr]);
   }
 
   northDirection() {
