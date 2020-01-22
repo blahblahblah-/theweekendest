@@ -151,7 +151,7 @@ class StationDetails extends React.Component {
   }
 
   southDestinations() {
-    const { routings, stations, station } = this.props;
+    const { routings, station } = this.props;
     let destinations = [];
     Object.keys(routings).forEach((key) => {
       const route = routings[key];
@@ -173,20 +173,7 @@ class StationDetails extends React.Component {
       })
     }
 
-    if (destinations.length === 0) {
-      return;
-    }
-
-    return Array.from(new Set(destinations)).sort(s => s.name).map((s) => {
-      const st = stations[s.substring(0, 3)];
-      if (st) {
-        return (
-          <Link to={`/stations/${st.id}`} key={st.id}>
-            { st.name.replace(/ - /g, "–") }
-          </Link>
-        );
-      }
-    }).reduce((prev, curr) => [prev, ', ', curr]);
+    return this.sortDestinations(destinations);
   }
 
   southDirection() {
@@ -252,7 +239,7 @@ class StationDetails extends React.Component {
   }
 
   northDestinations() {
-    const { routings, stations, station } = this.props;
+    const { routings, station } = this.props;
     let destinations = [];
     Object.keys(routings).forEach((key) => {
       const route = routings[key];
@@ -274,20 +261,7 @@ class StationDetails extends React.Component {
       })
     }
 
-    if (destinations.length === 0) {
-      return;
-    }
-
-    return Array.from(new Set(destinations)).sort(s => s.name).map((s) => {
-      const st = stations[s.substring(0, 3)];
-      if (st) {
-        return (
-          <Link to={`/stations/${st.id}`} key={st.id}>
-            { st.name.replace(/ - /g, "–") }
-          </Link>
-        );
-      }
-    }).reduce((prev, curr) => [prev, ', ', curr]);
+    return this.sortDestinations(destinations);
   }
 
   northDirection() {
@@ -345,6 +319,32 @@ class StationDetails extends React.Component {
       adjacentBoroughsArray.slice(0, -1).join(', '),
       adjacentBoroughsArray.slice(-1)[0]
     ].join(adjacentBoroughsArray.length < 2 ? '' : ' & ') + "—\n" ;
+  }
+
+  sortDestinations(destinations) {
+    const { stations } = this.props;
+
+    if (destinations.length === 0) {
+      return;
+    }
+
+    return Array.from(new Set(destinations)).sort((a, b) => {
+      const first = stations[a.substring(0, 3)].name;
+      const second = stations[b.substring(0, 3)].name;
+
+      if (first < second) { return -1; }
+      if (first > second) { return 1; }
+      return 0;
+    }).map((s) => {
+      const st = stations[s.substring(0, 3)];
+      if (st) {
+        return (
+          <Link to={`/stations/${st.id}`} key={st.id}>
+            { st.name.replace(/ - /g, "–") }
+          </Link>
+        );
+      }
+    }).reduce((prev, curr) => [prev, ', ', curr]);
   }
 
   renderOverlayControls() {
