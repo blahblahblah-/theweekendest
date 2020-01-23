@@ -464,15 +464,19 @@ class StationDetails extends React.Component {
                           <div dangerouslySetInnerHTML={{__html: this.renderArrivalTimes(trainId, "south")}}></div>
                           {
                             (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
-                            <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
-                              { train.direction_secondary_statuses.south }
-                            </Header>
+                            <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">
+                              <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
+                                { train.direction_secondary_statuses.south }
+                              </Header>
+                            </a>
                           }
                           {
                             trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id) &&
-                            <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
-                              { train.direction_secondary_statuses.north }
-                            </Header>
+                            <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">
+                              <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
+                                { train.direction_secondary_statuses.north }
+                              </Header>
+                            </a>
                           }
                         </List.Content>
                       </List.Item>
@@ -503,15 +507,19 @@ class StationDetails extends React.Component {
                           <div dangerouslySetInnerHTML={{__html: this.renderArrivalTimes(trainId, "north")}}></div>
                           {
                             (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
-                            <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
-                              { train.direction_secondary_statuses.north }
-                            </Header>
+                            <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">
+                              <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
+                                { train.direction_secondary_statuses.north }
+                              </Header>
+                            </a>
                           }
                           {
                             trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id) &&
-                            <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
-                              { train.direction_secondary_statuses.south }
-                            </Header>
+                            <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">
+                              <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
+                                { train.direction_secondary_statuses.south }
+                              </Header>
+                            </a>
                           }
                         </List.Content>
                       </List.Item>

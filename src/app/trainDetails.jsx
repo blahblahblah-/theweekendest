@@ -132,7 +132,7 @@ class TrainDetails extends React.Component {
                 { train.secondary_status }
               </Header>
               <Header as='h6'>
-                Powered by <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>
+                Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
               </Header>
             </div>
           </div>
