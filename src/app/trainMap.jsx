@@ -270,18 +270,36 @@ class TrainMap extends React.Component {
                 const activeBranches = branchStops.map((isStopping, index) => {
                   return isStopping || segments.branches[index].length > 0;
                 });
-                if (routing.id === 'M' && M_TRAIN_SHUFFLE.includes(stopId)) {
-                  transfers = transfers.map((t) => {
-                    if (t.directions.length === 1) {
-                      if (t.directions[0] === 'north') {
-                        t.directions[0] = 'south';
-                      } else {
-                        t.directions[0] = 'north';
+                if (M_TRAIN_SHUFFLE.includes(stopId)) {
+                  if (routing.id === 'M') {
+                    transfers = transfers.map((t) => {
+                      if (t.directions.length === 1) {
+                        if (t.directions[0] === 'north') {
+                          t.directions[0] = 'south';
+                        } else {
+                          t.directions[0] = 'north';
+                        }
+                        return t;
                       }
                       return t;
-                    }
-                    return t;
-                  });
+                    });
+                  } else {
+                    transfers = transfers.map((t) => {
+                      if (t.id === 'M') {
+                        if (t.directions.length === 1) {
+                          if (t.directions[0] === 'north') {
+                            t.directions[0] = 'south';
+                          } else {
+                            t.directions[0] = 'north';
+                          }
+                          return t;
+                        }
+                        return t;
+                      } else {
+                        return t;
+                      }
+                    });
+                  }
                 }
                 return (
                   <TrainMapStop key={stopId} stop={stop} color={routing.color} southStop={stopPattern.southStops[stopId]}
