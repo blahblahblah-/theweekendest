@@ -1006,23 +1006,23 @@ class Mapbox extends React.Component {
     const { trains, geoLocation } = this.state;
     return [
       {
-        menuItem: <Menu.Item as={Link} to='/trains' key='train'>Trains</Menu.Item>,
+        menuItem: <Menu.Item as={Link} to='/trains' key='train' title='Trains'>Trains</Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><TrainList trains={trains} handleOnMount={this.handleTrainList} infoBox={this.infoBox} /></Tab.Pane>,
       },
       {
-        menuItem: <Menu.Item as={Link} to='/stations' key='stations'>Stations</Menu.Item>,
+        menuItem: <Menu.Item as={Link} to='/stations' key='stations' title='Stations'>Stations</Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} /></Tab.Pane>,
       },
       {
-        menuItem: <Menu.Item as={Link} to='/starred' key='starred'><Icon name='star' /></Menu.Item>,
+        menuItem: <Menu.Item as={Link} to='/starred' key='starred' title='Starred Stations'><Icon name='star' /></Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} starred={true} /></Tab.Pane>,
       },
       {
-        menuItem: <Menu.Item as={Link} to='/nearby' key='nearby'><Icon name='location arrow' /></Menu.Item>,
+        menuItem: <Menu.Item as={Link} to='/nearby' key='nearby' title='Nearby Stations'><Icon name='location arrow' /></Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} handleOnMount={this.handleStationList} handleNearby={this.handleNearby} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
       },
       {
-        menuItem: <Menu.Item as={Link} to='/advisories' key='advisories'><Icon name='warning sign' /></Menu.Item>,
+        menuItem: <Menu.Item as={Link} to='/advisories' key='advisories' title='Advisories'><Icon name='warning sign' /></Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} advisories={true} /></Tab.Pane>,
       },
     ];

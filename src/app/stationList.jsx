@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import _ from 'lodash';
 import { Header, Segment, List, Input, Icon } from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import * as Cookies from 'es-cookie';
 import * as turf from './vendor/turf.js';
 
@@ -214,43 +215,82 @@ class StationList extends React.Component {
       <div>
         {
           !starred && !advisories && !nearby &&
-          <Input icon='search' placeholder='Search...' onChange={this.handleChange} className="station-search" />
+          <div>
+            <Input icon='search' placeholder='Search...' onChange={this.handleChange} className="station-search" />
+            <Helmet>
+              <title>the weekendest beta - Stations</title>
+              <meta property="og:url" content="https://www.theweekendest.com/stations" />
+              <meta name="twitter:url" content="https://www.theweekendest.com/stations" />
+              <link rel="canonical" href="https://www.theweekendest.com/stations" />
+              <meta property="og:title" content="the weekendest beta - Stations" />
+              <meta name="twitter:title" content="the weekendest beta - Stations" />
+              <meta name="Description" content="View New York City subway status, live arrival times and real-time routing by station." />
+              <meta property="og:description" content="View New York City subway status, live arrival times and real-time routing by station." />
+              <meta name="twitter:description" content="View New York City subway status, live arrival times and real-time routing by station." />
+            </Helmet>
+          </div>
         }
         {
           !advisories && !nearby &&
-          <List divided relaxed selection style={{marginTop: 0}}>
-            {
-              stationsDisplayed && stationsDisplayed.map((station) => {
-                return this.renderListItem(station, trainMap);
-              })
-            }
-            {
-              starred && stationsDisplayed.length == 0 &&
-              <List.Item>
-                <List.Content>
-                  Stations that are starred are displayed here.
-                </List.Content>
-              </List.Item>
-            }
-          </List>
+          <div>
+            <List divided relaxed selection style={{marginTop: 0}}>
+              {
+                stationsDisplayed && stationsDisplayed.map((station) => {
+                  return this.renderListItem(station, trainMap);
+                })
+              }
+              {
+                starred && stationsDisplayed.length == 0 &&
+                <List.Item>
+                  <List.Content>
+                    Stations that are starred are displayed here.
+                  </List.Content>
+                </List.Item>
+              }
+            </List>
+            <Helmet>
+              <title>the weekendest beta - Starred Stations</title>
+              <meta property="og:url" content="https://www.theweekendest.com/starred" />
+              <meta name="twitter:url" content="https://www.theweekendest.com/starred" />
+              <link rel="canonical" href="https://www.theweekendest.com/starred" />
+              <meta property="og:title" content="the weekendest beta - Starred Stations" />
+              <meta name="twitter:title" content="the weekendest beta - Starred Stations" />
+              <meta name="Description" content="Star your favorite New York City subway stations and view their trains' status, live arrival times and real-time routing." />
+              <meta property="og:description" content="Star your favorite New York City subway stations and view their trains' status, live arrival times and real-time routing." />
+              <meta name="twitter:description" content="Star your favorite New York City subway stations and view their trains' status, live arrival times and real-time routing." />
+            </Helmet>
+          </div>
         }
         {
           nearby &&
-          <List divided relaxed selection style={{marginTop: 0}}>
-            {
-              stationsNearby && stationsNearby.map((station) => {
-                return this.renderListItem(station, trainMap);
-              })
-            }
-            {
-              (!stationsNearby || stationsNearby.length === 0) &&
-              <List.Item>
-                <List.Content>
-                  No stations nearby. <Icon name='lemon outline' />
-                </List.Content>
-              </List.Item>
-            }
-          </List>
+          <div>
+            <List divided relaxed selection style={{marginTop: 0}}>
+              {
+                stationsNearby && stationsNearby.map((station) => {
+                  return this.renderListItem(station, trainMap);
+                })
+              }
+              {
+                (!stationsNearby || stationsNearby.length === 0) &&
+                <List.Item>
+                  <List.Content>
+                    No stations nearby. <Icon name='lemon outline' />
+                  </List.Content>
+                </List.Item>
+              }
+            </List>
+            <Helmet>
+              <title>the weekendest beta - Nearby Stations</title>
+              <meta property="og:url" content="https://www.theweekendest.com/nearby" />
+              <meta name="twitter:url" content="https://www.theweekendest.com/nearby" />
+              <link rel="canonical" href="https://www.theweekendest.com/nearby" />
+              <meta property="og:title" content="the weekendest beta - Nearby Stations" />
+              <meta name="twitter:title" content="the weekendest beta - Nearby Stations" />
+              <meta name="Description" content="Find the New York City subway stations nearest you, and view their trains' status, live arrival times and real-time routing." />
+              <meta property="og:description" content="Find the New York City subway stations nearest you, and view their trains' status, live arrival times and real-time routing." />
+              <meta name="twitter:description" content="Find the New York City subway stations nearest you, and view their trains' status, live arrival times and real-time routing." />
+            </Helmet>
+          </div>
         }
         {
           advisories &&
@@ -291,6 +331,17 @@ class StationList extends React.Component {
                 No advisories at this time, yay!
               </Header>
             }
+            <Helmet>
+              <title>the weekendest beta - Advisories</title>
+              <meta property="og:url" content="https://www.theweekendest.com/advisories" />
+              <meta name="twitter:url" content="https://www.theweekendest.com/advisories" />
+              <link rel="canonical" href="https://www.theweekendest.com/advisories" />
+              <meta property="og:title" content="the weekendest beta - Advisories" />
+              <meta name="twitter:title" content="the weekendest beta - Advisories" />
+              <meta name="Description" content="View in real-time which New York City subway stations are currently closed or have only one-way train service." />
+              <meta property="og:description" content="View in real-time which New York City subway stations are currently closed or have only one-way train service." />
+              <meta name="twitter:description" content="View in real-time which New York City subway stations are currently closed or have only one-way train service." />
+            </Helmet>
           </div>
         }
       </div>
