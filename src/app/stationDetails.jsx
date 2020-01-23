@@ -238,6 +238,20 @@ class StationDetails extends React.Component {
     ].join(adjacentBoroughsArray.length < 2 ? '' : ' & ') + "—\n" ;
   }
 
+  southStops() {
+    const { station } = this.props;
+
+    let results = Array.from(station.southStops);
+    if (M_TRAIN_SHUFFLE.includes(station.id)) {
+      results = results.filter((t) => t !== 'M');
+
+      if (station.northStops.has('M')) {
+        results.push('M');
+      }
+    }
+    return results;
+  }
+
   northDestinations() {
     const { routings, station } = this.props;
     let destinations = [];
@@ -319,6 +333,20 @@ class StationDetails extends React.Component {
       adjacentBoroughsArray.slice(0, -1).join(', '),
       adjacentBoroughsArray.slice(-1)[0]
     ].join(adjacentBoroughsArray.length < 2 ? '' : ' & ') + "—\n" ;
+  }
+
+  northStops() {
+    const { station } = this.props;
+
+    let results = Array.from(station.northStops);
+    if (M_TRAIN_SHUFFLE.includes(station.id)) {
+      results = results.filter((t) => t !== 'M');
+
+      if (station.southStops.has('M')) {
+        results.push('M');
+      }
+    }
+    return results;
   }
 
   sortDestinations(destinations) {
@@ -450,7 +478,7 @@ class StationDetails extends React.Component {
             <div>
               <List divided relaxed>
                 {
-                  Array.from(station.southStops).sort().map((trainId) => {
+                  this.southStops().sort().map((trainId) => {
                     const train = trains.find((t) => {
                       return t.id === trainId;
                     });
@@ -493,7 +521,7 @@ class StationDetails extends React.Component {
             <div>
               <List divided relaxed>
                 {
-                  Array.from(station.northStops).sort().map((trainId) => {
+                  this.northStops().sort().map((trainId) => {
                     const train = trains.find((t) => {
                       return t.id === trainId;
                     });
