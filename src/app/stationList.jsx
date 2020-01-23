@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'lodash';
-import { Header, Segment, List, Input } from "semantic-ui-react";
+import { Header, Segment, List, Input, Icon } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import * as Cookies from 'es-cookie';
+import * as turf from './vendor/turf.js';
 
 import TrainBullet from './trainBullet.jsx';
 
@@ -77,18 +78,21 @@ class StationList extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { advisories, starred } = this.props;
-    if (starred !== prevProps.starred || advisories !== prevProps.advisories) {
+    const { advisories, starred, nearby } = this.props;
+    if (starred !== prevProps.starred || advisories !== prevProps.advisories || nearby !== prevProps.nearby) {
       this.updateMap();
     }
   }
 
   updateMap() {
-    const { handleOnMount, advisories, infoBox } = this.props;
-    const starredStations = this.filterByStars();
+    const { handleOnMount, advisories, starred, nearby, infoBox, handleNearby } = this.props;
     if (advisories) {
       handleOnMount(this.stationsWithoutService().concat(this.stationsWithOneWayService()).map((s) => s.id), false);
+    } else if (nearby) {
+      handleNearby();
+      handleOnMount([], true);
     } else {
+      const starredStations = this.filterByStars();
       handleOnMount(starredStations.map((s) => s.id), true);
     }
     infoBox.classList.add('open');
@@ -104,6 +108,22 @@ class StationList extends React.Component {
       return result.stops.size > 0 &&
         (result.northStops.size === 0 || result.southStops.size === 0 && result.id !== 'H01');
     });
+  }
+
+  stationsNearby() {
+    const { geoLocation } = this.props;
+
+    if (geoLocation) {
+      const currentLocation = turf.helpers.point([geoLocation.longitude, geoLocation.latitude])
+      const options = {units: 'miles'};
+      const stations = this.stations.map((s) => {
+        const stationLocation = turf.helpers.point([s.longitude, s.latitude]);
+        s.distance = turf.distance(currentLocation, stationLocation, options);
+        return s;
+      });
+      return _.filter(stations, (result) => result.distance <= 1.0).sort((a, b) => a.distance - b.distance).slice(0, 5);
+    }
+    return [];
   }
 
   filterByStars() {
@@ -180,22 +200,24 @@ class StationList extends React.Component {
   }
 
   render() {
-    const { stations, trains, starred, advisories } = this.props;
+    const { stations, trains, starred, advisories, nearby } = this.props;
     const { stationsDisplayed } = this.state;
     const trainMap = {};
     const stationsWithoutService = advisories && this.stationsWithoutService();
     const stationsWithOneWayService = advisories && this.stationsWithOneWayService();
+    const stationsNearby = nearby && this.stationsNearby();
 
     trains.forEach((train) => {
       trainMap[train.id] = train;
     });
     return (
       <div>
-        { !starred && !advisories &&
+        {
+          !starred && !advisories && !nearby &&
           <Input icon='search' placeholder='Search...' onChange={this.handleChange} className="station-search" />
         }
         {
-          !advisories &&
+          !advisories && !nearby &&
           <List divided relaxed selection style={{marginTop: 0}}>
             {
               stationsDisplayed && stationsDisplayed.map((station) => {
@@ -212,7 +234,26 @@ class StationList extends React.Component {
             }
           </List>
         }
-        { advisories &&
+        {
+          nearby &&
+          <List divided relaxed selection style={{marginTop: 0}}>
+            {
+              stationsNearby && stationsNearby.map((station) => {
+                return this.renderListItem(station, trainMap);
+              })
+            }
+            {
+              (!stationsNearby || stationsNearby.length === 0) &&
+              <List.Item>
+                <List.Content>
+                  No stations nearby. <Icon name='lemon outline' />
+                </List.Content>
+              </List.Item>
+            }
+          </List>
+        }
+        {
+          advisories &&
           <div>
             {
               stationsWithoutService && stationsWithoutService.length > 0 &&

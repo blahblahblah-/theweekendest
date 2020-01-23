@@ -60,6 +60,11 @@ h1.yellow a, h3.yellow a {
       max-height: 60vh;
     }
   }
+
+  .selection-pane .ui.secondary.pointing.menu .item {
+    padding-left: .7em;
+    padding-right: .7em;
+  }
 }
 
 @media only screen and (min-width: 768px) {

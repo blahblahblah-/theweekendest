@@ -106,18 +106,24 @@ class Mapbox extends React.Component {
       ]
     });
 
-    this.map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
-    this.map.addControl(new mapboxgl.GeolocateControl({
+    this.geoControl = new mapboxgl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true
       },
       trackUserLocation: true
-    }), 'bottom-right');
+    });
+
+    this.map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+    this.map.addControl(this.geoControl, 'bottom-right');
 
     this.map.on('load', () => {
       this.mapLoaded = true;
       this.routeTimer = setInterval(() => this.fetchRoutes(), 120000);
       this.dataTimer = setInterval(() => this.fetchData(), 60000);
+    });
+
+    this.geoControl.on('geolocate', (e) => {
+      this.setState({geoLocation: e.coords});
     });
 
     this.map.fitBounds(defaultBounds, {
@@ -992,8 +998,12 @@ class Mapbox extends React.Component {
     }
   }
 
+  handleNearby = () => {
+    this.geoControl.trigger();
+  }
+
   panes() {
-    const { trains } = this.state;
+    const { trains, geoLocation } = this.state;
     return [
       {
         menuItem: <Menu.Item as={Link} to='/trains' key='train'>Trains</Menu.Item>,
@@ -1006,6 +1016,10 @@ class Mapbox extends React.Component {
       {
         menuItem: <Menu.Item as={Link} to='/starred' key='starred'><Icon name='star' /></Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} starred={true} /></Tab.Pane>,
+      },
+      {
+        menuItem: <Menu.Item as={Link} to='/nearby' key='nearby'><Icon name='location arrow' /></Menu.Item>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} handleOnMount={this.handleStationList} handleNearby={this.handleNearby} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/advisories' key='advisories'><Icon name='warning sign' /></Menu.Item>,
@@ -1145,8 +1159,11 @@ class Mapbox extends React.Component {
                 <Route path="/starred" render={() => {
                   return this.renderListings(2);
                 }} />
-                <Route path="/advisories" render={() => {
+                <Route path="/nearby" render={() => {
                   return this.renderListings(3);
+                }} />
+                <Route path="/advisories" render={() => {
+                  return this.renderListings(4);
                 }} />
                 <Route render={() => <Redirect to="/trains" /> } />
               </Switch>
