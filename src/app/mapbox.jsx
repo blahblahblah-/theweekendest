@@ -1014,15 +1014,15 @@ class Mapbox extends React.Component {
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} /></Tab.Pane>,
       },
       {
-        menuItem: <Menu.Item as={Link} to='/starred' key='starred' title='Starred Stations'><Icon name='star' /></Menu.Item>,
+        menuItem: <Menu.Item as={Link} to='/starred' key='starred' title='Starred Stations'><Icon name='star' style={{margin: 0}} /></Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} starred={true} /></Tab.Pane>,
       },
       {
-        menuItem: <Menu.Item as={Link} to='/nearby' key='nearby' title='Nearby Stations'><Icon name='location arrow' /></Menu.Item>,
+        menuItem: <Menu.Item as={Link} to='/nearby' key='nearby' title='Nearby Stations'><Icon name='location arrow' style={{margin: 0}} /></Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} handleOnMount={this.handleStationList} handleNearby={this.handleNearby} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
       },
       {
-        menuItem: <Menu.Item as={Link} to='/advisories' key='advisories' title='Advisories'><Icon name='warning sign' /></Menu.Item>,
+        menuItem: <Menu.Item as={Link} to='/advisories' key='advisories' title='Advisories'><Icon name='warning sign' style={{margin: 0}} /></Menu.Item>,
         render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} advisories={true} /></Tab.Pane>,
       },
     ];
