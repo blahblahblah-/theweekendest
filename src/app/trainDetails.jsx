@@ -167,7 +167,7 @@ class TrainDetails extends React.Component {
           </Header>
         </Responsive>
         <Responsive maxWidth={Responsive.onlyMobile.maxWidth} as='h6' className="mobile-goodservice">
-          Powered by <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>
+          Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
         </Responsive>
         {
           this.renderSummary()
