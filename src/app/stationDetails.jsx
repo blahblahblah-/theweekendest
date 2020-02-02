@@ -117,7 +117,7 @@ class StationDetails extends React.Component {
       actualDirection = direction === "north" ? "south" : "north";
     }
 
-    if (!arrivals[trainId] || !arrivals[trainId].arrival_times[actualDirection]) {
+    if (!arrivals[trainId] || !arrivals[trainId].trains[actualDirection]) {
       return;
     }
 
@@ -132,12 +132,12 @@ class StationDetails extends React.Component {
 
     const destinationsArray = Array.from(destinations);
 
-    const times = arrivals[trainId].arrival_times[actualDirection].filter((estimates) => {
-      return estimates.some((estimate) => estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= currentTime)
-    }).map((estimates) => {
+    const times = arrivals[trainId].trains[actualDirection].filter((train) => {
+      return train.arrival_times.some((estimate) => estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= currentTime)
+    }).map((train) => {
       return {
-        time: Math.round((estimates.find((estimate) => estimate.stop_id.substr(0, 3) === station.id).estimated_time  - currentTime) / 60),
-        destination: estimates[estimates.length - 1].stop_id.substr(0, 3)
+        time: Math.round((train.arrival_times.find((estimate) => estimate.stop_id.substr(0, 3) === station.id).estimated_time  - currentTime) / 60),
+        destination: train.arrival_times[train.arrival_times.length - 1].stop_id.substr(0, 3)
       }
     }).sort((a, b) => a.time - b.time).slice(0, 2);
 
