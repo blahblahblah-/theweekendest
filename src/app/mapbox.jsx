@@ -89,7 +89,6 @@ class Mapbox extends React.Component {
   }
   
   componentDidMount() {
-    this.fetchRoutes();
     this.fetchData();
 
     this.map = new mapboxgl.Map({
@@ -118,7 +117,6 @@ class Mapbox extends React.Component {
 
     this.map.on('load', () => {
       this.mapLoaded = true;
-      this.routeTimer = setInterval(() => this.fetchRoutes(), 120000);
       this.dataTimer = setInterval(() => this.fetchData(), 60000);
     });
 
@@ -132,7 +130,7 @@ class Mapbox extends React.Component {
     });
   }
 
-  fetchRoutes() {
+  fetchData() {
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
@@ -141,9 +139,7 @@ class Mapbox extends React.Component {
         }
         this.checksum = data.checksum;
       })
-  }
 
-  fetchData() {
     fetch(statusUrl)
       .then(response => response.json())
       .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }, this.renderOverlays));
