@@ -36,7 +36,7 @@ class StationDetails extends React.Component {
   }
 
   componentDidMount() {
-    const { station, handleOnMount, infoBox } = this.props;
+    const { station, handleOnMount, infoBox, handleDisplayTrainPositionsToggle } = this.props;
     const favs = Cookies.get('favs') && Cookies.get('favs').split(",");
 
     if (!favs || !favs.includes(station.id)) {
@@ -51,11 +51,12 @@ class StationDetails extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { handleOnMount, station, infoBox } = this.props;
+    const { handleOnMount, station, infoBox, handleDisplayTrainPositionsToggle } = this.props;
     if (prevProps.station.id !== station.id) {
       handleOnMount(station.id);
       infoBox.classList.add('open');
       infoBox.scrollTop = 0;
+
     }
   }
 
@@ -136,18 +137,27 @@ class StationDetails extends React.Component {
       return train.arrival_times.some((estimate) => estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= currentTime)
     }).map((train) => {
       return {
+        id: train.id,
         time: Math.round((train.arrival_times.find((estimate) => estimate.stop_id.substr(0, 3) === station.id).estimated_time  - currentTime) / 60),
         destination: train.arrival_times[train.arrival_times.length - 1].stop_id.substr(0, 3)
       }
     }).sort((a, b) => a.time - b.time).slice(0, 2);
 
     return times.map((estimate) => {
+      const runDestination = stations[estimate.destination.substr(0, 3)].name.replace(/ - /g, "–");
       if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0].substr(0, 3)) {
-        const runDestination = stations[estimate.destination.substr(0, 3)].name.replace(/ - /g, "–").split('–')[0];
-        return `<span>${estimate.time} min (${runDestination})</span>`;
+        const runDestinationShort = runDestination.split('–')[0];
+        return (
+          <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}>
+            {estimate.time} min ({runDestinationShort})
+          </Link>
+        );
       }
-      return `<span>${estimate.time} min</span>`;
-    }).join(', ')
+      return (
+        <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}>
+          {estimate.time} min
+        </Link>);
+    }).reduce((prev, curr) => [prev, ', ', curr]);
   }
 
   southDestinations() {
@@ -376,15 +386,19 @@ class StationDetails extends React.Component {
   }
 
   renderOverlayControls() {
-    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways,
-      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle } = this.props;
+    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions,
+      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle,
+      handleDisplayTrainPositionsToggle } = this.props;
     return (
-      <Popup trigger={<Button icon='sliders horizontal' title="Configure issues overlay (experimental)" />}
+      <Popup trigger={<Button icon='sliders horizontal' title="Configure overlays" />}
             on='click' hideOnScroll position='bottom center' style={{maxWidth: "195px"}}>
         <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-            displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={handleDisplayProblemsToggle}
+            displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
+            handleDisplayProblemsToggle={handleDisplayProblemsToggle}
             handleDisplayDelaysToggle={handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={handleDisplaySlowSpeedsToggle}
-            handleDisplayLongHeadwaysToggle={handleDisplayLongHeadwaysToggle} alwaysExpand={true} />
+            handleDisplayLongHeadwaysToggle={handleDisplayLongHeadwaysToggle}
+            handleDisplayTrainPositionsToggle={handleDisplayTrainPositionsToggle}
+            alwaysExpand={true} />
       </Popup>
     )
   }
@@ -489,7 +503,9 @@ class StationDetails extends React.Component {
                             textColor={train.text_color} size='small' link />
                         </List.Content>
                         <List.Content floated='right' className="station-details-route-status">
-                          <div dangerouslySetInnerHTML={{__html: this.renderArrivalTimes(trainId, "south")}}></div>
+                          <Header as="h5">
+                            { this.renderArrivalTimes(trainId, "south") }
+                          </Header>
                           {
                             (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
                             <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">
@@ -532,7 +548,9 @@ class StationDetails extends React.Component {
                             textColor={train.text_color} size='small' link />
                         </List.Content>
                         <List.Content floated='right' className="station-details-route-status">
-                          <div dangerouslySetInnerHTML={{__html: this.renderArrivalTimes(trainId, "north")}}></div>
+                          <Header as="h5">
+                            { this.renderArrivalTimes(trainId, "north")}
+                          </Header>
                           {
                             (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
                             <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">

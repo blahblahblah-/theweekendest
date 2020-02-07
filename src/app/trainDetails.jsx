@@ -11,18 +11,19 @@ import TrainBullet from './trainBullet.jsx';
 
 class TrainDetails extends React.Component {
   componentDidMount() {
-    const { handleOnMount, train, coords, zoom, infoBox } = this.props;
+    const { handleOnMount, train, coords, zoom, infoBox, handleDisplayTrainPositionsToggle } = this.props;
     handleOnMount(train.id, coords, zoom);
     infoBox.classList.remove('open');
     infoBox.scrollTop = 0;
   }
 
   componentDidUpdate(prevProps) {
-    const { handleOnMount, train, coords, zoom, infoBox } = this.props;
+    const { handleOnMount, train, coords, zoom, infoBox, handleDisplayTrainPositionsToggle } = this.props;
     if (prevProps.train.id !== train.id) {
       handleOnMount(train.id, coords, zoom);
       infoBox.classList.remove('open');
       infoBox.scrollTop = 0;
+
     }
   }
 
@@ -74,15 +75,19 @@ class TrainDetails extends React.Component {
   }
 
   renderOverlayControls() {
-    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways,
-      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle } = this.props;
+    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions,
+      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle,
+      handleDisplayTrainPositionsToggle} = this.props;
     return (
-      <Popup trigger={<Button icon='sliders horizontal' title="Configure issues overlay (experimental)" />}
+      <Popup trigger={<Button icon='sliders horizontal' title="Configure overlays" />}
             on='click' hideOnScroll position='bottom center' style={{maxWidth: "195px"}}>
         <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-            displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={handleDisplayProblemsToggle}
+            displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
+            handleDisplayProblemsToggle={handleDisplayProblemsToggle}
             handleDisplayDelaysToggle={handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={handleDisplaySlowSpeedsToggle}
-            handleDisplayLongHeadwaysToggle={handleDisplayLongHeadwaysToggle} alwaysExpand={true} />
+            handleDisplayLongHeadwaysToggle={handleDisplayLongHeadwaysToggle}
+            handleDisplayTrainPositionsToggle={handleDisplayTrainPositionsToggle}
+            alwaysExpand={true} />
       </Popup>
     )
   }

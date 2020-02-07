@@ -56,7 +56,7 @@ h1.yellow a, h3.yellow a {
     max-height: 38px;
 
     &.open {
-      overflow-y: auto;
+      overflow-y: scroll;
       max-height: 60vh;
     }
   }
@@ -69,7 +69,7 @@ h1.yellow a, h3.yellow a {
 
 @media only screen and (min-width: 768px) {
   .inner-infobox {
-    overflow-y: auto;
+    overflow-y: scroll;
     overflow-x: hidden;
     width: 350px;
     max-height: 75vh;
@@ -318,4 +318,23 @@ h4.ui.top.attached.header.advisories-header {
 
 .infobox .inner-infobox .ui.toggle.checkbox.long-headway input:checked~.box:before, .ui.toggle.checkbox.long-headway input:checked~label:before, .infobox .inner-infobox.long-headway .ui.toggle.checkbox input:focus:checked~.box:before, .ui.toggle.checkbox.long-headway input:focus:checked~label:before {
   background-color: #dddddd!important;
+}
+.chevrons {
+  margin-left: 27px;
+  margin-bottom: 3px;
+ 
+ .chevron::before {
+    border-style: solid;
+    border-width: 0.25em 0.25em 0 0;
+    content: '';
+    display: inline-block;
+    height: 15px;
+    left: 0.15em;
+    position: relative;
+    top: 0.15em;
+    transform: rotate(135deg);
+    vertical-align: top;
+    width: 15px;
+    top: 0;
+  } 
 }

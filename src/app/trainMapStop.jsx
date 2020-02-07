@@ -51,13 +51,13 @@ class TrainMapStop extends React.Component {
   }
 
   renderLine(isActiveBranch, index, branchStart, branchEnd) {
-    const { color, branchStops } = this.props;
+    const { color, branchStops, arrivalTime } = this.props;
     const stopExists = branchStops[index];
     const branchStartHere = branchStart !== null && branchStart == index;
     const branchEndHere = branchEnd !== null && branchEnd == index;
     const marginValue = "20px";
     const branching = branchStartHere || branchEndHere;
-    const margin = branching ? ("0 0 0 " + marginValue) : ("0 " + marginValue);
+    const margin = branching ? ("0 0 0 " + marginValue) : (arrivalTime ? ("0 10px") : ("0 " + marginValue));
     let background;
 
     if (stopExists) {
@@ -82,7 +82,7 @@ class TrainMapStop extends React.Component {
     }
 
     return (
-      <div key={index} style={{minWidth: (branching ? "120px" : "60px"), display: "flex"}}>
+      <div key={index} style={{minWidth: (branching ? "120px" : (arrivalTime ? "45px" : "60px")), display: "flex"}}>
         {
           this.renderMainLine(background, margin, stopExists)
         }
@@ -110,10 +110,17 @@ class TrainMapStop extends React.Component {
   }
 
   render() {
-    const { stop, transfers, activeBranches, branchStart, branchEnd } = this.props;
+    const { stop, transfers, activeBranches, branchStart, branchEnd, arrivalTime } = this.props;
     return (
       <li>
         <div style={{minHeight: "50px", display: "flex"}}>
+          {
+            arrivalTime &&
+            <Header as='h6'
+            style={{minWidth: "20px", maxWidth: "20px", margin: "auto 0 auto 10px", display: "inline", textAlign: "center"}}>
+              { Math.round(arrivalTime / 60) } min
+            </Header>
+          }
           { activeBranches.map((obj, index) => {
               return this.renderLine(obj, index, branchStart, branchEnd);
             })
