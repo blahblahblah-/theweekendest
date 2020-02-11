@@ -1623,7 +1623,7 @@ class Mapbox extends React.Component {
                 real-time new york city subway map
               </Header.Subheader>
             </Header>
-            <Button icon disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "11px 11px 0 0"}}>
+            <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "11px 11px 0 0"}}>
               <Icon loading={loading} name='refresh' />
             </Button>
           </Responsive>
@@ -1636,7 +1636,7 @@ class Mapbox extends React.Component {
                 real-time new york city subway map
               </Header.Subheader>
             </Header>
-            <Button icon disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "18px 9px 0 0"}}>
+            <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "18px 9px 0 0"}}>
               <Icon loading={loading} name='refresh' />
             </Button>
           </Responsive>
