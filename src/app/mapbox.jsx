@@ -436,6 +436,8 @@ class Mapbox extends React.Component {
       }).bind(this));
     }
 
+    this.map.setLayoutProperty("TrainPositions", "visibility", "visible");
+
     this.map.moveLayer("TrainPositions")
   }
 
