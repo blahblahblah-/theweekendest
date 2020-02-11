@@ -143,6 +143,10 @@ class StationDetails extends React.Component {
       }
     }).sort((a, b) => a.time - b.time).slice(0, 2);
 
+    if (times.length < 1) {
+      return;
+    }
+
     return times.map((estimate) => {
       const runDestination = stations[estimate.destination.substr(0, 3)].name.replace(/ - /g, "–");
       if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0].substr(0, 3)) {
