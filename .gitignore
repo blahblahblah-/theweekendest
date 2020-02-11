@@ -39,3 +39,5 @@
 yarn-debug.log*
 .yarn-integrity
 .env
+
+/src/data/test
