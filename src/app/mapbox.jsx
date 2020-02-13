@@ -635,7 +635,7 @@ class Mapbox extends React.Component {
         const bearing = turf.bearing(
           turf.helpers.point(feature.geometry.coordinates), turf.helpers.point(pointAhead.geometry.coordinates)
         );
-        const bearingInRads = bearing * (Math.PI / 180);
+        const bearingInRads = (bearing - 29) * (Math.PI / 180);
         let visibility = false;
 
         if ((this.selectedTrip && this.selectedTrip.id === pos.id) || this.selectedTrains.includes(pos.route)) {
@@ -653,8 +653,8 @@ class Mapbox extends React.Component {
           "icon": pos.routeName.endsWith('X') ? `train-pos-x-${routing[pos.route].color.slice(1).toLowerCase()}` : `train-pos-${routing[pos.route].color.slice(1).toLowerCase()}`,
           "text-color": routing[pos.route].color.toLowerCase() === '#fbbd08' ? '#000000' : '#ffffff',
           "bearing": bearing,
-          "text-rotate": pos.routeName.endsWith('X') ? bearing % Math.PI : 0,
-          "offset": [Math.sin(bearingInRads) * -0.2, Math.cos(bearingInRads) * 0.2],
+          "text-rotate": pos.routeName.endsWith('X') ? (bearing % 90) + 60 : 0,
+          "offset": [Math.sin(bearingInRads) * -0.3, Math.cos(bearingInRads) * 0.3],
           "visibility": visibility
         }
 
