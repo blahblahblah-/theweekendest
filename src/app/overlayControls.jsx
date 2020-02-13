@@ -12,7 +12,7 @@ class OverlayControls extends React.Component {
     return (
       <List>
         <List.Item>
-          <Checkbox toggle onChange={handleDisplayTrainPositionsToggle} checked={displayTrainPositions} label={<label>train positions</label>} />
+          <Checkbox toggle onChange={handleDisplayTrainPositionsToggle} checked={displayTrainPositions} label={<label title="Train location estimations are calculated from estimated arrival times and may not be accurate.">train locations</label>} />
         </List.Item>
         <List.Item>
           <Checkbox toggle onChange={handleDisplayProblemsToggle} checked={displayProblems} label={<label title="May cause performance issues">overlay issues (experimental)</label>} />
