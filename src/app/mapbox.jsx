@@ -653,7 +653,7 @@ class Mapbox extends React.Component {
           "icon": pos.routeName.endsWith('X') ? `train-pos-x-${routing[pos.route].color.slice(1).toLowerCase()}` : `train-pos-${routing[pos.route].color.slice(1).toLowerCase()}`,
           "text-color": routing[pos.route].color.toLowerCase() === '#fbbd08' ? '#000000' : '#ffffff',
           "bearing": bearing,
-          "text-rotate": pos.routeName.endsWith('X') ? (bearing % 90) + 90 : 0,
+          "text-rotate": pos.routeName.endsWith('X') ? (bearing % 90) + 90 - this.map.getBearing() : 0,
           "offset": pos.routeName.endsWith('X') ? [0, 0] : [Math.sin(bearingInRads) * -0.3, Math.cos(bearingInRads) * 0.3],
           "visibility": visibility
         }
