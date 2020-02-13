@@ -130,6 +130,10 @@ class Mapbox extends React.Component {
       this.dataTimer = setInterval(this.fetchData.bind(this), 30000);
     });
 
+    this.map.on('rotateend', () => {
+      this.renderTrainPositions();
+    })
+
     this.geoControl.on('geolocate', (e) => {
       this.setState({geoLocation: e.coords});
     });
