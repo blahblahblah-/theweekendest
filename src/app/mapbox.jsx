@@ -47,6 +47,8 @@ const statusColors = {
   'delay': '#ff8093'
 }
 
+const M_TRAIN_SHUFFLE = ["M18", "M16", "M14", "M13", "M12", "M11"];
+
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
 class Mapbox extends React.Component {
@@ -584,7 +586,7 @@ class Mapbox extends React.Component {
             const precedingStops = matchedRouting.slice(0, matchedRouting.indexOf(nextId)).reverse();
             const prevStop = precedingStops.find((stop) => stations[stop.substr(0, 3)]);
             let timeDiff = (next.estimated_time - currentTime) * 2;
-            timeDiff = (timeDiff < 300) ? 300 : timeDiff;
+            timeDiff = (timeDiff < 420) ? 420 : timeDiff;
 
             prev = {
               stop_id: prevStop.substr(0, 3),
@@ -1121,16 +1123,40 @@ class Mapbox extends React.Component {
   }
 
   stopTypeIcon(stopId) {
+    let southStops = new Set(stations[stopId]["southStops"]);
+    let northStops = new Set(stations[stopId]["northStops"]);
+
+    if (M_TRAIN_SHUFFLE.includes(stopId)) {
+      let southStopsContainM = false;
+      let northStopsContainM = false;
+
+      if (southStops.has('M')) {
+        southStopsContainM = true;
+      }
+      if (northStops.has('M')) {
+        northStopsContainM = true;
+      }
+      southStops.delete('M');
+      northStops.delete('M');
+
+      if (southStopsContainM) {
+        northStops.add('M');
+      }
+      if (northStopsContainM) {
+        southStops.add('M');
+      }
+    }
+
     if (this.selectedTrains.length == 1) {
       const selectedTrain = this.selectedTrains[0];
 
-      if (stations[stopId]["southStops"].has(selectedTrain) && stations[stopId]["northStops"].has(selectedTrain)) {
+      if (southStops.has(selectedTrain) && northStops.has(selectedTrain)) {
         return "express-stop";
       }
-      if (stations[stopId]["southStops"].has(selectedTrain)) {
+      if (southStops.has(selectedTrain)) {
         return "all-downtown-trains";
       }
-      if (stations[stopId]["northStops"].has(selectedTrain)) {
+      if (northStops.has(selectedTrain)) {
         return "all-uptown-trains";
       }
       if (stations[stopId]["stops"].size == 0) {
@@ -1143,28 +1169,28 @@ class Mapbox extends React.Component {
     if (stations[stopId]["stops"].size == 0) {
       return "cross-15";
     }
-    if (passed.every((train) => stations[stopId]["southStops"].has(train)) &&
-      (passed.every((train) => stations[stopId]["northStops"].has(train)))) {
+    if (passed.every((train) => southStops.has(train)) &&
+      (passed.every((train) => northStops.has(train)))) {
       return "express-stop";
     }
-    if (stations[stopId]["northStops"].size == 0) {
-      if (passed.every((train) => stations[stopId]["southStops"].has(train))) {
+    if (northStops.size == 0) {
+      if (passed.every((train) => southStops.has(train))) {
         return "all-downtown-trains";
       } else {
         return "downtown-only";
       }
     }
-    if (stations[stopId]["southStops"].size == 0) {
-      if (passed.every((train) => stations[stopId]["northStops"].has(train))) {
+    if (southStops.size == 0) {
+      if (passed.every((train) => northStops.has(train))) {
         return "all-uptown-trains";
       } else {
         return "uptown-only";
       }
     }
-    if (passed.every((train) => stations[stopId]["southStops"].has(train))) {
+    if (passed.every((train) => southStops.has(train))) {
       return "downtown-all-trains";
     }
-    if (passed.every((train) => stations[stopId]["northStops"].has(train))) {
+    if (passed.every((train) => northStops.has(train))) {
       return "uptown-all-trains";
     }
     return "circle-15";
