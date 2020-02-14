@@ -95,8 +95,8 @@ class TripDetails extends React.Component {
             <Icon name='linkify' />
           </Clipboard>
           <div className="train-details-header">
-            <div className="train-info">
-              <TrainBullet name={train.name} color={train.color} textColor={train.text_color} style={{margin: '10px 0 0 8px'}} />
+            <div className="train-info trip-bullet">
+              <TrainBullet name={train.name} color={train.color} textColor={train.text_color} />
               { train.alternate_name && 
                 <Header as='h5' style={{display: "inline-block"}}>{train.alternate_name.replace(" Shuttle", "")}</Header>
               }
@@ -115,9 +115,12 @@ class TripDetails extends React.Component {
                 Train ID: { trip.id }<br />
                 To: { stations[destination].name.replace(/ - /g, "–") }
               </Header>
-              <Header as='h4' color={this.statusColor(train.direction_statuses[direction])} style={{marginTop: 0}}>
-                { train.direction_secondary_statuses[direction] }
-              </Header>
+              <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">
+                <Header as='h4' color={this.statusColor(train.direction_statuses[direction])} style={{marginTop: 0}}>
+                  { train.direction_secondary_statuses[direction] }
+                </Header>
+                <div></div>
+              </a>
               <Header as='h6'>
                 Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
               </Header>
@@ -168,9 +171,11 @@ class TripDetails extends React.Component {
             <Header as='h5' style={{textAlign: 'right', margin: 0}}>
               To: { stations[destination].name.replace(/ - /g, "–") }
             </Header>
-            <Header as='h5' color={this.statusColor(train.status)} style={{margin: 0}}>
-              { train.secondary_status }
-            </Header>
+            <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">
+              <Header as='h5' color={this.statusColor(train.status)} style={{margin: 0}}>
+                { train.secondary_status }
+              </Header>
+            </a>
             <Header as='h6' style={{margin: 0}}>
               Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
             </Header>

@@ -338,3 +338,13 @@ h4.ui.top.attached.header.advisories-header {
     top: 0;
   } 
 }
+
+.trip-bullet {
+  .route {
+    margin: 10px 0 0 8px;
+
+    &.diamond {
+      margin-bottom: 10px;
+    }
+  }
+}
