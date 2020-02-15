@@ -1112,6 +1112,10 @@ class Mapbox extends React.Component {
           }
         }
 
+        if (stopTypeIcon === "cross-15") {
+          bearing = this.map.getBearing();
+        }
+
         return {
           "type": "Feature",
           "properties": {
