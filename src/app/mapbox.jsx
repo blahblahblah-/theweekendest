@@ -164,7 +164,7 @@ class Mapbox extends React.Component {
 
       fetch(statusUrl)
         .then(response => response.json())
-        .then(data => this.setState({ trains: data.routes, timestamp: data.timestamp }, this.renderOverlays));
+        .then(data => this.setState({ trains: data.routes, blogPost: data.blog_post, timestamp: data.timestamp }, this.renderOverlays));
     });
   }
 
@@ -1006,36 +1006,45 @@ class Mapbox extends React.Component {
         return {
           "type": "FeatureCollection",
           "features": Object.keys(stations).map((key) => {
-            let bearing = 0;
+            let bearing = stations[key].bearing;
             let opacity = 0.1;
             let priority = 10;
             let stopType = this.stopTypeIcon(key);
 
             if (routing.includes(key)) {
               const stationCoords = [stations[key].longitude, stations[key].latitude];
-              const stationPt = turf.helpers.point(stationCoords);
 
               opacity = 1;
               priority = (routing[routing.length - 1] === key ? 1 : 5);
+              stopType = this.selectedTrip.direction === 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
 
-              if (lineLength > 0) {
-                // Station is at beginning of line
-                if (coords[0][0] === stationCoords[0] && coords[0][1] === stationCoords[1]) {
-                  const pointAhead = turf.along(line, 0.01);
-
-                  bearing = turf.bearing(stationPt, pointAhead);
-                } else {
-                  const lineSegment = turf.lineSlice(turf.helpers.point(coords[0]), stationPt, line)
-                  const segmentLength = turf.length(lineSegment);
-                  const pointBehind = turf.along(lineSegment, segmentLength - 0.01);
-
-                  bearing = turf.bearing(pointBehind, stationPt);
-                }
-
-                stopType = 'all-uptown-trains';
-              } else {
-                stopType = this.selectedTrip.direction === 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
+              if (this.selectedTrip.train === 'M' && M_TRAIN_SHUFFLE.includes(key)) {
+                stopType = this.selectedTrip.direction !== 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
               }
+
+              if (bearing === undefined) {
+                const stationPt = turf.helpers.point(stationCoords);
+                if (lineLength > 0) {
+                  // Station is at beginning of line
+                  if (coords[0][0] === stationCoords[0] && coords[0][1] === stationCoords[1]) {
+                    const pointAhead = turf.along(line, 0.01);
+
+                    bearing = turf.bearing(stationPt, pointAhead);
+                  } else {
+                    const lineSegment = turf.lineSlice(turf.helpers.point(coords[0]), stationPt, line)
+                    const segmentLength = turf.length(lineSegment);
+                    const pointBehind = turf.along(lineSegment, segmentLength - 0.01);
+
+                    bearing = turf.bearing(pointBehind, stationPt);
+                  }
+
+                  stopType = 'all-uptown-trains';
+                } else {
+                  stopType = this.selectedTrip.direction === 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
+                }
+              }
+            } else {
+              bearing = 0;
             }
 
             return {
@@ -1064,10 +1073,10 @@ class Mapbox extends React.Component {
         const stopTypeIcon = this.stopTypeIcon(key);
         const stationCoords = [stations[key].longitude, stations[key].latitude];
         const stationPt = turf.helpers.point(stationCoords);
+        let bearing = stations[key].bearing;
 
         let opacity = 1;
         let priority = 5;
-        let bearing = 0;
         if (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
             !this.selectedStations.includes(key) && (this.selectedTrains.length === 1 || stations[key].stops.size > 0)) {
           opacity = 0.1;
@@ -1086,7 +1095,7 @@ class Mapbox extends React.Component {
           priority = 4;
         }
 
-        if (!["circle-15", "express-stop", "cross-15"].includes(stopTypeIcon)) {
+        if (bearing === undefined && !["circle-15", "express-stop", "cross-15"].includes(stopTypeIcon)) {
           const matchedRouting = Object.values(processedRoutings).flat().find((r) => r.find((s) => s === key));
 
           if (matchedRouting.length > 1) {
@@ -1112,8 +1121,12 @@ class Mapbox extends React.Component {
           }
         }
 
-        if (stopTypeIcon === "cross-15") {
+        if (bearing === undefined && stopTypeIcon === "cross-15") {
           bearing = this.map.getBearing();
+        }
+
+        if (bearing === undefined) {
+          bearing = 0;
         }
 
         return {
@@ -1638,7 +1651,7 @@ class Mapbox extends React.Component {
   }
 
   render() {
-    const { loading, trains, arrivals, routing, stops, timestamp,
+    const { loading, trains, arrivals, routing, stops, timestamp, blogPost,
       displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions } = this.state;
     return (
       <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
@@ -1766,6 +1779,11 @@ class Mapbox extends React.Component {
             <Loader active={!(trains && trains.length)} />
             <Header inverted as='h5' floated='left' style={{margin: "10px 5px"}}>
               Last updated {timestamp && (new Date(timestamp)).toLocaleTimeString('en-US')}.<br />
+              { blogPost &&
+                <span>
+                  Latest blog post: <a href={blogPost.link} target="_blank">{blogPost.title}</a>.<br />
+                </span>
+              }
               Powered by <a href='https://www.goodservice.io' target='_blank'>goodservice.io</a>.<br />
               Created by <a href='https://sunny.ng' target='_blank'>Sunny Ng</a>.<br />
               <a href='https://github.com/blahblahblah-/theweekendest' target='_blank'>Source code</a>.
