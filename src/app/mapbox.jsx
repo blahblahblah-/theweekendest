@@ -1000,8 +1000,13 @@ class Mapbox extends React.Component {
         const northboundRouting = (this.selectedTrip.direction === 'north') ? routing : routing.slice().reverse();
         const northboundCoordinatesArray = this.routingGeoJson(northboundRouting, [], false);
         const coords = (this.selectedTrip.direction === 'north') ? northboundCoordinatesArray : northboundCoordinatesArray.reverse();
-        const line = turf.helpers.lineString(coords);
-        const lineLength = turf.length(line);
+        let line;
+        let lineLength;
+
+        if (coords.length > 1) {
+          line = turf.helpers.lineString(coords);
+          lineLength = turf.length(line);
+        }
 
         return {
           "type": "FeatureCollection",
@@ -1022,7 +1027,7 @@ class Mapbox extends React.Component {
                 stopType = this.selectedTrip.direction !== 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
               }
 
-              if (bearing === undefined) {
+              if (bearing === undefined && line) {
                 const stationPt = turf.helpers.point(stationCoords);
                 if (lineLength > 0) {
                   // Station is at beginning of line
