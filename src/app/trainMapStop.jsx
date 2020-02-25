@@ -111,6 +111,7 @@ class TrainMapStop extends React.Component {
 
   render() {
     const { stop, transfers, activeBranches, branchStart, branchEnd, arrivalTime } = this.props;
+    const eta = arrivalTime && Math.round(arrivalTime / 60);
     return (
       <li>
         <div style={{minHeight: "50px", display: "flex"}}>
@@ -118,7 +119,12 @@ class TrainMapStop extends React.Component {
             arrivalTime &&
             <Header as='h6'
             style={{minWidth: "20px", maxWidth: "20px", margin: "auto 0 auto 10px", display: "inline", textAlign: "center"}}>
-              { Math.round(arrivalTime / 60) } min
+              { arrivalTime > 1 &&
+                <span>{ eta } min</span>
+              }
+              { arrivalTime <= 1 &&
+                <span>--</span>
+              }
             </Header>
           }
           { activeBranches.map((obj, index) => {

@@ -4,10 +4,18 @@ import { cloneDeep } from "lodash";
 
 class TripMap extends React.Component {  
   normalizeTrip(arrivalTimes, currentTime) {
-    return arrivalTimes.filter((a) => a.estimated_time >= currentTime).map((a) => {
+    const times = arrivalTimes.filter((a) => a.estimated_time >= (currentTime - 89)).map((a) => {
       a.stop_id = a.stop_id.substr(0, 3);
       return a;
     });
+
+    const firstStopInFuture = times.find((a) => a.estimated_time > currentTime);
+    if (!firstStopInFuture) {
+      return times;
+    }
+
+   const pos = times.indexOf(firstStopInFuture);
+   return times.slice(Math.max(0, pos - 1), times.length);
   }
 
   render() {
@@ -25,7 +33,7 @@ class TripMap extends React.Component {
               return (
                 <TrainMapStop key={stopId} stop={stop} color={train.color} southStop={true}
                   northStop={false} transfers={transfers} branchStops={[true]} activeBranches={[true]}
-                  arrivalTime={tripStop.estimated_time - currentTime}
+                  arrivalTime={Math.max(tripStop.estimated_time - currentTime, 1)}
                   />
               )
             })
