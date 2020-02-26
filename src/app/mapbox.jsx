@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
-import { Responsive, Checkbox, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu, List } from "semantic-ui-react";
+import { Responsive, Checkbox, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu, List, Grid } from "semantic-ui-react";
 import { BrowserRouter as Router, Route, Link, Switch, Redirect, withRouter } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { debounce, filter, map } from 'lodash';
@@ -433,6 +433,7 @@ class Mapbox extends React.Component {
       this.map.on('click', "TrainPositions", e => {
         const path = `/trains/${e.features[0].properties.routeId}/${e.features[0].properties.tripId.replace("..", "-")}`;
         this.debounceNavigate(path);
+        return false;
       });
       this.map.on('mouseenter', 'TrainPositions', (() => {
         this.map.getCanvas().style.cursor = 'pointer';
@@ -979,6 +980,13 @@ class Mapbox extends React.Component {
       this.map.on('click', "Stops", e => {
         const path = `/stations/${e.features[0].properties.id}`;
         this.debounceNavigate(path);
+        return false;
+      });
+      this.map.on('click', e => {
+        if (!this.showAll) {
+          this.debounceNavigate(`/trains#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}/${this.map.getBearing()}`);
+          return false;
+        }
       });
       this.map.on('mouseenter', 'Stops', (() => {
         this.map.getCanvas().style.cursor = 'pointer';
@@ -1402,12 +1410,21 @@ class Mapbox extends React.Component {
     this.showAll = false;
   }
 
-  resetView() {
+  resetView(coords, zoom, bearing) {
     if (this.showAll) {
       return;
     }
 
-    this.map.fitBounds(defaultBounds, { bearing: 29});
+    if (coords && zoom) {
+      this.map.easeTo({
+        center: coords,
+        zoom: zoom,
+        bearing: (bearing === undefined) ? 29 : bearing,
+      });
+    } else {
+      this.map.fitBounds(defaultBounds, { bearing: 29});
+    }
+
     this.selectedTrains = trainIds;
     this.selectedStations = [];
     this.selectedTrip = null;
@@ -1550,13 +1567,27 @@ class Mapbox extends React.Component {
   }
 
   handleTrainList = () => {
+    const hash = location.hash.substr(1).split('/');
+    let coords = null;
+    let zoom = null;
+    let bearing = null;
+
+    if (hash.length > 1) {
+      const coordsArray = hash[0].split(',');
+      if (coordsArray.length > 1) {
+        coords = [coordsArray[1], coordsArray[0]];
+        zoom = hash[1];
+        bearing = hash[2];
+      }
+    }
+
     if (!this.mapLoaded) {
       this.map.on('load', () => {
-        this.resetView();
+        this.resetView(coords, zoom, bearing);
       });
       return;
     }
-    this.resetView();
+    this.resetView(coords, zoom, bearing);
   }
 
   handleStationList = (stations, includeTrains) => {
@@ -1577,8 +1608,23 @@ class Mapbox extends React.Component {
     }
   }
 
+  handleResetMap = () => {
+    const center = this.map.getCenter();
+    const zoom = this.map.getZoom();
+    const bearing = this.map.getBearing();
+    this.props.history.push(`/trains#${center.lat},${center.lng}/${zoom}/${bearing}`);
+  }
+
   handleNearby = () => {
     this.geoControl.trigger();
+  }
+
+  handleRealignMap = () => {
+    this.map.fitBounds(defaultBounds, { bearing: 29});
+  }
+
+  handleRealignMapToTrain = (train) => {
+    this.goToTrain(train);
   }
 
   panes() {
@@ -1627,24 +1673,42 @@ class Mapbox extends React.Component {
             information
           </Header>
           <Legend />
-          <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-            displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
-            handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
-            handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
-            handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
-            handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle} />
+          <Grid>
+            <Grid.Column width={3}>
+              <Button icon title="Center map" onClick={this.handleRealignMap}>
+                <Icon name='crosshairs' />
+              </Button>
+            </Grid.Column>
+            <Grid.Column width={13}>
+              <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+                displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
+                handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
+                handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
+                handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle} />
+            </Grid.Column>
+          </Grid>
         </Responsive>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as={Segment}>
           <Header as='h4'>
             legend
           </Header>
           <Legend />
-          <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-            displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
-            handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
-            handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
-            handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
-            handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle} />
+          <Grid>
+            <Grid.Column width={3}>
+              <Button icon title="Center map" onClick={this.handleRealignMap}>
+                <Icon name='crosshairs' />
+              </Button>
+            </Grid.Column>
+            <Grid.Column width={13}>
+              <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+                displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
+                handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
+                handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
+                handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle} />
+            </Grid.Column>
+          </Grid>
         </Responsive>
         <Segment className="selection-pane">
           { trains && trains.length > 1 &&
@@ -1718,6 +1782,7 @@ class Mapbox extends React.Component {
                       return (
                         <TripDetails trip={trip} stops={stops} direction={direction} stations={stations}
                           train={trains.find((train) => train.id == props.match.params.id)}
+                          handleResetMap={this.handleResetMap}
                           handleOnMount={this.handleMountTripDetails} infoBox={this.infoBox}
                         />
                       );
@@ -1743,6 +1808,8 @@ class Mapbox extends React.Component {
                           handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
                           handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
                           handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
+                          handleResetMap={this.handleResetMap}
+                          handleRealignMap={this.handleRealignMapToTrain}
                           handleOnMount={this.handleMountTrainDetails} coords={coords} zoom={zoom} infoBox={this.infoBox}
                         />
                       );
@@ -1762,6 +1829,7 @@ class Mapbox extends React.Component {
                         handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
                         handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
                         handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
+                        handleResetMap={this.handleResetMap}
                         handleOnMount={this.handleMountStationDetails} infoBox={this.infoBox}
                       />
                     )

@@ -77,7 +77,7 @@ class StationDetails extends React.Component {
   }
 
   handleHome = _ => {
-    this.props.history.push("/");
+    this.props.handleResetMap();
   }
 
   handleShare = _ => {

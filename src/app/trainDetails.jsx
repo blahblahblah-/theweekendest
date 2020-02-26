@@ -63,7 +63,7 @@ class TrainDetails extends React.Component {
   }
 
   handleHome = _ => {
-    this.props.history.push("/");
+    this.props.handleResetMap();
   }
 
   handleShare = _ => {
@@ -72,6 +72,11 @@ class TrainDetails extends React.Component {
       title: document.title,
       url: document.location.href
     });
+  }
+
+  handleRealignMap = _ => {
+    const { train, handleRealignMap } = this.props;
+    handleRealignMap(train.id);
   }
 
   renderOverlayControls() {
@@ -116,6 +121,9 @@ class TrainDetails extends React.Component {
           <Button icon onClick={this.handleHome} title="Home">
             <Icon name='map outline' />
           </Button>
+          <Button icon title="Center map" onClick={this.handleRealignMap}>
+            <Icon name='crosshairs' />
+          </Button>
           { this.renderOverlayControls() }
           { navigator.share &&
             <Button icon onClick={this.handleShare} style={{float: "right"}} title="Share">
@@ -153,6 +161,9 @@ class TrainDetails extends React.Component {
             </Button>
             <Button icon onClick={this.handleHome} title="Home">
               <Icon name='map outline' />
+            </Button>
+            <Button icon title="Center map" onClick={this.handleRealignMap}>
+              <Icon name='crosshairs' />
             </Button>
             { this.renderOverlayControls() }
             <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${this.props.train.id}`}>

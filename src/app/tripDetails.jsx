@@ -18,7 +18,7 @@ class TripDetails extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { handleOnMount, trip, infoBox } = this.props;
+    const { handleOnMount, trip, direction, train, infoBox } = this.props;
     if (prevProps.trip.id !== trip.id) {
       handleOnMount(trip.id, direction, train.id);
       infoBox.classList.remove('open');
@@ -43,7 +43,7 @@ class TripDetails extends React.Component {
   }
 
   handleHome = _ => {
-    this.props.history.push("/");
+    this.props.handleResetMap();
   }
 
   handleGoToTrain = _ => {
@@ -96,7 +96,7 @@ class TripDetails extends React.Component {
           </Clipboard>
           <div className="train-details-header">
             <div className="train-info trip-bullet">
-              <TrainBullet name={train.name} color={train.color} textColor={train.text_color} />
+              <TrainBullet name={train.name} id={train.id} color={train.color} textColor={train.text_color} link />
               { train.alternate_name && 
                 <Header as='h5' style={{display: "inline-block"}}>{train.alternate_name.replace(" Shuttle", "")}</Header>
               }
@@ -148,7 +148,7 @@ class TripDetails extends React.Component {
               </Button>
             }
           </Popup>
-          <TrainBullet name={train.name} color={train.color} textColor={train.text_color} size='small' style={{display: "inline-block", flexGrow: 0, margin: 0}} />
+          <TrainBullet name={train.name} id={train.id} color={train.color} textColor={train.text_color} size='small' style={{display: "inline-block", flexGrow: 0, margin: 0}} link />
           { train.alternate_name && 
             <Header as='h5' style={{margin: 0, flexGrow: 0}}>
               {train.alternate_name.replace(" Shuttle", "")}
