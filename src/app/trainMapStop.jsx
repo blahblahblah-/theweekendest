@@ -123,7 +123,7 @@ class TrainMapStop extends React.Component {
                 <span>{ eta } min</span>
               }
               { arrivalTime <= 1 &&
-                <span>--</span>
+                <span>Due</span>
               }
             </Header>
           }

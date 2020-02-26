@@ -134,7 +134,7 @@ class StationDetails extends React.Component {
     const destinationsArray = Array.from(destinations);
 
     const times = arrivals[trainId].trains[actualDirection].filter((train) => {
-      return train.arrival_times.some((estimate) => estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= currentTime)
+      return train.arrival_times.some((estimate) => estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= (currentTime - 59))
     }).map((train) => {
       return {
         id: train.id,
@@ -149,17 +149,18 @@ class StationDetails extends React.Component {
 
     return times.map((estimate) => {
       const runDestination = stations[estimate.destination.substr(0, 3)].name.replace(/ - /g, "–");
+      const timeText = estimate.time < 1 ? "Due" : `${estimate.time} min`;
       if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0].substr(0, 3)) {
         const runDestinationShort = runDestination.split('–')[0];
         return (
           <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}>
-            {estimate.time} min ({runDestinationShort})
+            {timeText} ({runDestinationShort})
           </Link>
         );
       }
       return (
         <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}>
-          {estimate.time} min
+          {timeText}
         </Link>);
     }).reduce((prev, curr) => [prev, ', ', curr]);
   }
