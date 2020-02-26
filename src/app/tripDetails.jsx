@@ -58,6 +58,11 @@ class TripDetails extends React.Component {
     });
   }
 
+  handleRealignMap = _ => {
+    const { handleOnMount, trip, direction, train } = this.props;
+    handleOnMount(trip.id, direction, train.id);
+  }
+
   render() {
     const { trip, stops, train, stations, direction } = this.props;
     const name = (train.alternate_name) ? ("S - " + train.alternate_name) : train.name;
@@ -85,6 +90,9 @@ class TripDetails extends React.Component {
           </Button>
           <Button icon onClick={this.handleGoToTrain} title={`${name} Train Info`}>
             <Icon name='subway' />
+          </Button>
+          <Button icon title="Center map" onClick={this.handleRealignMap}>
+            <Icon name='crosshairs' />
           </Button>
           { navigator.share &&
             <Button icon onClick={this.handleShare} style={{float: "right"}} title="Share">
@@ -142,6 +150,9 @@ class TripDetails extends React.Component {
             </Button>
             <Button icon onClick={this.handleGoToTrain} title="${name} Train Info">
               <Icon name='subway' />
+            </Button>
+            <Button icon title="Center map" onClick={this.handleRealignMap}>
+              <Icon name='crosshairs' />
             </Button>
             <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${train.id}/${trip.id.replace('..', '-')}`}>
               <Icon name='linkify' />

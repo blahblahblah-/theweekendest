@@ -1623,10 +1623,6 @@ class Mapbox extends React.Component {
     this.map.fitBounds(defaultBounds, { bearing: 29});
   }
 
-  handleRealignMapToTrain = (train) => {
-    this.goToTrain(train);
-  }
-
   panes() {
     const { trains, geoLocation } = this.state;
     return [
@@ -1809,7 +1805,6 @@ class Mapbox extends React.Component {
                           handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
                           handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
                           handleResetMap={this.handleResetMap}
-                          handleRealignMap={this.handleRealignMapToTrain}
                           handleOnMount={this.handleMountTrainDetails} coords={coords} zoom={zoom} infoBox={this.infoBox}
                         />
                       );

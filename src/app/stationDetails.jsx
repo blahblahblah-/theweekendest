@@ -109,6 +109,11 @@ class StationDetails extends React.Component {
     });
   }
 
+  handleRealignMap = _ => {
+    const { handleOnMount, station } = this.props;
+    handleOnMount(station.id);
+  }
+
   renderArrivalTimes(trainId, direction) {
     const { station, arrivals, routings, stations } = this.props;
     const currentTime = Date.now() / 1000;
@@ -433,6 +438,9 @@ class StationDetails extends React.Component {
           <Button icon onClick={this.handleHome} title="Home">
             <Icon name='map outline' />
           </Button>
+          <Button icon title="Center map" onClick={this.handleRealignMap}>
+            <Icon name='crosshairs' />
+          </Button>
           {
             this.renderOverlayControls()
           }
@@ -466,6 +474,9 @@ class StationDetails extends React.Component {
             </Button>
             <Button icon onClick={this.handleHome} title="Home">
               <Icon name='map outline' />
+            </Button>
+            <Button icon title="Center map" onClick={this.handleRealignMap}>
+              <Icon name='crosshairs' />
             </Button>
             {
               this.renderOverlayControls()

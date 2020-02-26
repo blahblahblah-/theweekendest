@@ -75,8 +75,8 @@ class TrainDetails extends React.Component {
   }
 
   handleRealignMap = _ => {
-    const { train, handleRealignMap } = this.props;
-    handleRealignMap(train.id);
+    const { train, handleOnMount } = this.props;
+    handleOnMount(train.id);
   }
 
   renderOverlayControls() {
