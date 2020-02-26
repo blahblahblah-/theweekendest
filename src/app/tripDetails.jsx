@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Responsive, Button, Icon, Header, Segment, Popup } from "semantic-ui-react";
-import { withRouter } from "react-router-dom";
+import { withRouter, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Clipboard from 'react-clipboard.js';
 
@@ -113,7 +113,11 @@ class TripDetails extends React.Component {
 
               <Header as='h4' style={{textAlign: 'right'}}>
                 Train ID: { trip.id }<br />
-                To: { stations[destination].name.replace(/ - /g, "–") }
+                To: {
+                  <Link to={`/stations/${stations[destination].id}`}>
+                    { stations[destination].name.replace(/ - /g, "–") }
+                  </Link>
+                }
               </Header>
               <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">
                 <Header as='h4' color={this.statusColor(train.direction_statuses[direction])} style={{marginTop: 0}}>
@@ -169,7 +173,11 @@ class TripDetails extends React.Component {
           </div>
           <div>
             <Header as='h5' style={{textAlign: 'right', margin: 0}}>
-              To: { stations[destination].name.replace(/ - /g, "–") }
+              To: {
+                <Link to={`/stations/${stations[destination].id}`}>
+                  { stations[destination].name.replace(/ - /g, "–") }
+                </Link>
+              }
             </Header>
             <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">
               <Header as='h5' color={this.statusColor(train.status)} style={{margin: 0}}>
