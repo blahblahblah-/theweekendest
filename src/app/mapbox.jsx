@@ -982,12 +982,6 @@ class Mapbox extends React.Component {
         this.debounceNavigate(path);
         return false;
       });
-      this.map.on('click', e => {
-        if (!this.showAll) {
-          this.debounceNavigate(`/trains#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}/${this.map.getBearing()}`);
-          return false;
-        }
-      });
       this.map.on('mouseenter', 'Stops', (() => {
         this.map.getCanvas().style.cursor = 'pointer';
       }).bind(this));
@@ -1664,26 +1658,24 @@ class Mapbox extends React.Component {
           <meta property="og:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
           <meta name="twitter:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
         </Helmet>
-        <Responsive {...Responsive.onlyMobile} as={Segment} className="mobile-top-bar">
-          <Header as='h4'>
-            information
-          </Header>
-          <Legend />
-          <Grid>
-            <Grid.Column width={3}>
-              <Button icon title="Center map" onClick={this.handleRealignMap}>
-                <Icon name='crosshairs' />
-              </Button>
-            </Grid.Column>
-            <Grid.Column width={13}>
-              <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-                displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
-                handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
-                handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
-                handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
-                handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle} />
-            </Grid.Column>
-          </Grid>
+        <Responsive {...Responsive.onlyMobile} as={Segment} className="mobile-top-bar" style={{padding: 0}}>
+          <div className='mobile-details-header'>
+            <Header as='h4' style={{flexGrow: 1, margin: "14px"}}>
+              information
+            </Header>
+            <Button icon title="Center map" onClick={this.handleRealignMap} style={{float: "right"}}>
+              <Icon name='crosshairs' />
+            </Button>
+          </div>
+          <div style={{margin: "14px"}}>
+            <Legend />
+            <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+                  displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
+                  handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                  handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
+                  handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
+                  handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle} />
+          </div>
         </Responsive>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as={Segment}>
           <Header as='h4'>
@@ -1770,7 +1762,7 @@ class Mapbox extends React.Component {
                         return arrivals[props.match.params.id].trains[d].includes(trip);
                       });
 
-                      if (!trip) {
+                      if (!trip || trip.arrival_times.length < 1) {
                         return (
                           <Redirect to={`/trains/${props.match.params.id}`} />
                         );

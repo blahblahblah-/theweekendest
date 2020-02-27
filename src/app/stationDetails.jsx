@@ -475,9 +475,6 @@ class StationDetails extends React.Component {
             <Button icon onClick={this.handleHome} title="Home">
               <Icon name='map outline' />
             </Button>
-            <Button icon title="Center map" onClick={this.handleRealignMap}>
-              <Icon name='crosshairs' />
-            </Button>
             {
               this.renderOverlayControls()
             }
@@ -493,12 +490,15 @@ class StationDetails extends React.Component {
               </Button>
             }
           </Popup>
-          <Header as="h5" style={{margin: 0}}>
+          <Header as="h5" style={{margin: 0, flexGrow: 1, maxHeight: "36px", overflow: "hidden"}}>
             { station.name.replace(/ - /g, "–") }
             <span className='header-secondary-name'>
               { station.secondary_name }
             </span>
           </Header>
+          <Button icon title="Center map" onClick={this.handleRealignMap}>
+            <Icon name='crosshairs' />
+          </Button>
         </Responsive>
         <div className="details-body">
           <Segment>

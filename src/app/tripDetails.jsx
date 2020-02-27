@@ -151,9 +151,6 @@ class TripDetails extends React.Component {
             <Button icon onClick={this.handleGoToTrain} title="${name} Train Info">
               <Icon name='subway' />
             </Button>
-            <Button icon title="Center map" onClick={this.handleRealignMap}>
-              <Icon name='crosshairs' />
-            </Button>
             <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${train.id}/${trip.id.replace('..', '-')}`}>
               <Icon name='linkify' />
             </Clipboard>
@@ -164,14 +161,12 @@ class TripDetails extends React.Component {
             }
           </Popup>
           <TrainBullet name={train.name} id={train.id} color={train.color} textColor={train.text_color} size='small' style={{display: "inline-block", flexGrow: 0, margin: 0}} link />
-          { train.alternate_name && 
-            <Header as='h5' style={{margin: 0, flexGrow: 0}}>
-              {train.alternate_name.replace(" Shuttle", "")}
-            </Header>
-          }
-          <Header as='h4' style={{margin: 0, flexGrow: 1, textAlign: "right"}}>
+          <Header as='h4' style={{margin: "0 2px 0 0", flexGrow: 1, textAlign: "right"}}>
             ID: {trip.id}
           </Header>
+          <Button icon title="Center map" onClick={this.handleRealignMap}>
+            <Icon name='crosshairs' />
+          </Button>
         </Responsive>
         <Responsive maxWidth={Responsive.onlyMobile.maxWidth} as='div' className="mobile-goodservice train-details-header">
           <div className='chevrons' style={{marginLeft: "42px"}}>
@@ -183,7 +178,12 @@ class TripDetails extends React.Component {
             </div>
           </div>
           <div>
-            <Header as='h5' style={{textAlign: 'right', margin: 0}}>
+            { train.alternate_name && 
+              <Header as='h5' style={{margin: 0, flexGrow: 0}}>
+                {train.alternate_name}
+              </Header>
+            }
+            <Header as='h5' style={{textAlign: 'right', margin: 0, maxWidth: "160px"}}>
               To: {
                 <Link to={`/stations/${stations[destination].id}`}>
                   { stations[destination].name.replace(/ - /g, "–") }

@@ -162,9 +162,6 @@ class TrainDetails extends React.Component {
             <Button icon onClick={this.handleHome} title="Home">
               <Icon name='map outline' />
             </Button>
-            <Button icon title="Center map" onClick={this.handleRealignMap}>
-              <Icon name='crosshairs' />
-            </Button>
             { this.renderOverlayControls() }
             <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${this.props.train.id}`}>
               <Icon name='linkify' />
@@ -182,11 +179,14 @@ class TrainDetails extends React.Component {
             </Header>
           }
           <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank" style={{flexGrow: 1, textAlign: "right"}}>
-            <Header as='h4' color={this.statusColor(train.status)} style={{margin: 0}}>
+            <Header as='h4' color={this.statusColor(train.status)} style={{margin: "0 2px 0 0"}}>
               { train.secondary_status }
             </Header>
             <div></div>
           </a>
+          <Button icon title="Center map" onClick={this.handleRealignMap}>
+            <Icon name='crosshairs' />
+          </Button>
         </Responsive>
         <Responsive maxWidth={Responsive.onlyMobile.maxWidth} as='h6' className="mobile-goodservice">
           Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
