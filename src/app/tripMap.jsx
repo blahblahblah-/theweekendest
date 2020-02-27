@@ -4,7 +4,7 @@ import { cloneDeep } from "lodash";
 
 class TripMap extends React.Component {  
   normalizeTrip(arrivalTimes, currentTime) {
-    const times = arrivalTimes.filter((a) => a.estimated_time >= (currentTime - 89)).map((a) => {
+    const times = arrivalTimes.filter((a) => a.estimated_time >= (currentTime - 59)).map((a) => {
       a.stop_id = a.stop_id.substr(0, 3);
       return a;
     });
