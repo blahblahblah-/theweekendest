@@ -134,6 +134,16 @@ class Mapbox extends React.Component {
       this.renderTrainPositions();
     })
 
+    this.map.on('click', (e) => {
+      if (!this.showAll) {
+        const center = this.map.getCenter();
+        const zoom = this.map.getZoom();
+        const bearing = this.map.getBearing();
+        this.debounceNavigate(`/trains#${center.lat},${center.lng}/${zoom}/${bearing}`);
+        e.originalEvent.stopPropagation();
+      }
+    });
+
     this.geoControl.on('geolocate', (e) => {
       this.setState({geoLocation: e.coords});
     });
@@ -350,7 +360,7 @@ class Mapbox extends React.Component {
         this.map.on('click', layerId, (e) => {
           if (this.showAll) {
             this.debounceNavigate(`/trains/${key}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
-            return false;
+            e.originalEvent.stopPropagation();
           }
         });
         this.map.on('mouseenter', layerId, (() => {
@@ -433,7 +443,7 @@ class Mapbox extends React.Component {
       this.map.on('click', "TrainPositions", e => {
         const path = `/trains/${e.features[0].properties.routeId}/${e.features[0].properties.tripId.replace("..", "-")}`;
         this.debounceNavigate(path);
-        return false;
+        e.originalEvent.stopPropagation();
       });
       this.map.on('mouseenter', 'TrainPositions', (() => {
         this.map.getCanvas().style.cursor = 'pointer';
@@ -787,8 +797,8 @@ class Mapbox extends React.Component {
   }
 
   debounceNavigate = _.debounce(this.navigate, 100, {
-    'leading': true,
-    'trailing': false
+    'leading': false,
+    'trailing': true
   });
 
   routingGeoJson(routing, problemSections, filterByProblems) {
@@ -980,7 +990,7 @@ class Mapbox extends React.Component {
       this.map.on('click', "Stops", e => {
         const path = `/stations/${e.features[0].properties.id}`;
         this.debounceNavigate(path);
-        return false;
+        e.originalEvent.stopPropagation();
       });
       this.map.on('mouseenter', 'Stops', (() => {
         this.map.getCanvas().style.cursor = 'pointer';
