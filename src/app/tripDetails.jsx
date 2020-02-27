@@ -105,9 +105,6 @@ class TripDetails extends React.Component {
           <div className="train-details-header">
             <div className="train-info trip-bullet">
               <TrainBullet name={train.name} id={train.id} color={train.color} textColor={train.text_color} link />
-              { train.alternate_name && 
-                <Header as='h5' style={{display: "inline-block"}}>{train.alternate_name.replace(" Shuttle", "")}</Header>
-              }
               <div className='chevrons'>
                 <div className='chevron' style={{color: train.color}}>
                 </div>
@@ -118,8 +115,9 @@ class TripDetails extends React.Component {
               </div>
             </div>
             <div className="status">
-
               <Header as='h4' style={{textAlign: 'right'}}>
+                { train.alternate_name }
+                { train.alternate_name && <br /> }
                 Train ID: { trip.id }<br />
                 To: {
                   <Link to={`/stations/${stations[destination].id}`}>
