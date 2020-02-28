@@ -359,7 +359,7 @@ class Mapbox extends React.Component {
         this.map.addLayer(layer);
         this.map.on('click', layerId, (e) => {
           if (this.showAll) {
-            this.debounceNavigate(`/trains/${key}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
+            this.debounceLayerNavigate(`/trains/${key}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
             e.originalEvent.stopPropagation();
           }
         });
@@ -442,7 +442,7 @@ class Mapbox extends React.Component {
 
       this.map.on('click', "TrainPositions", e => {
         const path = `/trains/${e.features[0].properties.routeId}/${e.features[0].properties.tripId.replace("..", "-")}`;
-        this.debounceNavigate(path);
+        this.debounceLayerNavigate(path);
         e.originalEvent.stopPropagation();
       });
       this.map.on('mouseenter', 'TrainPositions', (() => {
@@ -796,7 +796,14 @@ class Mapbox extends React.Component {
     this.props.history.push(path);
   }
 
-  debounceNavigate = _.debounce(this.navigate, 100, {
+  debounceLayerNavigate = _.debounce((path) => {
+    this.debounceNavigate(path);
+  }, 100, {
+    'leading': true,
+    'trailing': false
+  });
+
+  debounceNavigate = _.debounce(this.navigate, 150, {
     'leading': false,
     'trailing': true
   });
@@ -989,7 +996,7 @@ class Mapbox extends React.Component {
       });
       this.map.on('click', "Stops", e => {
         const path = `/stations/${e.features[0].properties.id}`;
-        this.debounceNavigate(path);
+        this.debounceLayerNavigate(path);
         e.originalEvent.stopPropagation();
       });
       this.map.on('mouseenter', 'Stops', (() => {
