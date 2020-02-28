@@ -119,10 +119,10 @@ class TrainMapStop extends React.Component {
             arrivalTime &&
             <Header as='h6'
             style={{minWidth: "20px", maxWidth: "20px", margin: "auto 0 auto 10px", display: "inline", textAlign: "center"}}>
-              { arrivalTime > 1 &&
+              { eta > 0 &&
                 <span>{ eta } min</span>
               }
-              { arrivalTime <= 1 &&
+              { eta <= 0 &&
                 <span>Due</span>
               }
             </Header>

@@ -9,7 +9,7 @@ class TripMap extends React.Component {
       return a;
     });
 
-    const firstStopInFuture = times.find((a) => a.estimated_time > currentTime);
+    const firstStopInFuture = times.find((a) => a.estimated_time >= currentTime + 30);
     if (!firstStopInFuture) {
       return times;
     }
