@@ -52,9 +52,11 @@ class TripDetails extends React.Component {
   }
 
   handleShare = _ => {
+    const { trip, train } = this.props;
+    const name = (train.alternate_name) ? ("S - " + train.alternate_name) : train.name;
     navigator.share({
-      title: document.title,
-      url: document.location.href
+      title: `the weekendest beta - ${name} Train - Trip ${trip.id}`,
+      url: `https://www.theweekendest.com/trains/${train.id}/${trip.id}`
     });
   }
 
