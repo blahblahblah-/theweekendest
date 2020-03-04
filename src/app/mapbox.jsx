@@ -477,7 +477,7 @@ class Mapbox extends React.Component {
 
     const tripData = arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
 
-    if (!trainPositions[this.selectedTrip.id] || !tripData) {
+    if (!tripData) {
       return;
     }
 
@@ -492,7 +492,7 @@ class Mapbox extends React.Component {
 
     const route = routing[this.selectedTrip.train];
     const line = turf.helpers.lineString(coords);
-    const lineSlice = turf.lineSlice(turf.helpers.point(trainPositions[this.selectedTrip.id]), turf.helpers.point(coords[coords.length - 1]), line);
+    const lineSlice = trainPositions[this.selectedTrip.id] ? turf.lineSlice(turf.helpers.point(trainPositions[this.selectedTrip.id]), turf.helpers.point(coords[coords.length - 1]), line) : line;
 
     const geojson = {
       "type": "Feature",
