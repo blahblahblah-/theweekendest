@@ -96,6 +96,7 @@ class Mapbox extends React.Component {
     this.selectedTrip = null;
     this.selectedStations = [];
     this.selectedTripCoords = null;
+    this.clickCount = 0;
   }
   
   componentDidMount() {
@@ -136,12 +137,25 @@ class Mapbox extends React.Component {
 
     this.map.on('click', (e) => {
       if (!this.showAll) {
-        const center = this.map.getCenter();
-        const zoom = this.map.getZoom();
-        const bearing = this.map.getBearing();
-        this.debounceNavigate(`/trains#${center.lat},${center.lng}/${zoom}/${bearing}`);
-        e.originalEvent.stopPropagation();
+        this.clickCount++;
+
+        if (this.clickCount === 1) {
+          setTimeout(() => {
+            if(this.clickCount === 1) {
+              const center = this.map.getCenter();
+              const zoom = this.map.getZoom();
+              const bearing = this.map.getBearing();
+              this.debounceNavigate(`/trains#${center.lat},${center.lng}/${zoom}/${bearing}`);
+              e.originalEvent.stopPropagation();
+            }
+            this.clickCount = 0;
+          }, 300);
+        }
       }
+    });
+
+    this.map.on('dblclick', (e) => {
+      return false;
     });
 
     this.geoControl.on('geolocate', (e) => {
@@ -359,8 +373,10 @@ class Mapbox extends React.Component {
         this.map.addLayer(layer);
         this.map.on('click', layerId, (e) => {
           if (this.showAll) {
-            this.debounceLayerNavigate(`/trains/${key}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
-            e.originalEvent.stopPropagation();
+            setTimeout(() => {
+              this.debounceLayerNavigate(`/trains/${key}/#${e.lngLat.lat},${e.lngLat.lng}/${e.target.style.z}`);
+              e.originalEvent.stopPropagation();
+            })
           }
         });
         this.map.on('mouseenter', layerId, (() => {
