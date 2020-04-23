@@ -143,12 +143,10 @@ class TrainDetails extends React.Component {
               }
             </div>
             <div className="status">
-              <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">
-                <Header as='h4' color={this.statusColor(train.status)}>
-                  { train.secondary_status }
-                </Header>
-                <div></div>
-              </a>
+              <Header as='h4' color={this.statusColor(train.status)}>
+                { train.secondary_status }
+              </Header>
+              <div></div>
               <Header as='h6'>
                 Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
               </Header>
@@ -180,12 +178,10 @@ class TrainDetails extends React.Component {
               {train.alternate_name.replace(" Shuttle", "")}
             </Header>
           }
-          <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank" style={{flexGrow: 1, textAlign: "right"}}>
-            <Header as='h4' color={this.statusColor(train.status)} style={{margin: "0 2px 0 0"}}>
-              { train.secondary_status }
-            </Header>
-            <div></div>
-          </a>
+          <Header as='h4' color={this.statusColor(train.status)} style={{margin: "0 2px 0 0", flexGrow: 1, textAlign: "right"}}>
+            { train.secondary_status }
+          </Header>
+          <div></div>
           <Button icon title="Center map" onClick={this.handleRealignMap}>
             <Icon name='crosshairs' />
           </Button>

@@ -127,12 +127,12 @@ class TripDetails extends React.Component {
                   </Link>
                 }
               </Header>
-              <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">
+              <Link to={`/trains/${train.id}/`}>
                 <Header as='h4' color={this.statusColor(train.direction_statuses[direction])} style={{marginTop: 0}}>
                   { train.direction_secondary_statuses[direction] }
                 </Header>
                 <div></div>
-              </a>
+              </Link>
               <Header as='h6'>
                 Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
               </Header>
@@ -190,11 +190,11 @@ class TripDetails extends React.Component {
                 </Link>
               }
             </Header>
-            <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">
+            <Link to={`/trains/${train.id}/`}>
               <Header as='h5' color={this.statusColor(train.status)} style={{margin: 0}}>
                 { train.secondary_status }
               </Header>
-            </a>
+            </Link>
             <Header as='h6' style={{margin: 0}}>
               Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
             </Header>

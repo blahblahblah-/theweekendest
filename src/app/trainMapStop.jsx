@@ -120,7 +120,7 @@ class TrainMapStop extends React.Component {
             <Header as='h6'
             style={{minWidth: "20px", maxWidth: "20px", margin: "auto 0 auto 10px", display: "inline", textAlign: "center"}}>
               { eta > 0 &&
-                <span>{ eta } min</span>
+                <span title={new Date(Date.now() + arrivalTime * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit'})}>{ eta } min</span>
               }
               { eta <= 0 &&
                 <span>Due</span>

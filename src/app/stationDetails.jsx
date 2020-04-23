@@ -525,19 +525,19 @@ class StationDetails extends React.Component {
                           </Header>
                           {
                             (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
-                            <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">
+                            <Link to={`/trains/${trainId}/`}>
                               <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
                                 { train.direction_secondary_statuses.south }
                               </Header>
-                            </a>
+                            </Link>
                           }
                           {
                             trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id) &&
-                            <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">
+                            <Link to={`/trains/${trainId}/`}>
                               <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
                                 { train.direction_secondary_statuses.north }
                               </Header>
-                            </a>
+                            </Link>
                           }
                         </List.Content>
                       </List.Item>
@@ -570,19 +570,19 @@ class StationDetails extends React.Component {
                           </Header>
                           {
                             (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
-                            <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">
+                            <Link to={`/trains/${trainId}/`}>
                               <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
                                 { train.direction_secondary_statuses.north }
                               </Header>
-                            </a>
+                            </Link>
                           }
                           {
                             trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id) &&
-                            <a href={`https://www.goodservice.io/trains/${trainId}/status`} target="_blank">
+                            <Link to={`/trains/${trainId}/`}>
                               <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
                                 { train.direction_secondary_statuses.south }
                               </Header>
-                            </a>
+                            </Link>
                           }
                         </List.Content>
                       </List.Item>
