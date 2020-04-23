@@ -145,7 +145,7 @@ class Mapbox extends React.Component {
               const center = this.map.getCenter();
               const zoom = this.map.getZoom();
               const bearing = this.map.getBearing();
-              this.debounceNavigate(`/trains#${center.lat},${center.lng}/${zoom}/${bearing}`);
+              this.debounceLayerNavigate(`/trains#${center.lat},${center.lng}/${zoom}/${bearing}`);
               e.originalEvent.stopPropagation();
             }
             this.clickCount = 0;
@@ -814,12 +814,12 @@ class Mapbox extends React.Component {
 
   debounceLayerNavigate = _.debounce((path) => {
     this.debounceNavigate(path);
-  }, 100, {
+  }, 300, {
     'leading': true,
     'trailing': false
   });
 
-  debounceNavigate = _.debounce(this.navigate, 150, {
+  debounceNavigate = _.debounce(this.navigate, 450, {
     'leading': false,
     'trailing': true
   });
