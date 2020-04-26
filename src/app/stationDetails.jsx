@@ -518,6 +518,7 @@ class StationDetails extends React.Component {
                         <List.Content floated='left' style={{marginRight: "0.5em"}}>
                           <TrainBullet name={train.name} id={trainId} color={train.color}
                             textColor={train.text_color} size='small' link />
+                          { train.alternate_name && train.alternate_name.replace(" Shuttle", "") }
                         </List.Content>
                         <List.Content floated='right' className="station-details-route-status">
                           <Header as="h5">
@@ -563,6 +564,7 @@ class StationDetails extends React.Component {
                         <List.Content floated='left'>
                           <TrainBullet name={train.name} id={trainId} color={train.color}
                             textColor={train.text_color} size='small' link />
+                          { train.alternate_name && train.alternate_name.replace(" Shuttle", "") }
                         </List.Content>
                         <List.Content floated='right' className="station-details-route-status">
                           <Header as="h5">
