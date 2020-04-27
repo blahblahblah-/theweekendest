@@ -27,18 +27,18 @@ class TrainList extends React.Component {
   render() {
     const { trains } = this.props;
     return (
-      <List divided relaxed selection>
+      <List divided relaxed selection className="train-list">
         {
           trains.filter((train) => train.visible || train.status !== 'Not Scheduled').map((train) => {
             return (
               <List.Item as={Link} key={train.id} to={`/trains/${train.id}`}>
-                <List.Content floated='left' style={{marginRight: "0.3em"}}>
+                <List.Content floated='left' className="bullet-container">
                   <TrainBullet name={train.name} color={train.color}
                     textColor={train.text_color} size='small' />
                 </List.Content>
                 {
                   train.alternate_name &&
-                    <List.Content floated='left' style={{lineHeight: "2em"}}>
+                    <List.Content floated='left' className="alternate-name">
                       { train.alternate_name.replace(' Shuttle', '').replace('Avenue', 'Av') }
                     </List.Content>
                 }

@@ -352,8 +352,28 @@ h4.ui.top.attached.header.advisories-header {
   }
 }
 
-.stop-times {
-  .alternate-name {
-    color: rgba(0,0,0,.4);
+.ui.list.stop-times {
+  .item .content {
+    &.bullet-container {
+      margin-right: 0;
+    }
+
+    &.alternate-name {
+      color: rgba(0,0,0,.4);
+      line-height: 2em;
+      margin: 0;
+    }
+  }
+}
+
+.ui.list.train-list {
+  .item .content {
+    &.bullet-container {
+      margin-right: 0.3em;
+    }
+
+    &.alternate-name {
+      line-height: 2em;
+    }
   }
 }

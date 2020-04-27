@@ -515,7 +515,7 @@ class StationDetails extends React.Component {
                     });
                     return (
                       <List.Item key={trainId}>
-                        <List.Content floated='left' style={{marginRight: "0.5em"}}>
+                        <List.Content floated='left' className="bullet-container">
                           <TrainBullet name={train.name} id={trainId} color={train.color}
                             textColor={train.text_color} size='small' link />
                         </List.Content>
@@ -565,7 +565,7 @@ class StationDetails extends React.Component {
                     });
                     return (
                       <List.Item key={trainId}>
-                        <List.Content floated='left' style={{marginRight: "0.5em"}}>
+                        <List.Content floated='left' className="bullet-container">
                           <TrainBullet name={train.name} id={trainId} color={train.color}
                             textColor={train.text_color} size='small' link />
                         </List.Content>
