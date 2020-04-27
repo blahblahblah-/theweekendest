@@ -507,7 +507,7 @@ class StationDetails extends React.Component {
               { this.southDirection() }To { this.southDestinations() }
             </Header>
             <div>
-              <List divided relaxed>
+              <List divided relaxed className="stop-times">
                 {
                   this.southStops().sort().map((trainId) => {
                     const train = trains.find((t) => {
@@ -518,8 +518,12 @@ class StationDetails extends React.Component {
                         <List.Content floated='left' style={{marginRight: "0.5em"}}>
                           <TrainBullet name={train.name} id={trainId} color={train.color}
                             textColor={train.text_color} size='small' link />
-                          { train.alternate_name && train.alternate_name.replace(" Shuttle", "") }
                         </List.Content>
+                        { train.alternate_name &&
+                          <List.Content floated='left' className="alternate-name">
+                            { train.alternate_name.replace(" Shuttle", "") }
+                          </List.Content>
+                        }
                         <List.Content floated='right' className="station-details-route-status">
                           <Header as="h5">
                             { this.renderArrivalTimes(trainId, "south") }
@@ -553,7 +557,7 @@ class StationDetails extends React.Component {
               { this.northDirection() }To { this.northDestinations() }
             </Header>
             <div>
-              <List divided relaxed>
+              <List divided relaxed className="stop-times">
                 {
                   this.northStops().sort().map((trainId) => {
                     const train = trains.find((t) => {
@@ -561,11 +565,15 @@ class StationDetails extends React.Component {
                     });
                     return (
                       <List.Item key={trainId}>
-                        <List.Content floated='left'>
+                        <List.Content floated='left' style={{marginRight: "0.5em"}}>
                           <TrainBullet name={train.name} id={trainId} color={train.color}
                             textColor={train.text_color} size='small' link />
-                          { train.alternate_name && train.alternate_name.replace(" Shuttle", "") }
                         </List.Content>
+                        { train.alternate_name &&
+                          <List.Content floated='left' className="alternate-name">
+                            { train.alternate_name.replace(" Shuttle", "") }
+                          </List.Content>
+                        }
                         <List.Content floated='right' className="station-details-route-status">
                           <Header as="h5">
                             { this.renderArrivalTimes(trainId, "north")}

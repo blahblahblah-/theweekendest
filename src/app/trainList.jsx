@@ -32,13 +32,13 @@ class TrainList extends React.Component {
           trains.filter((train) => train.visible || train.status !== 'Not Scheduled').map((train) => {
             return (
               <List.Item as={Link} key={train.id} to={`/trains/${train.id}`}>
-                <List.Content floated='left'>
+                <List.Content floated='left' style={{marginRight: "0.3em"}}>
                   <TrainBullet name={train.name} color={train.color}
                     textColor={train.text_color} size='small' />
                 </List.Content>
                 {
                   train.alternate_name &&
-                    <List.Content floated='left'>
+                    <List.Content floated='left' style={{lineHeight: "2em"}}>
                       { train.alternate_name.replace(' Shuttle', '').replace('Avenue', 'Av') }
                     </List.Content>
                 }
