@@ -53,7 +53,7 @@ class TripDetails extends React.Component {
 
   handleShare = _ => {
     const { trip, train } = this.props;
-    const name = (train.alternate_name) ? ("S - " + train.alternate_name) : train.name;
+    const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     navigator.share({
       title: `the weekendest beta - ${name} Train - Trip ${trip.id}`,
       url: `https://www.theweekendest.com/trains/${train.id}/${trip.id}`
@@ -67,7 +67,7 @@ class TripDetails extends React.Component {
 
   render() {
     const { trip, stops, train, stations, direction } = this.props;
-    const name = (train.alternate_name) ? ("S - " + train.alternate_name) : train.name;
+    const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     const title = `the weekendest beta - ${name} Train - Trip ${trip.id}`;
     const destination = trip.arrival_times[trip.arrival_times.length - 1].stop_id.substr(0, 3);
     return (

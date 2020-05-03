@@ -68,7 +68,7 @@ class TrainDetails extends React.Component {
 
   handleShare = _ => {
     const { train } = this.props;
-    const name = (train.alternate_name) ? ("S - " + train.alternate_name) : train.name;
+    const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
 
     navigator.share({
       title: `the weekendest beta - ${name} Train`,
@@ -101,7 +101,7 @@ class TrainDetails extends React.Component {
 
   render() {
     const { routing, stops, train, stations } = this.props;
-    const name = (train.alternate_name) ? ("S - " + train.alternate_name) : train.name;
+    const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     const title = `the weekendest beta - ${name} Train`;
     return (
       <Segment className="details-pane">

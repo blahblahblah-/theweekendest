@@ -520,9 +520,11 @@ class StationDetails extends React.Component {
                             textColor={train.text_color} size='small' link />
                         </List.Content>
                         { train.alternate_name &&
-                          <List.Content floated='left' className="alternate-name">
-                            { train.alternate_name.replace(" Shuttle", "") }
-                          </List.Content>
+                          <Link to={`/trains/${trainId}/`}>
+                            <List.Content floated='left' className="alternate-name">
+                              { train.alternate_name.replace(" Shuttle", "") }
+                            </List.Content>
+                          </Link>
                         }
                         <List.Content floated='right' className="station-details-route-status">
                           <Header as="h5">
@@ -570,9 +572,11 @@ class StationDetails extends React.Component {
                             textColor={train.text_color} size='small' link />
                         </List.Content>
                         { train.alternate_name &&
-                          <List.Content floated='left' className="alternate-name">
-                            { train.alternate_name.replace(" Shuttle", "") }
-                          </List.Content>
+                          <Link to={`/trains/${trainId}/`}>
+                            <List.Content floated='left' className="alternate-name">
+                              { train.alternate_name.replace(" Shuttle", "") }
+                            </List.Content>
+                          </Link>
                         }
                         <List.Content floated='right' className="station-details-route-status">
                           <Header as="h5">
