@@ -113,7 +113,8 @@ class Mapbox extends React.Component {
       maxBounds: [
         [-74.8113, 40.1797],
         [-73.3584, 41.1247]
-      ]
+      ],
+      maxPitch: 0,
     });
 
     this.geoControl = new mapboxgl.GeolocateControl({
@@ -993,7 +994,7 @@ class Mapbox extends React.Component {
           "text-optional": true,
           "text-justify": "auto",
           "text-padding": 5,
-          "text-variable-anchor": ["bottom-right", "right", "left", "bottom-left", "top-left", "bottom"],
+          "text-variable-anchor": ["bottom-right", "top-right", "bottom-left", "top-left", "right", "left", "bottom"],
           "text-radial-offset": 0.2,
           "icon-image": ['get', 'stopType'],
           "icon-size": {
