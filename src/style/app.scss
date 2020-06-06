@@ -44,8 +44,12 @@ h1.yellow a, h3.yellow a {
   padding: 9px 20px;
   text-align: center;
 
+  a {
+    font-weight: bold;
+  }
+
   @media only screen and (max-width: 767px) {
-    padding: 1px 11px;
+    padding: 1px 9px;
     text-align: left;
 
     .header {
