@@ -1746,8 +1746,7 @@ class Mapbox extends React.Component {
       displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions } = this.state;
     return (
       <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
-        <div ref={el => this.mapContainer = el}
-          style={{top: 0, bottom: 0, left: 0, right: 0, position: "absolute"}}>
+        <div ref={el => this.mapContainer = el} className='mapbox'>
         </div>
         <Segment inverted vertical className="infobox">
           { trains.length > 1 &&
