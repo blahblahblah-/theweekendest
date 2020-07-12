@@ -19,12 +19,10 @@ class App extends React.Component {
     return(
       <Router>
         <Message color='black' className='toast'>
-          <Message.Header>Black Lives Matter</Message.Header>
+          <Message.Header>Black Trans Lives Matter</Message.Header>
           <p>
-            Be the change against racial injustice: demand police accountability by&nbsp;
-            <a href="https://www.brooklynnaacp.org/repeal50a" onClick={() => this.trackOutboundLink('https://www.brooklynnaacp.org/repeal50a')} target="_blank">repealing 50-a</a>,
-            and demand to&nbsp;
-            <a href="https://docs.google.com/spreadsheets/d/18pWRSu58DpENABkYUJlZw1ltCPZft7KJc6lFaOZK8-s/htmlview?sle=true&pru=AAABcq-h3HA*oh7juZvqh_r6uiGrz12t1A#" onClick={() => this.trackOutboundLink('https://docs.google.com/spreadsheets/d/18pWRSu58DpENABkYUJlZw1ltCPZft7KJc6lFaOZK8-s/htmlview?sle=true&pru=AAABcq-h3HA*oh7juZvqh_r6uiGrz12t1A#')} target="_blank">defund the NYPD</a>.
+            Support&nbsp;
+            <a href="https://www.theokraproject.com/" onClick={() => this.trackOutboundLink('https://www.theokraproject.com/')} target="_blank">the Okra Project</a>.
           </p>
         </Message>
         <Mapbox />
