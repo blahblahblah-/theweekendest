@@ -30,6 +30,10 @@ h1.yellow a, h3.yellow a {
   padding: 10px !important;
   max-height: 90%;
   border-radius: 1rem !important;
+
+  @media only screen and (max-width: 767px) {
+    top: 30px;
+  }
 }
 
 .mapbox {
@@ -38,6 +42,10 @@ h1.yellow a, h3.yellow a {
   left: 0;
   right: 0;
   position: absolute;
+
+  @media only screen and (max-width: 767px) {
+    top: 20px;
+  }
 }
 
 .ui.message.toast {
