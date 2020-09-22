@@ -1311,11 +1311,13 @@ class Mapbox extends React.Component {
 
         this.map.fitBounds(bounds, {
           padding: {
-            top: (width >= Responsive.onlyTablet.minWidth) ? 20 : 140,
-            right: (width >= Responsive.onlyTablet.minWidth) ? 20 : 60,
-            left: (width >= Responsive.onlyTablet.minWidth) ? 480 : 100,
-            bottom: 30,
+            top: (width >= Responsive.onlyTablet.minWidth) ? 200 : 140,
+            right: (width >= Responsive.onlyTablet.minWidth) ? 60 : 30,
+            left: (width >= Responsive.onlyTablet.minWidth) ? 480 : 30,
+            bottom: (width >= Responsive.onlyTablet.minWidth) ? 100 : 0,
           },
+          bearing: 29,
+          maxZoom: 12.5,
         });
       }
     });
