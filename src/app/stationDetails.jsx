@@ -29,6 +29,8 @@ const BOROUGHS = {
   "SI": "Staten Island"
 }
 
+const STREET_NANE_SUFFIXES = ['St', 'Av', 'Dr', 'Blvd', 'Rd']
+
 class StationDetails extends React.Component {
   constructor(props) {
     super(props);
@@ -157,7 +159,7 @@ class StationDetails extends React.Component {
       const runDestination = stations[estimate.destination.substr(0, 3)].name.replace(/ - /g, "–");
       const timeText = estimate.time < 1 ? "Due" : `${estimate.time} min`;
       if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0].substr(0, 3)) {
-        const runDestinationShort = runDestination.split('–')[0];
+        const runDestinationShort = this.shortenStationName(runDestination);
         return (
           <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}>
             {timeText} ({runDestinationShort})
@@ -394,6 +396,27 @@ class StationDetails extends React.Component {
         );
       }
     }).reduce((prev, curr) => [prev, ', ', curr]);
+  }
+
+  shortenStationName(stationName) {
+    const stationNameArray = stationName.split('–');
+    if (stationNameArray.length === 1) {
+      return stationNameArray[0];
+    }
+    if (stationNameArray[0].endsWith('Sq')) {
+      return stationNameArray[0];
+    } else if (stationNameArray[1].endsWith('Sq')) {
+      return stationNameArray[1];
+    } else if (STREET_NANE_SUFFIXES.some((s) => stationNameArray[0].endsWith(s)) && STREET_NANE_SUFFIXES.some((s) => stationNameArray[1].endsWith(s))) {
+      return stationName;
+    } else if (['Far Rockaway', 'Rockaway Park'].includes(stationNameArray[0])) {
+      return stationNameArray[0];
+    } else if (stationNameArray[0] === 'Jamaica') {
+      return stationName;
+    } else if (STREET_NANE_SUFFIXES.some((s) => stationNameArray[1].endsWith(s))) {
+      return stationNameArray[1];
+    }
+    return stationNameArray[0];
   }
 
   renderOverlayControls() {
