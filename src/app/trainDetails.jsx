@@ -71,7 +71,7 @@ class TrainDetails extends React.Component {
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
 
     navigator.share({
-      title: `the weekendest beta - ${name} Train`,
+      title: `The Weekendest beta - ${name} Train`,
       url: `https://www.theweekendest.com/trains/${train.id}`
     });
   }
@@ -82,15 +82,15 @@ class TrainDetails extends React.Component {
   }
 
   renderOverlayControls() {
-    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions,
-      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle,
+    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly,
+      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle, handleDisplayAccessibleOnlyToggle,
       handleDisplayTrainPositionsToggle} = this.props;
     return (
       <Popup trigger={<Button icon='sliders horizontal' title="Configure overlays" />}
             on='click' hideOnScroll position='bottom center' style={{maxWidth: "195px"}}>
         <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-            displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
-            handleDisplayProblemsToggle={handleDisplayProblemsToggle}
+            displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
+            handleDisplayProblemsToggle={handleDisplayProblemsToggle} handleDisplayAccessibleOnlyToggle={handleDisplayAccessibleOnlyToggle}
             handleDisplayDelaysToggle={handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={handleDisplaySlowSpeedsToggle}
             handleDisplayLongHeadwaysToggle={handleDisplayLongHeadwaysToggle}
             handleDisplayTrainPositionsToggle={handleDisplayTrainPositionsToggle}
@@ -100,9 +100,9 @@ class TrainDetails extends React.Component {
   }
 
   render() {
-    const { routing, stops, train, stations, accessibleStations, elevatorOutages } = this.props;
+    const { routing, stops, train, stations, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
-    const title = `the weekendest beta - ${name} Train`;
+    const title = `The Weekendest beta - ${name} Train`;
     return (
       <Segment className="details-pane">
         <Helmet>
@@ -192,7 +192,7 @@ class TrainDetails extends React.Component {
         {
           this.renderSummary()
         }
-        <TrainMap routing={routing} stops={stops} train={train} stations={stations} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} />
+        <TrainMap routing={routing} stops={stops} train={train} stations={stations} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} />
       </Segment>
     );
   }

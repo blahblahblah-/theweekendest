@@ -5,26 +5,29 @@ import { List, Checkbox, Header } from "semantic-ui-react";
 class OverlayControls extends React.Component {
 
   render() {
-    const { alwaysExpand, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions,
-      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle,
+    const { alwaysExpand, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly,
+      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle, handleDisplayAccessibleOnlyToggle,
       handleDisplayTrainPositionsToggle} = this.props;
 
     return (
-      <List>
+      <List className='overlay-controls'>
         <List.Item>
-          <Checkbox toggle onChange={handleDisplayTrainPositionsToggle} checked={displayTrainPositions} label={<label title="Train location estimations are calculated from estimated arrival times and may not be accurate.">train locations</label>} />
+          <Checkbox toggle onChange={handleDisplayAccessibleOnlyToggle} checked={displayAccessibleOnly} label={<label>Accessibly Stations Only</label>} />
         </List.Item>
         <List.Item>
-          <Checkbox toggle onChange={handleDisplayProblemsToggle} checked={displayProblems} label={<label title="May cause performance issues">overlay issues (experimental)</label>} />
+          <Checkbox toggle onChange={handleDisplayTrainPositionsToggle} checked={displayTrainPositions} label={<label title="Train location estimations are calculated from estimated arrival times and may not be accurate.">Train Locations</label>} />
+        </List.Item>
+        <List.Item>
+          <Checkbox toggle onChange={handleDisplayProblemsToggle} checked={displayProblems} label={<label title="May cause performance issues">Overlay Issues (experimental)</label>} />
           <List.List style={{"display": ((displayProblems || alwaysExpand) ? "block" : "none")}}>
             <List.Item>
-              <Checkbox className="delay" toggle onChange={handleDisplayDelaysToggle} checked={displayDelays} disabled={!displayProblems} label={<label>delays</label>} />
+              <Checkbox className="delay" toggle onChange={handleDisplayDelaysToggle} checked={displayDelays} disabled={!displayProblems} label={<label>Delays</label>} />
             </List.Item>
             <List.Item>
-              <Checkbox className="slow" toggle onChange={handleDisplaySlowSpeedsToggle} checked={displaySlowSpeeds} disabled={!displayProblems} label={<label>slow speeds</label>} />
+              <Checkbox className="slow" toggle onChange={handleDisplaySlowSpeedsToggle} checked={displaySlowSpeeds} disabled={!displayProblems} label={<label>Slow Speeds</label>} />
             </List.Item>
             <List.Item>
-              <Checkbox className="long-headway" toggle onChange={handleDisplayLongHeadwaysToggle} checked={displayLongHeadways} disabled={!displayProblems} label={<label>long headways</label>} />
+              <Checkbox className="long-headway" toggle onChange={handleDisplayLongHeadwaysToggle} checked={displayLongHeadways} disabled={!displayProblems} label={<label>Long Headways</label>} />
             </List.Item>
             <List.Item>
               <Header as='h6'>

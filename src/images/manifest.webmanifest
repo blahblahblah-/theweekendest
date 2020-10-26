@@ -1,10 +1,10 @@
 {
-  "name": "the weekendest",
-  "short_name": "the weekendest",
+  "name": "The Weekendest",
+  "short_name": "The Weekendest",
   "start_url": "https://www.theweekendest.com",
   "display": "fullscreen",
   "background_color": "#000000",
-  "description": "real time new york city subway map",
+  "description": "Real-Time New York City Subway Map",
   "icons": [{
     "src": "apple-touch-icon.png",
     "sizes": "180x180",
