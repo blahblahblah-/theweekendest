@@ -425,15 +425,15 @@ class StationDetails extends React.Component {
   }
 
   renderOverlayControls() {
-    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions,
-      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle,
+    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly,
+      handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle, handleDisplayAccessibleOnlyToggle,
       handleDisplayTrainPositionsToggle } = this.props;
     return (
       <Popup trigger={<Button icon='sliders horizontal' title="Configure overlays" />}
             on='click' hideOnScroll position='bottom center' style={{maxWidth: "195px"}}>
         <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-            displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
-            handleDisplayProblemsToggle={handleDisplayProblemsToggle}
+            displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
+            handleDisplayProblemsToggle={handleDisplayProblemsToggle} handleDisplayAccessibleOnlyToggle={handleDisplayAccessibleOnlyToggle}
             handleDisplayDelaysToggle={handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={handleDisplaySlowSpeedsToggle}
             handleDisplayLongHeadwaysToggle={handleDisplayLongHeadwaysToggle}
             handleDisplayTrainPositionsToggle={handleDisplayTrainPositionsToggle}

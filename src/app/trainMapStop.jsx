@@ -8,12 +8,14 @@ import { accessibilityIcon } from './utils/accessibility.jsx';
 class TrainMapStop extends React.Component {
 
   renderStop() {
-    const { southStop, northStop, stop } = this.props;
+    const { southStop, northStop, stop, accessibleStations, displayAccessibleOnly } = this.props;
+
+    const opacity = !displayAccessibleOnly || accessibleStations.north.includes(stop.id + 'N') || accessibleStations.south.includes(stop.id + 'S') ? 1 : 0.2;
 
     if (southStop && northStop) {
       return (
         <Link to={`/stations/${stop.id}`}>
-          <div style={{border: "1px #999 solid", height: "10px", width: "10px", borderRadius: "50%",
+          <div style={{border: "1px #999 solid", height: "10px", width: "10px", borderRadius: "50%", opacity: opacity,
             position: "relative", backgroundColor: "white", left: "5px", top: "20px", cursor: "pointer"}}>
           </div>
         </Link>
@@ -23,7 +25,7 @@ class TrainMapStop extends React.Component {
     if (northStop) {
       return (
         <Link to={`/stations/${stop.id}`}>
-          <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderTopLeftRadius: "10px", 
+          <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderTopLeftRadius: "10px", opacity: opacity,
             borderTopRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
             top: "20px", cursor: "pointer"}}>
           </div>
@@ -33,7 +35,7 @@ class TrainMapStop extends React.Component {
 
     return (
       <Link to={`/stations/${stop.id}`}>
-        <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderBottomLeftRadius: "10px",
+        <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderBottomLeftRadius: "10px", opacity: opacity,
           borderBottomRightRadius: "10px", position: "relative", backgroundColor: "white", left: "5px",
           top: "25px", cursor: "pointer"}}>
         </div>
@@ -112,8 +114,9 @@ class TrainMapStop extends React.Component {
   }
 
   render() {
-    const { stop, transfers, activeBranches, branchStart, branchEnd, arrivalTime, accessibleStations, elevatorOutages } = this.props;
+    const { stop, transfers, activeBranches, branchStart, branchEnd, arrivalTime, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
     const eta = arrivalTime && Math.round(arrivalTime / 60);
+    const opacity = !stop || !displayAccessibleOnly || accessibleStations.north.includes(stop.id + 'N') || accessibleStations.south.includes(stop.id + 'S') ? 1 : 0.2;
     return (
       <li>
         <div style={{minHeight: "50px", display: "flex"}}>
@@ -134,7 +137,7 @@ class TrainMapStop extends React.Component {
             })
           }
           <Header as='h5'
-            style={{display: "inline", margin: "auto 0", cursor: "pointer"}}>
+            style={{display: "inline", margin: "auto 0", cursor: "pointer", opacity: opacity}}>
             {
               stop &&
               <Link to={`/stations/${stop.id}`}>
@@ -143,7 +146,7 @@ class TrainMapStop extends React.Component {
               </Link>
             }
           </Header>
-          <div style={{display: "inline-block", margin: "auto 0"}}>
+          <div style={{display: "inline-block", margin: "auto 0", opacity: opacity}}>
             {
               transfers && transfers.map((route) => {
                 return (

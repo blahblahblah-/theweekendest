@@ -20,6 +20,35 @@ h1.yellow a, h3.yellow a {
   color: #ffe21f!important;
 }
 
+.overlay-controls {
+  .ui.checkbox .box, .ui.checkbox label {
+    font-size: .8em;
+  }
+}
+
+.display-legend {
+  margin-bottom: .2em;
+}
+
+.ui.header.site-name {
+  margin-top: 0;
+  padding: 0;
+
+  a {
+    color: white;
+  }
+}
+
+.yellow-bar {
+  width: 342px;
+  height: 5px;
+  background-color: #fcea40;
+
+  @media only screen and (max-width: 767px) {
+    width: 269px;
+  }
+}
+
 .infobox {
   display: block;
   position: absolute !important;
@@ -225,9 +254,17 @@ h1.yellow a, h3.yellow a {
     line-height: 28px!important;
   }
 
+  .left.floated.content {
+    margin-right: .25em;
+  }
+
   .secondary-name {
     font-size: 0.9em;
-    line-height: 28px!important;
+    line-height: 29px!important;
+  }
+
+  .accessibility-icon {
+    line-height: 29px!important;
   }
 }
 
@@ -280,7 +317,7 @@ h1.yellow a, h3.yellow a {
   height: 36px;
   margin-bottom: 14px;
   align-items: center;
-  width: 231px;
+  width: 228px;
 
   &.mobile-train-details-header {
     margin-bottom: 0;

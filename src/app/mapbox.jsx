@@ -8,7 +8,7 @@ import { debounce, filter, map } from 'lodash';
 import * as Cookies from 'es-cookie';
 import * as turf from './vendor/turf.js';
 
-import Legend from './legend.jsx';
+import LegendModal from './legendModal.jsx';
 import OverlayControls from './overlayControls.jsx';
 import TrainList from './trainList.jsx';
 import TrainDetails from './trainDetails.jsx';
@@ -59,6 +59,7 @@ class Mapbox extends React.Component {
       trains: [],
       arrivals: {},
       routing: {},
+      displayAccessibleOnly: false,
       displayProblems: false,
       displayDelays: false,
       displaySlowSpeeds: false,
@@ -1036,7 +1037,7 @@ class Mapbox extends React.Component {
   }
 
   stopsGeoJson() {
-    const { processedRoutings, arrivals } = this.state;
+    const { processedRoutings, arrivals, accessibleStations, displayAccessibleOnly } = this.state;
 
     if (this.selectedTrip && arrivals) {
       const tripData = arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
@@ -1128,8 +1129,10 @@ class Mapbox extends React.Component {
 
         let opacity = 1;
         let priority = 5;
-        if (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
-            !this.selectedStations.includes(key) && (this.selectedTrains.length === 1 || stations[key].stops.size > 0)) {
+
+        if ((displayAccessibleOnly && !accessibleStations.north.includes(key + 'N') && !accessibleStations.south.includes(key + 'S')) ||
+            (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
+            !this.selectedStations.includes(key) && (this.selectedTrains.length === 1 || stations[key].stops.size > 0))) {
           opacity = 0.1;
           priority = 10;
         } else if (this.selectedStations.length > 0 && !this.selectedStations.includes(key)) {
@@ -1200,8 +1203,12 @@ class Mapbox extends React.Component {
   }
 
   stopTypeIcon(stopId) {
+    const { accessibleStations, displayAccessibleOnly, elevatorOutages } = this.state;
+
     let southStops = new Set(stations[stopId]["southStops"]);
     let northStops = new Set(stations[stopId]["northStops"]);
+    const southAccessible = accessibleStations.south.includes(stopId + 'S');
+    const northAccessible = accessibleStations.north.includes(stopId + 'N');
 
     if (M_TRAIN_SHUFFLE.includes(stopId)) {
       let southStopsContainM = false;
@@ -1227,13 +1234,16 @@ class Mapbox extends React.Component {
     if (this.selectedTrains.length == 1) {
       const selectedTrain = this.selectedTrains[0];
 
-      if (southStops.has(selectedTrain) && northStops.has(selectedTrain)) {
+      if (displayAccessibleOnly && elevatorOutages[stopId]) {
+        return "stop-with-issues";
+      }
+      if (southStops.has(selectedTrain) && northStops.has(selectedTrain) && (!displayAccessibleOnly || (southAccessible && northAccessible))) {
         return "express-stop";
       }
-      if (southStops.has(selectedTrain)) {
+      if (southStops.has(selectedTrain) && (!displayAccessibleOnly || southAccessible)) {
         return "all-downtown-trains";
       }
-      if (northStops.has(selectedTrain)) {
+      if (northStops.has(selectedTrain) && (!displayAccessibleOnly || northAccessible)) {
         return "all-uptown-trains";
       }
       if (stations[stopId]["stops"].size == 0) {
@@ -1246,28 +1256,32 @@ class Mapbox extends React.Component {
     if (stations[stopId]["stops"].size == 0) {
       return "cross-15";
     }
+    if (displayAccessibleOnly && elevatorOutages[stopId]) {
+      return "stop-with-issues";
+    }
     if (passed.every((train) => southStops.has(train)) &&
-      (passed.every((train) => northStops.has(train)))) {
+      (passed.every((train) => northStops.has(train))) &&
+      (!displayAccessibleOnly || (southAccessible && northAccessible))) {
       return "express-stop";
     }
-    if (northStops.size == 0) {
+    if (northStops.size == 0 || (displayAccessibleOnly && southAccessible && !northAccessible)) {
       if (passed.every((train) => southStops.has(train))) {
         return "all-downtown-trains";
       } else {
         return "downtown-only";
       }
     }
-    if (southStops.size == 0) {
+    if (southStops.size == 0 || (displayAccessibleOnly && !southAccessible && northAccessible)) {
       if (passed.every((train) => northStops.has(train))) {
         return "all-uptown-trains";
       } else {
         return "uptown-only";
       }
     }
-    if (passed.every((train) => southStops.has(train))) {
+    if (passed.every((train) => southStops.has(train)) && (!displayAccessibleOnly || (southAccessible && northAccessible))) {
       return "downtown-all-trains";
     }
-    if (passed.every((train) => northStops.has(train))) {
+    if (passed.every((train) => northStops.has(train)) && (!displayAccessibleOnly || (southAccessible && northAccessible))) {
       return "uptown-all-trains";
     }
     return "circle-15";
@@ -1578,6 +1592,17 @@ class Mapbox extends React.Component {
     });
   }
 
+  handleDisplayAccessibleOnlyToggle = (e, {checked}) => {
+    this.setState({displayAccessibleOnly: checked}, () => {
+      this.renderStops();
+    });
+    gtag('event', 'toggle', {
+      'event_category': 'displayAccessibleOnly',
+      'event_label': checked.toString()
+    });
+  }
+
+
   handleMountTrainDetails = (train, coords, zoom) => {
     if (!this.mapLoaded) {
       this.map.on('load', () => {
@@ -1666,7 +1691,7 @@ class Mapbox extends React.Component {
   }
 
   panes() {
-    const { trains, geoLocation, accessibleStations, elevatorOutages } = this.state;
+    const { trains, geoLocation, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.state;
     return [
       {
         menuItem: <Menu.Item as={Link} to='/trains' key='train' title='Trains'>Trains</Menu.Item>,
@@ -1674,34 +1699,34 @@ class Mapbox extends React.Component {
       },
       {
         menuItem: <Menu.Item as={Link} to='/stations' key='stations' title='Stations'>Stations</Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} handleOnMount={this.handleStationList} infoBox={this.infoBox} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} handleOnMount={this.handleStationList} infoBox={this.infoBox} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/starred' key='starred' title='Starred Stations'><Icon name='star' style={{margin: 0}} /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages}  handleOnMount={this.handleStationList} infoBox={this.infoBox} starred={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} handleOnMount={this.handleStationList} infoBox={this.infoBox} starred={true} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/nearby' key='nearby' title='Nearby Stations'><Icon name='location arrow' style={{margin: 0}} /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages}  handleOnMount={this.handleStationList} handleNearby={this.handleNearby} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} accessibleStations={accessibleStations} displayAccessibleOnly={displayAccessibleOnly} elevatorOutages={elevatorOutages}  handleOnMount={this.handleStationList} handleNearby={this.handleNearby} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/advisories' key='advisories' title='Advisories'><Icon name='warning sign' style={{margin: 0}} /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} handleOnMount={this.handleStationList} infoBox={this.infoBox} advisories={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} handleOnMount={this.handleStationList} infoBox={this.infoBox} advisories={true} /></Tab.Pane>,
       },
     ];
   }
 
   renderListings(index) {
-    const { trains, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions } = this.state;
+    const { trains, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly } = this.state;
     return (
       <div>
         <Helmet>
-          <title>the weekendest beta - real-time new york city subway map</title>
+          <title>The Weekendest beta - Real-Time New York City Subway Map</title>
           <meta property="og:url" content="https://www.theweekendest.com" />
           <meta name="twitter:url" content="https://www.theweekendest.com" />
           <link rel="canonical" href="https://www.theweekendest.com" />
-          <meta property="og:title" content="the weekendest beta - real-time new york city subway map" />
-          <meta name="twitter:title" content="the weekendest beta - real-time new york city subway map" />
+          <meta property="og:title" content="The Weekendest beta - Real-Time New York City Subway Map" />
+          <meta name="twitter:title" content="The Weekendest beta - Real-Time New York City Subway Map" />
           <meta name="Description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
           <meta property="og:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
           <meta name="twitter:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
@@ -1709,37 +1734,46 @@ class Mapbox extends React.Component {
         <Responsive {...Responsive.onlyMobile} as={Segment} className="mobile-top-bar" style={{padding: 0}}>
           <div className='mobile-details-header'>
             <Header as='h4' style={{flexGrow: 1, margin: "14px"}}>
-              information
+              Information
             </Header>
+            <LegendModal trigger={
+              <Button icon title="Display legend" style={{float: "right"}}>
+                <Icon name='list alternate outline' />
+              </Button>
+            } />
             <Button icon title="Center map" onClick={this.handleRealignMap} style={{float: "right"}}>
               <Icon name='crosshairs' />
             </Button>
           </div>
           <div style={{margin: "14px"}}>
-            <Legend />
             <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-                  displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
-                  handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                  displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
+                  handleDisplayProblemsToggle={this.handleDisplayProblemsToggle} handleDisplayAccessibleOnlyToggle={this.handleDisplayAccessibleOnlyToggle}
                   handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
                   handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
                   handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle} />
           </div>
         </Responsive>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as={Segment}>
-          <Header as='h4'>
-            legend
-          </Header>
-          <Legend />
           <Grid>
             <Grid.Column width={3}>
-              <Button icon title="Center map" onClick={this.handleRealignMap}>
-                <Icon name='crosshairs' />
-              </Button>
+              <div className='display-legend'>
+                <LegendModal trigger={
+                  <Button icon title="Display legend">
+                    <Icon name='list alternate outline' />
+                  </Button>
+                } />
+              </div>
+              <div>
+                <Button icon title="Center map" onClick={this.handleRealignMap}>
+                  <Icon name='crosshairs' />
+                </Button>
+              </div>
             </Grid.Column>
             <Grid.Column width={13}>
               <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-                displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions}
-                handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
+                handleDisplayProblemsToggle={this.handleDisplayProblemsToggle} handleDisplayAccessibleOnlyToggle={this.handleDisplayAccessibleOnlyToggle}
                 handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
                 handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
                 handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle} />
@@ -1757,7 +1791,7 @@ class Mapbox extends React.Component {
 
   render() {
     const { loading, trains, arrivals, routing, stops, timestamp, blogPost, accessibleStations, elevatorOutages,
-      displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions } = this.state;
+      displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly } = this.state;
     return (
       <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
         <div ref={el => this.mapContainer = el} className='mapbox'>
@@ -1771,25 +1805,27 @@ class Mapbox extends React.Component {
             </Responsive>
           }
           <Responsive {...Responsive.onlyMobile} as='div'>
-            <Header inverted as='h3' color='yellow' style={{padding: "5px", float: "left", marginBottom: 0}}>
-            <Link to='/'>
-              the weekendest<span id="alpha">beta</span>
-            </Link>
+            <div className='yellow-bar'></div>
+            <Header inverted as='h3' className='site-name' style={{float: "left", marginBottom: '2px'}}>
+              <Link to='/'>
+                The Weekendest<span id="alpha">beta</span>
+              </Link>
               <Header.Subheader>
-                real-time new york city subway map
+                Real-Time NYC Subway Map
               </Header.Subheader>
             </Header>
-            <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "11px 11px 0 0"}}>
+            <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "5px 11px 0 0"}}>
               <Icon loading={loading} name='refresh' />
             </Button>
           </Responsive>
           <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div'>
-            <Header inverted as='h1' color='yellow' style={{padding: "5px", float: 'left'}}>
-            <Link to='/'>
-              the weekendest<span id="alpha">beta</span>
-            </Link>
+            <div className='yellow-bar'></div>
+            <Header inverted as='h1' className='site-name' style={{float: 'left'}}>
+              <Link to='/'>
+                The Weekendest<span id="alpha">beta</span>
+              </Link>
               <Header.Subheader>
-                real-time new york city subway map
+                Real-Time New York City Subway Map
               </Header.Subheader>
             </Header>
             <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "18px 9px 0 0"}}>
@@ -1842,10 +1878,10 @@ class Mapbox extends React.Component {
                           elevatorOutages={elevatorOutages}
                           train={trains.find((train) => train.id == props.match.params.id)}
                           displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-                          displayTrainPositions={displayTrainPositions}
+                          displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
                           displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
                           handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
-                          handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
+                          handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} handleDisplayAccessibleOnlyToggle={this.handleDisplayAccessibleOnlyToggle}
                           handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
                           handleResetMap={this.handleResetMap}
                           handleOnMount={this.handleMountTrainDetails} coords={coords} zoom={zoom} infoBox={this.infoBox}
@@ -1864,10 +1900,10 @@ class Mapbox extends React.Component {
                         accessibleStations={accessibleStations}
                         elevatorOutages={elevatorOutages}
                         displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-                        displayTrainPositions={displayTrainPositions}
+                        displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
                         displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
                         handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
-                        handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle}
+                        handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} handleDisplayAccessibleOnlyToggle={this.handleDisplayAccessibleOnlyToggle}
                         handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
                         handleResetMap={this.handleResetMap}
                         handleOnMount={this.handleMountStationDetails} infoBox={this.infoBox}

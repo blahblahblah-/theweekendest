@@ -18,9 +18,31 @@ const resultRenderer = ({ title }) => <Label content={title} />
 class StationList extends React.Component {
   constructor(props) {
     super(props);
-    const { stations } = this.props;
+
+    this.state = { stationsDisplayed: [] };
+  }
+
+  componentDidMount() {
+    this.updateMap();
+    this.filterAndSortStations();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { advisories, starred, nearby, displayAccessibleOnly } = this.props;
+    if (starred !== prevProps.starred || advisories !== prevProps.advisories || nearby !== prevProps.nearby) {
+      this.updateMap();
+    }
+    if (displayAccessibleOnly !== prevProps.displayAccessibleOnly) {
+      this.filterAndSortStations();
+    }
+  }
+
+  filterAndSortStations() {
+    const { stations, displayAccessibleOnly, accessibleStations } = this.props;
     // Sort by numbers first before alpha
-    this.stations = Object.values(stations).sort((a, b) => {
+    this.stations = Object.values(stations).filter((station) => {
+      return !displayAccessibleOnly || accessibleStations.north.includes(station.id + 'N') || accessibleStations.south.includes(station.id + 'S');
+    }).sort((a, b) => {
       const matchA = a.name.match(/^(\d+)/g);
       const matchB = b.name.match(/^(\d+)/g);
 
@@ -73,24 +95,13 @@ class StationList extends React.Component {
 
       return 0;
     });
-    this.state = {stationsDisplayed: this.stations};
-  }
-
-  componentDidMount() {
-    this.updateMap();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { advisories, starred, nearby } = this.props;
-    if (starred !== prevProps.starred || advisories !== prevProps.advisories || nearby !== prevProps.nearby) {
-      this.updateMap();
-    }
+    this.setState({stationsDisplayed: this.stations});
   }
 
   updateMap() {
     const { handleOnMount, advisories, starred, nearby, infoBox, handleNearby } = this.props;
     if (advisories) {
-      handleOnMount(this.stationsWithoutService().concat(this.stationsWithOneWayService()).map((s) => s.id), false);
+      handleOnMount(this.stationsWithElevatorOutages().concat(this.stationsWithoutService().concat(this.stationsWithOneWayService())).map((s) => s.id), false);
     } else if (nearby) {
       handleNearby();
       handleOnMount([], true);
@@ -100,6 +111,11 @@ class StationList extends React.Component {
     }
     infoBox.classList.add('open');
     infoBox.scrollTop = 0;
+  }
+
+  stationsWithElevatorOutages() {
+    const { elevatorOutages } = this.props;
+    return _.filter(this.stations, (result) => elevatorOutages[result.id]);
   }
 
   stationsWithoutService() {
@@ -210,6 +226,7 @@ class StationList extends React.Component {
     const trainMap = {};
     const stationsWithoutService = advisories && this.stationsWithoutService();
     const stationsWithOneWayService = advisories && this.stationsWithOneWayService();
+    const stationsWithElevatorOutages = advisories && this.stationsWithElevatorOutages();
     const stationsNearby = nearby && this.stationsNearby();
 
     trains.forEach((train) => {
@@ -222,12 +239,12 @@ class StationList extends React.Component {
           <div>
             <Input icon='search' placeholder='Search...' onChange={this.handleChange} className="station-search" />
             <Helmet>
-              <title>the weekendest beta - Stations</title>
+              <title>The Weekendest beta - Stations</title>
               <meta property="og:url" content="https://www.theweekendest.com/stations" />
               <meta name="twitter:url" content="https://www.theweekendest.com/stations" />
               <link rel="canonical" href="https://www.theweekendest.com/stations" />
-              <meta property="og:title" content="the weekendest beta - Stations" />
-              <meta name="twitter:title" content="the weekendest beta - Stations" />
+              <meta property="og:title" content="The Weekendest beta - Stations" />
+              <meta name="twitter:title" content="The Weekendest beta - Stations" />
               <meta name="Description" content="View New York City subway status, live arrival times and real-time routing by station." />
               <meta property="og:description" content="View New York City subway status, live arrival times and real-time routing by station." />
               <meta name="twitter:description" content="View New York City subway status, live arrival times and real-time routing by station." />
@@ -253,12 +270,12 @@ class StationList extends React.Component {
               }
             </List>
             <Helmet>
-              <title>the weekendest beta - Starred Stations</title>
+              <title>The Weekendest beta - Starred Stations</title>
               <meta property="og:url" content="https://www.theweekendest.com/starred" />
               <meta name="twitter:url" content="https://www.theweekendest.com/starred" />
               <link rel="canonical" href="https://www.theweekendest.com/starred" />
-              <meta property="og:title" content="the weekendest beta - Starred Stations" />
-              <meta name="twitter:title" content="the weekendest beta - Starred Stations" />
+              <meta property="og:title" content="The Weekendest beta - Starred Stations" />
+              <meta name="twitter:title" content="The Weekendest beta - Starred Stations" />
               <meta name="Description" content="Star your favorite New York City subway stations and view their trains' status, live arrival times and real-time routing." />
               <meta property="og:description" content="Star your favorite New York City subway stations and view their trains' status, live arrival times and real-time routing." />
               <meta name="twitter:description" content="Star your favorite New York City subway stations and view their trains' status, live arrival times and real-time routing." />
@@ -284,12 +301,12 @@ class StationList extends React.Component {
               }
             </List>
             <Helmet>
-              <title>the weekendest beta - Nearby Stations</title>
+              <title>The Weekendest beta - Nearby Stations</title>
               <meta property="og:url" content="https://www.theweekendest.com/nearby" />
               <meta name="twitter:url" content="https://www.theweekendest.com/nearby" />
               <link rel="canonical" href="https://www.theweekendest.com/nearby" />
-              <meta property="og:title" content="the weekendest beta - Nearby Stations" />
-              <meta name="twitter:title" content="the weekendest beta - Nearby Stations" />
+              <meta property="og:title" content="The Weekendest beta - Nearby Stations" />
+              <meta name="twitter:title" content="The Weekendest beta - Nearby Stations" />
               <meta name="Description" content="Find the New York City subway stations nearest you, and view their trains' status, live arrival times and real-time routing." />
               <meta property="og:description" content="Find the New York City subway stations nearest you, and view their trains' status, live arrival times and real-time routing." />
               <meta name="twitter:description" content="Find the New York City subway stations nearest you, and view their trains' status, live arrival times and real-time routing." />
@@ -330,18 +347,35 @@ class StationList extends React.Component {
               </div>
             }
             {
-              !stationsWithoutService && !stationsWithOneWayService &&
+              stationsWithElevatorOutages && stationsWithElevatorOutages.length > 0 &&
+              <div>
+                <Header as='h4' attached='top' inverted className='advisories-header'>
+                  Stations with elevator outages
+                </Header>
+                <List divided relaxed selection attached="true" style={{marginTop: 0}}>
+                  {
+                    stationsWithElevatorOutages.map((station) => {
+                      return this.renderListItem(station, trainMap);
+                    })
+                  }
+                </List>
+              </div>
+            }
+            {
+              (!stationsWithoutService || stationsWithoutService.length === 0) &&
+              (!stationsWithOneWayService || stationsWithOneWayService.length === 0) &&
+              (!stationsWithElevatorOutages || stationsWithElevatorOutages.length === 0) &&
               <Header as='h4' style={{margin: "0.5em" }}>
                 No advisories at this time, yay!
               </Header>
             }
             <Helmet>
-              <title>the weekendest beta - Advisories</title>
+              <title>The Weekendest beta - Advisories</title>
               <meta property="og:url" content="https://www.theweekendest.com/advisories" />
               <meta name="twitter:url" content="https://www.theweekendest.com/advisories" />
               <link rel="canonical" href="https://www.theweekendest.com/advisories" />
-              <meta property="og:title" content="the weekendest beta - Advisories" />
-              <meta name="twitter:title" content="the weekendest beta - Advisories" />
+              <meta property="og:title" content="The Weekendest beta - Advisories" />
+              <meta name="twitter:title" content="The Weekendest beta - Advisories" />
               <meta name="Description" content="View in real-time which New York City subway stations are currently closed or have only one-way train service." />
               <meta property="og:description" content="View in real-time which New York City subway stations are currently closed or have only one-way train service." />
               <meta name="twitter:description" content="View in real-time which New York City subway stations are currently closed or have only one-way train service." />

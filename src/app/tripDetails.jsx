@@ -5,7 +5,6 @@ import { withRouter, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Clipboard from 'react-clipboard.js';
 
-import OverlayControls from './overlayControls.jsx';
 import TripMap from './tripMap.jsx';
 import TrainBullet from './trainBullet.jsx';
 
@@ -55,7 +54,7 @@ class TripDetails extends React.Component {
     const { trip, train } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     navigator.share({
-      title: `the weekendest beta - ${name} Train - Trip ${trip.id}`,
+      title: `The Weekendest beta - ${name} Train - Trip ${trip.id}`,
       url: `https://www.theweekendest.com/trains/${train.id}/${trip.id}`
     });
   }
@@ -68,7 +67,7 @@ class TripDetails extends React.Component {
   render() {
     const { trip, stops, train, stations, direction, accessibleStations, elevatorOutages } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
-    const title = `the weekendest beta - ${name} Train - Trip ${trip.id}`;
+    const title = `The Weekendest beta - ${name} Train - Trip ${trip.id}`;
     const destination = trip.arrival_times[trip.arrival_times.length - 1].stop_id.substr(0, 3);
     return (
       <Segment className="details-pane">
