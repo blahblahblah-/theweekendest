@@ -6,6 +6,8 @@ import Clipboard from 'react-clipboard.js';
 import { Helmet } from "react-helmet";
 import * as Cookies from 'es-cookie';
 
+import { accessibilityIcon } from './utils/accessibility.jsx';
+
 import OverlayControls from './overlayControls.jsx';
 import TrainBullet from './trainBullet.jsx';
 
@@ -173,7 +175,7 @@ class StationDetails extends React.Component {
     }).reduce((prev, curr) => [prev, ', ', curr]);
   }
 
-  southDestinations() {
+  southDestinations(link) {
     const { routings, station } = this.props;
     let destinations = [];
     Object.keys(routings).forEach((key) => {
@@ -196,7 +198,7 @@ class StationDetails extends React.Component {
       })
     }
 
-    return this.sortDestinations(destinations);
+    return this.sortDestinations(destinations, link);
   }
 
   southDirection() {
@@ -275,7 +277,7 @@ class StationDetails extends React.Component {
     return results;
   }
 
-  northDestinations() {
+  northDestinations(link) {
     const { routings, station } = this.props;
     let destinations = [];
     Object.keys(routings).forEach((key) => {
@@ -298,7 +300,7 @@ class StationDetails extends React.Component {
       })
     }
 
-    return this.sortDestinations(destinations);
+    return this.sortDestinations(destinations, link);
   }
 
   northDirection() {
@@ -372,7 +374,7 @@ class StationDetails extends React.Component {
     return results;
   }
 
-  sortDestinations(destinations) {
+  sortDestinations(destinations, link) {
     const { stations } = this.props;
 
     if (destinations.length === 0) {
@@ -389,6 +391,9 @@ class StationDetails extends React.Component {
     }).map((s) => {
       const st = stations[s.substring(0, 3)];
       if (st) {
+        if (!link) {
+          return st.name.replace(/ - /g, "–");
+        }
         return (
           <Link to={`/stations/${st.id}`} key={st.id}>
             { st.name.replace(/ - /g, "–") }
@@ -438,7 +443,7 @@ class StationDetails extends React.Component {
   }
 
   render() {
-    const { stations, station, trains } = this.props;
+    const { stations, station, trains, accessibleStations, elevatorOutages } = this.props;
     const { fav } = this.state;
     const name = `${ station.name.replace(/ - /g, "–") }${ station.secondary_name ? ` (${station.secondary_name})` : ""}`;
     const title = `the weekendest beta - ${name} Station`;
@@ -481,6 +486,7 @@ class StationDetails extends React.Component {
           </Clipboard>
           <Header as="h3" className='header-station-name'>
             { station.name.replace(/ - /g, "–") }
+            { accessibilityIcon(accessibleStations, elevatorOutages, station.id) }
           </Header>
           { station.secondary_name &&
             <span className='header-secondary-name'>
@@ -488,6 +494,31 @@ class StationDetails extends React.Component {
                 station.secondary_name
               }
             </span>
+          }
+          {
+            accessibleStations.north.includes(station.id + 'N') && !accessibleStations.south.includes(station.id + 'S') &&
+            <div>
+              <Icon name='accessible' color='blue' title='This station is accessible' />
+              { this.northDirection()?.slice(0, -2) || ((this.northDestinations(false) || "North") + '-bound') }-only
+            </div>
+          }
+          {
+            !accessibleStations.north.includes(station.id + 'N') && accessibleStations.south.includes(station.id + 'S') &&
+            <div>
+              <Icon name='accessible' color='blue' title='This station is accessible' />
+              { this.southDirection()?.slice(0, -2) || ((this.southDestinations(false) || "South") + '-bound') }-only
+            </div>
+          }
+          {
+            elevatorOutages[station.id] &&
+            <div className='elevator-outages'>
+              {
+                elevatorOutages[station.id].filter((value, index, self) => self.indexOf(value) === index).map((outage, i) => {
+                return (<h5 key={i}>Elevator for {outage} is out of service.</h5>);
+              })
+              }
+              <h5>For more info, see <a href='https://new.mta.info/elevator-escalator-status' target='_blank'>mta.info</a>.</h5>
+            </div>
           }
         </Responsive>
         <Responsive {...Responsive.onlyMobile} as='div' className="mobile-details-header">
@@ -516,6 +547,7 @@ class StationDetails extends React.Component {
           </Popup>
           <Header as="h5" style={{margin: 0, flexGrow: 1, maxHeight: "36px", overflow: "hidden"}}>
             { station.name.replace(/ - /g, "–") }
+            { accessibilityIcon(accessibleStations, elevatorOutages, station.id) }
             <span className='header-secondary-name'>
               { station.secondary_name }
             </span>
@@ -524,10 +556,35 @@ class StationDetails extends React.Component {
             <Icon name='crosshairs' />
           </Button>
         </Responsive>
+        {
+          accessibleStations.north.includes(station.id + 'N') && !accessibleStations.south.includes(station.id + 'S') &&
+          <Responsive {...Responsive.onlyMobile} as='div' className='details-body'>
+            <Icon name='accessible' color='blue' title='This station is accessible' />
+            { this.northDirection()?.slice(0, -2) || ((this.northDestinations(false) || "North") + '-bound') }-only
+          </Responsive>
+        }
+        {
+          !accessibleStations.north.includes(station.id + 'N') && accessibleStations.south.includes(station.id + 'S') &&
+          <Responsive {...Responsive.onlyMobile} as='div' className='details-body'>
+            <Icon name='accessible' color='blue' title='This station is accessible' />
+            { this.southDirection()?.slice(0, -2) || ((this.southDestinations(false) || "South") + '-bound') }-only
+          </Responsive>
+        }
+        {
+          elevatorOutages[station.id] &&
+            <Responsive {...Responsive.onlyMobile} as='div' className='details-body elevator-outages'>
+              {
+                elevatorOutages[station.id].filter((value, index, self) => self.indexOf(value) === index).map((outage, i) => {
+                return (<h5 key={i}>Elevator for {outage} is out of service.</h5>);
+              })
+              }
+              <h5>For more info, see <a href='https://new.mta.info/elevator-escalator-status' target='_blank'>mta.info</a>.</h5>
+            </Responsive>
+          }
         <div className="details-body">
           <Segment>
             <Header as="h5" style={{whiteSpace: "pre-line"}}>
-              { this.southDirection() }To { this.southDestinations() }
+              { this.southDirection() }To { this.southDestinations(true) }
             </Header>
             <div>
               <List divided relaxed className="stop-times">
@@ -579,7 +636,7 @@ class StationDetails extends React.Component {
           </Segment>
           <Segment>
             <Header as="h5" style={{whiteSpace: "pre-line"}}>
-              { this.northDirection() }To { this.northDestinations() }
+              { this.northDirection() }To { this.northDestinations(true) }
             </Header>
             <div>
               <List divided relaxed className="stop-times">
@@ -654,6 +711,9 @@ class StationDetails extends React.Component {
                           { stop.secondary_name }
                         </List.Content>
                       }
+                      <List.Content floated='left' className="accessibility-icon">
+                        { accessibilityIcon(accessibleStations, elevatorOutages, stop.id) }
+                      </List.Content>
                       <List.Content floated='right'>
                         {
                           Array.from(stop.stops).sort().map((trainId) => {

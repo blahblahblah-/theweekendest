@@ -416,3 +416,19 @@ h4.ui.top.attached.header.advisories-header {
     }
   }
 }
+
+.accessible-icon {
+  margin-left: .2em;
+
+  .accessible.icon:only-child {
+    margin-right: .2em;
+    width: auto;
+  }
+}
+
+.elevator-outages {
+  h5 {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
