@@ -24,7 +24,7 @@ class TripMap extends React.Component {
     const tripRoute = this.normalizeTrip(trip.arrival_times, currentTime);
     return(
       <div>
-        <ul style={{listStyleType: "none", textAlign: "left", margin: "auto", padding: 0}}>
+        <ul style={{listStyleType: "none", textAlign: "left", margin: "auto", padding: 0, marginBottom: '.5em'}}>
           {
             tripRoute.map((tripStop) => {
               const stopId = tripStop.stop_id

@@ -135,6 +135,10 @@ class TrainMapStop extends React.Component {
               }
             </Header>
           }
+          {
+            !arrivalTime &&
+            <div style={{minWidth: '14px'}}></div>
+          }
           { activeBranches.map((obj, index) => {
               return this.renderLine(obj, index, branchStart, branchEnd);
             })
