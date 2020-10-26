@@ -244,6 +244,10 @@ h1.yellow a, h3.yellow a {
   .route {
     display: inline-block;
     margin-left: 3px;
+
+    &.diamond {
+      margin-top: .5em;
+    }
   }
 }
 

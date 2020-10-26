@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { List, Checkbox, Header } from "semantic-ui-react";
+import { List, Checkbox, Header, Icon } from "semantic-ui-react";
 
 class OverlayControls extends React.Component {
 
@@ -12,7 +12,12 @@ class OverlayControls extends React.Component {
     return (
       <List className='overlay-controls'>
         <List.Item>
-          <Checkbox toggle onChange={handleDisplayAccessibleOnlyToggle} checked={displayAccessibleOnly} label={<label>Accessibly Stations Only</label>} />
+          <Checkbox toggle onChange={handleDisplayAccessibleOnlyToggle} checked={displayAccessibleOnly} label={
+            <label>
+              <Icon name='accessible' color='blue' title='This station is accessible' />
+              Accessibly Stations Only
+            </label>
+          } />
         </List.Item>
         <List.Item>
           <Checkbox toggle onChange={handleDisplayTrainPositionsToggle} checked={displayTrainPositions} label={<label title="Train location estimations are calculated from estimated arrival times and may not be accurate.">Train Locations</label>} />

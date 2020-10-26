@@ -189,7 +189,7 @@ class TrainMap extends React.Component {
     if (segments) {
       return(
         <div>
-          <ul style={{listStyleType: "none", textAlign: "left", margin: "auto", padding: 0}}>
+          <ul style={{listStyleType: "none", textAlign: "left", margin: "auto", padding: 0, marginBottom: '.5em'}}>
             {
               segments.line.map((stopId, lineIndex) => {
                 let branchStart = null;
