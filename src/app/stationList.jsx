@@ -95,7 +95,7 @@ class StationList extends React.Component {
 
       return 0;
     });
-    this.setState({stationsDisplayed: this.stations});
+    this.setState({stationsDisplayed: this.stations}, this.updateMap);
   }
 
   updateMap() {
