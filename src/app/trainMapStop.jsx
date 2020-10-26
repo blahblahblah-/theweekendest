@@ -9,10 +9,13 @@ class TrainMapStop extends React.Component {
 
   renderStop() {
     const { southStop, northStop, stop, accessibleStations, displayAccessibleOnly } = this.props;
+    const accessibleNorth = accessibleStations.north.includes(stop.id + 'N');
+    const accessibleSouth = accessibleStations.south.includes(stop.id + 'S');
+    const accessible = accessibleNorth || accessibleSouth;
 
-    const opacity = !displayAccessibleOnly || accessibleStations.north.includes(stop.id + 'N') || accessibleStations.south.includes(stop.id + 'S') ? 1 : 0.2;
+    const opacity = !displayAccessibleOnly || accessible ? 1 : 0.2;
 
-    if (southStop && northStop) {
+    if (southStop && northStop && (!displayAccessibleOnly || !accessible || (accessibleNorth && accessibleSouth))) {
       return (
         <Link to={`/stations/${stop.id}`}>
           <div style={{border: "1px #999 solid", height: "10px", width: "10px", borderRadius: "50%", opacity: opacity,
@@ -22,7 +25,7 @@ class TrainMapStop extends React.Component {
       )
     }
 
-    if (northStop) {
+    if (northStop && (!displayAccessibleOnly || accessibleNorth)) {
       return (
         <Link to={`/stations/${stop.id}`}>
           <div style={{border: "1px #999 solid", height: "5px", width: "10px", borderTopLeftRadius: "10px", opacity: opacity,
