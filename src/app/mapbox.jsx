@@ -22,6 +22,7 @@ import transfers from '../data/transfers.json';
 const apiUrl = 'https://www.goodservice.io/api/routes';
 const statusUrl = 'https://www.goodservice.io/api/info'
 const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
+const accessibilityUrl = 'https://www.goodservice.io/api/accessibility';
 const stations = {};
 const stationLocations = {};
 const center = [-74.003683, 40.7079445]
@@ -68,7 +69,12 @@ class Mapbox extends React.Component {
       routingByDirection: {},
       routeStops: {},
       offsets: {},
-      trainPositions: {}
+      trainPositions: {},
+      accessibleStations: {
+        north: [],
+        south: [],
+      },
+      elevatorOutages: {},
     };
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
@@ -171,6 +177,10 @@ class Mapbox extends React.Component {
 
   fetchData() {
     this.setState({loading: true}, () => {
+      fetch(accessibilityUrl)
+        .then(response => response.json())
+        .then(data => this.setState({ accessibleStations: data.accessible_stations, elevatorOutages: data.outages }))
+
       fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
@@ -1656,7 +1666,7 @@ class Mapbox extends React.Component {
   }
 
   panes() {
-    const { trains, geoLocation } = this.state;
+    const { trains, geoLocation, accessibleStations, elevatorOutages } = this.state;
     return [
       {
         menuItem: <Menu.Item as={Link} to='/trains' key='train' title='Trains'>Trains</Menu.Item>,
@@ -1664,19 +1674,19 @@ class Mapbox extends React.Component {
       },
       {
         menuItem: <Menu.Item as={Link} to='/stations' key='stations' title='Stations'>Stations</Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} handleOnMount={this.handleStationList} infoBox={this.infoBox} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/starred' key='starred' title='Starred Stations'><Icon name='star' style={{margin: 0}} /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} starred={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages}  handleOnMount={this.handleStationList} infoBox={this.infoBox} starred={true} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/nearby' key='nearby' title='Nearby Stations'><Icon name='location arrow' style={{margin: 0}} /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} handleOnMount={this.handleStationList} handleNearby={this.handleNearby} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages}  handleOnMount={this.handleStationList} handleNearby={this.handleNearby} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/advisories' key='advisories' title='Advisories'><Icon name='warning sign' style={{margin: 0}} /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} handleOnMount={this.handleStationList} infoBox={this.infoBox} advisories={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} handleOnMount={this.handleStationList} infoBox={this.infoBox} advisories={true} /></Tab.Pane>,
       },
     ];
   }
@@ -1746,7 +1756,7 @@ class Mapbox extends React.Component {
   }
 
   render() {
-    const { loading, trains, arrivals, routing, stops, timestamp, blogPost,
+    const { loading, trains, arrivals, routing, stops, timestamp, blogPost, accessibleStations, elevatorOutages,
       displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions } = this.state;
     return (
       <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
@@ -1807,6 +1817,8 @@ class Mapbox extends React.Component {
                       return (
                         <TripDetails trip={trip} stops={stops} direction={direction} stations={stations}
                           train={trains.find((train) => train.id == props.match.params.id)}
+                          accessibleStations={accessibleStations}
+                          elevatorOutages={elevatorOutages}
                           handleResetMap={this.handleResetMap}
                           handleOnMount={this.handleMountTripDetails} infoBox={this.infoBox}
                         />
@@ -1826,6 +1838,8 @@ class Mapbox extends React.Component {
 
                       return (
                         <TrainDetails routing={routing[props.match.params.id]} stops={stops} stations={stations}
+                          accessibleStations={accessibleStations}
+                          elevatorOutages={elevatorOutages}
                           train={trains.find((train) => train.id == props.match.params.id)}
                           displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
                           displayTrainPositions={displayTrainPositions}
@@ -1847,6 +1861,8 @@ class Mapbox extends React.Component {
                     return (
                       <StationDetails routings={routing} trains={trains} station={stations[props.match.params.id]} stations={stations}
                         arrivals={arrivals}
+                        accessibleStations={accessibleStations}
+                        elevatorOutages={elevatorOutages}
                         displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
                         displayTrainPositions={displayTrainPositions}
                         displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}

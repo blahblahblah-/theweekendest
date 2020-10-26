@@ -19,7 +19,7 @@ class TripMap extends React.Component {
   }
 
   render() {
-    const { trip, train, stops } = this.props;
+    const { trip, train, stops, accessibleStations, elevatorOutages } = this.props;
     const currentTime = Date.now() / 1000;
     const tripRoute = this.normalizeTrip(trip.arrival_times, currentTime);
     return(
@@ -33,6 +33,7 @@ class TripMap extends React.Component {
               return (
                 <TrainMapStop key={stopId} stop={stop} color={train.color} southStop={true}
                   northStop={false} transfers={transfers} branchStops={[true]} activeBranches={[true]}
+                  accessibleStations={accessibleStations} elevatorOutages={elevatorOutages}
                   arrivalTime={Math.max(tripStop.estimated_time - currentTime, 1)}
                   />
               )

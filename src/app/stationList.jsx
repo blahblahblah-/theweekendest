@@ -9,6 +9,8 @@ import * as turf from './vendor/turf.js';
 
 import TrainBullet from './trainBullet.jsx';
 
+import { accessibilityIcon } from './utils/accessibility.jsx';
+
 import Cross from "./icons/cross-15.svg";
 
 const resultRenderer = ({ title }) => <Label content={title} />
@@ -160,6 +162,7 @@ class StationList extends React.Component {
   }
 
   renderListItem(station, trainMap) {
+    const { accessibleStations, elevatorOutages } = this.props;
     return(
       <List.Item as={Link} key={station.id} className='station-list-item' to={`/stations/${station.id}`}>
         <List.Content floated='left' style={{marginRight: "0.5em"}}>
@@ -172,6 +175,7 @@ class StationList extends React.Component {
                 }
               </span>
             }
+            { accessibilityIcon(accessibleStations, elevatorOutages, station.id) }
           </Header>
         </List.Content>
         <List.Content floated='right'>

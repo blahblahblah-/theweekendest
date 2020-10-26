@@ -3,6 +3,8 @@ import { Header } from 'semantic-ui-react';
 import TrainBullet from './trainBullet.jsx';
 import { withRouter, Link } from "react-router-dom";
 
+import { accessibilityIcon } from './utils/accessibility.jsx';
+
 class TrainMapStop extends React.Component {
 
   renderStop() {
@@ -110,7 +112,7 @@ class TrainMapStop extends React.Component {
   }
 
   render() {
-    const { stop, transfers, activeBranches, branchStart, branchEnd, arrivalTime } = this.props;
+    const { stop, transfers, activeBranches, branchStart, branchEnd, arrivalTime, accessibleStations, elevatorOutages } = this.props;
     const eta = arrivalTime && Math.round(arrivalTime / 60);
     return (
       <li>
@@ -136,7 +138,8 @@ class TrainMapStop extends React.Component {
             {
               stop &&
               <Link to={`/stations/${stop.id}`}>
-                {stop.name.replace(/ - /g, "–")}
+                { stop.name.replace(/ - /g, "–") }
+                { accessibilityIcon(accessibleStations, elevatorOutages, stop.id) }
               </Link>
             }
           </Header>
