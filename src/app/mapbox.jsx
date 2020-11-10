@@ -69,6 +69,7 @@ class Mapbox extends React.Component {
       processedRoutings: {},
       routingByDirection: {},
       routeStops: {},
+      destinations: [],
       offsets: {},
       trainPositions: {},
       accessibleStations: {
@@ -217,6 +218,7 @@ class Mapbox extends React.Component {
     const processedRoutings = {};
     const routingByDirection = {};
     const routeStops = {};
+    const destinations = new Set();
 
     Object.keys(routing).forEach((key) => {
       const northStops = new Set();
@@ -263,10 +265,15 @@ class Mapbox extends React.Component {
         "north": northRoutings,
         "south": southRoutings
       };
+      [northRoutings, southRoutings].forEach((direction) => {
+        direction.forEach((routing) => {
+          destinations.add(routing[routing.length - 1]);
+        });
+      });
       const allRoutings = northRoutings.concat(southRoutings.map((routing) => routing.slice(0).reverse()));
       processedRoutings[key] = Array.from(new Set(allRoutings.map(JSON.stringify)), JSON.parse);
     });
-    this.setState({processedRoutings: processedRoutings, routeStops: routeStops, routingByDirection: routingByDirection}, this.calculateOffsets);
+    this.setState({processedRoutings: processedRoutings, routeStops: routeStops, routingByDirection: routingByDirection, destinations: [...destinations]}, this.calculateOffsets);
   }
 
   calculateOffsets() {
@@ -1050,7 +1057,11 @@ class Mapbox extends React.Component {
           "text-size": {
             "stops": [[10, 8], [13, 12]]
           },
-          "text-font": ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"],
+          "text-font": ['case',
+            ['get', 'destination'],
+            ['literal', ['Lato Bold', "Open Sans Bold","Arial Unicode MS Bold"]],
+            ['literal', ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"]],
+          ],
           "text-optional": true,
           "text-justify": "auto",
           'text-allow-overlap': false,
@@ -1069,7 +1080,11 @@ class Mapbox extends React.Component {
           "symbol-sort-key": ['get', 'priority'],
         },
         "paint": {
-          "text-color": "#aaaaaa",
+          "text-color": ['case',
+            ['get', 'destination'],
+            '#ffffff',
+            '#eeeeee',
+          ],
           "icon-opacity": ['get', 'opacity'],
           "text-opacity": ['get', 'opacity'],
         },
@@ -1090,7 +1105,7 @@ class Mapbox extends React.Component {
   }
 
   stopsGeoJson() {
-    const { processedRoutings, arrivals, accessibleStations, displayAccessibleOnly } = this.state;
+    const { processedRoutings, arrivals, destinations, accessibleStations, displayAccessibleOnly } = this.state;
 
     if (this.selectedTrip && arrivals) {
       const tripData = arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
@@ -1179,9 +1194,10 @@ class Mapbox extends React.Component {
         const stationCoords = [stations[key].longitude, stations[key].latitude];
         const stationPt = turf.helpers.point(stationCoords);
         let bearing = stations[key].bearing;
-
         let opacity = 1;
         let priority = 5;
+        let destination = false;
+
         if ((displayAccessibleOnly && !accessibleStations.north.includes(key + 'N') && !accessibleStations.south.includes(key + 'S')) ||
           (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
           !this.selectedStations.includes(key) && (this.selectedTrains.length === 1 || stations[key].stops.size > 0))) {
@@ -1190,8 +1206,11 @@ class Mapbox extends React.Component {
         } else if (this.selectedStations.length > 0 && !this.selectedStations.includes(key)) {
           opacity = 0.5;
           priority = 7;
-        } else if (this.selectedTrains.length == 1 && processedRoutings[this.selectedTrains[0]] &&
-          (processedRoutings[this.selectedTrains[0]].some((routing) => routing[0] === key || routing[routing.length - 1] === key))) {
+        } else if (
+          (this.selectedTrains.length == 1 && processedRoutings[this.selectedTrains[0]] &&
+            (processedRoutings[this.selectedTrains[0]].some((routing) => routing[0] === key || routing[routing.length - 1] === key)))
+          || (this.selectedTrains.length > 1 && destinations.includes(key))) {
+          destination = true;
           priority = 1;
         } else if (this.selectedTrains.length > 0 && this.selectedTrains.some((train) => stations[key].stops.has(train))
           && prioritizedStations.has(key)) {
@@ -1244,6 +1263,7 @@ class Mapbox extends React.Component {
             "opacity": opacity,
             "priority": priority,
             "bearing": bearing,
+            'destination': destination,
           },
           "geometry": {
             "type": "Point",
