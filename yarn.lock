@@ -5222,9 +5222,9 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-"mapbox-gl@https://github.com/mapdwell/mapbox-gl-js.git#fit-bearing":
-  version "1.12.0-dev"
-  resolved "https://github.com/mapdwell/mapbox-gl-js.git#acf517a2966f498f07fac9127efbce45526a27fb"
+"mapbox-gl@https://github.com/mapbox/mapbox-gl-js.git#main":
+  version "1.13.0-dev"
+  resolved "https://github.com/mapbox/mapbox-gl-js.git#94e4714c0ab2896304d72e6322b30fe0bad392a5"
   dependencies:
     "@mapbox/geojson-rewind" "^0.5.0"
     "@mapbox/geojson-types" "^1.0.2"
