@@ -1115,6 +1115,7 @@ class Mapbox extends React.Component {
         const northboundRouting = (this.selectedTrip.direction === 'north') ? routing : routing.slice().reverse();
         const northboundCoordinatesArray = this.routingGeoJson(northboundRouting, [], false);
         const coords = (this.selectedTrip.direction === 'north') ? northboundCoordinatesArray : northboundCoordinatesArray.reverse();
+
         let line;
         let lineLength;
 
@@ -1126,6 +1127,7 @@ class Mapbox extends React.Component {
         return {
           "type": "FeatureCollection",
           "features": Object.keys(stations).map((key) => {
+            const destination = routing[routing.length - 1] === key;
             let bearing = stations[key].bearing;
             let opacity = 0.1;
             let priority = 10;
@@ -1176,6 +1178,7 @@ class Mapbox extends React.Component {
                 "opacity": opacity,
                 "priority": priority,
                 "bearing": bearing,
+                'destination': destination,
               },
               "geometry": {
                 "type": "Point",
