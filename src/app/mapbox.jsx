@@ -1011,7 +1011,7 @@ class Mapbox extends React.Component {
           },
           'text-size': 1,
           'symbol-placement': 'line',
-          'symbol-spacing': 1,
+          'symbol-spacing': 5,
           'symbol-sort-key': 10,
         },
         'paint': {
