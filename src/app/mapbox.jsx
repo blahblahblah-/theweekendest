@@ -1257,8 +1257,15 @@ class Mapbox extends React.Component {
   lineOutlineGeojson() {
     const { routing, processedRoutings } = this.state;
     const coordinates = [];
+    let trainsToDisplay = Object.keys(routing);
 
-    Object.keys(routing).forEach((key) => {
+    if (this.selectedTrip) {
+      trainsToDisplay = [this.selectedTrip.train];
+    } else if (this.selectedTrains.length > 0) {
+      trainsToDisplay = this.selectedTrains;
+    }
+
+    trainsToDisplay.forEach((key) => {
       if (!processedRoutings[key]) {
         return;
       }
