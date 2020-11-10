@@ -340,7 +340,7 @@ class Mapbox extends React.Component {
         "properties": {
           "color": route.color,
           "offset": offsets[key],
-          "opacity": this.selectedTrains.includes(key) ? 1 : 0.1
+          "opacity": this.selectedTrains.includes(key) ? 1 : 0.1,
         },
         "geometry": {
           "type": "MultiLineString",
@@ -573,6 +573,9 @@ class Mapbox extends React.Component {
 
       if (this.map.getLayer("Stops")) {
         this.map.moveLayer("Stops")
+      }
+      if (this.map.getLayer("TrainOutlines")) {
+        this.map.moveLayer("TrainOutlines")
       }
 
       if (this.map.getLayer("TrainPositions")) {
@@ -815,6 +818,10 @@ class Mapbox extends React.Component {
       this.map.moveLayer("Stops");
     }
 
+    if (this.map.getLayer("TrainOutlines")) {
+      this.map.moveLayer("TrainOutlines")
+    }
+
     if (this.map.getLayer("TrainPositions")) {
       this.map.moveLayer("TrainPositions");
     }
@@ -983,6 +990,48 @@ class Mapbox extends React.Component {
   }
 
   renderStops() {
+    if (this.map.getSource("TrainOutlines")) {
+      this.map.getSource("TrainOutlines").setData(this.lineOutlineGeojson());
+    } else {
+      this.map.addSource("TrainOutlines", {
+        "type": "geojson",
+        "data": this.lineOutlineGeojson()
+      });
+    }
+    if (!this.map.getLayer("TrainOutlines")) {
+      this.map.addLayer({
+        'id': 'TrainOutlines',
+        'type': 'symbol',
+        'source': 'TrainOutlines',
+        'layout': {
+          'text-field': '-',
+          'text-padding': 0,
+          'text-line-height': {
+            "stops": [[10, 0.1], [12.5, 8]]
+          },
+          'text-size': 1,
+          'symbol-placement': 'line',
+          'symbol-spacing': 1,
+          'symbol-sort-key': 10,
+        },
+        'paint': {
+          'text-color': '#aaaaaa',
+          'text-opacity': 0.01,
+        },
+      });
+      this.map.on('click', "Stops", e => {
+        const path = `/stations/${e.features[0].properties.id}`;
+        this.debounceLayerNavigate(path);
+        e.originalEvent.stopPropagation();
+      });
+      this.map.on('mouseenter', 'Stops', (() => {
+        this.map.getCanvas().style.cursor = 'pointer';
+      }).bind(this));
+      this.map.on('mouseleave', 'Stops', (() => {
+        this.map.getCanvas().style.cursor = '';
+      }).bind(this));
+    }
+
     if (this.map.getSource("Stops")) {
       this.map.getSource("Stops").setData(this.stopsGeoJson());
     } else {
@@ -1004,9 +1053,12 @@ class Mapbox extends React.Component {
           "text-font": ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"],
           "text-optional": true,
           "text-justify": "auto",
-          "text-padding": 5,
+          'text-allow-overlap': false,
+          "text-padding": 1,
           "text-variable-anchor": ["bottom-right", "top-right", "bottom-left", "top-left", "right", "left", "bottom"],
-          "text-radial-offset": 0.2,
+          "text-radial-offset": {
+            "stops":  [[9, 0.25], [12, 0.75], [14, 1]],
+          },
           "icon-image": ['get', 'stopType'],
           "icon-size": {
             "stops": [[9, 0.1], [12, 0.75]]
@@ -1021,7 +1073,7 @@ class Mapbox extends React.Component {
           "icon-opacity": ['get', 'opacity'],
           "text-opacity": ['get', 'opacity'],
         },
-      });
+      }, "TrainOutlines");
       this.map.on('click', "Stops", e => {
         const path = `/stations/${e.features[0].properties.id}`;
         this.debounceLayerNavigate(path);
@@ -1034,6 +1086,7 @@ class Mapbox extends React.Component {
         this.map.getCanvas().style.cursor = '';
       }).bind(this));
     }
+    this.map.moveLayer('TrainOutlines');
   }
 
   stopsGeoJson() {
@@ -1107,7 +1160,7 @@ class Mapbox extends React.Component {
                 "stopType": stopType,
                 "opacity": opacity,
                 "priority": priority,
-                "bearing": bearing
+                "bearing": bearing,
               },
               "geometry": {
                 "type": "Point",
@@ -1129,10 +1182,9 @@ class Mapbox extends React.Component {
 
         let opacity = 1;
         let priority = 5;
-
         if ((displayAccessibleOnly && !accessibleStations.north.includes(key + 'N') && !accessibleStations.south.includes(key + 'S')) ||
-            (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
-            !this.selectedStations.includes(key) && (this.selectedTrains.length === 1 || stations[key].stops.size > 0))) {
+          (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
+          !this.selectedStations.includes(key) && (this.selectedTrains.length === 1 || stations[key].stops.size > 0))) {
           opacity = 0.1;
           priority = 10;
         } else if (this.selectedStations.length > 0 && !this.selectedStations.includes(key)) {
@@ -1191,7 +1243,7 @@ class Mapbox extends React.Component {
             "stopType": stopTypeIcon,
             "opacity": opacity,
             "priority": priority,
-            "bearing": bearing
+            "bearing": bearing,
           },
           "geometry": {
             "type": "Point",
@@ -1200,6 +1252,36 @@ class Mapbox extends React.Component {
         }
       })
     };
+  }
+
+  lineOutlineGeojson() {
+    const { routing, processedRoutings } = this.state;
+    const coordinates = [];
+
+    Object.keys(routing).forEach((key) => {
+      if (!processedRoutings[key]) {
+        return;
+      }
+
+      const layerId = `${key}-train`;
+      const source = this.map.getSource(layerId);
+
+      if (!source) {
+        return;
+      }
+      const data = source._data;
+      data.geometry.coordinates.forEach((a) => {
+        coordinates.push(a);
+      });
+    });
+
+    return {
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiLineString",
+        "coordinates": coordinates
+      }
+    }
   }
 
   stopTypeIcon(stopId) {
@@ -1500,7 +1582,7 @@ class Mapbox extends React.Component {
     });
 
     this.renderStops();
-    this.setState(this.renderTrainPositions());
+    this.renderTrainPositions();
     this.showAll = true;
   }
 
@@ -1527,6 +1609,7 @@ class Mapbox extends React.Component {
       this.renderOverlays();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
+        this.map.moveLayer('TrainOutlines');
         this.map.moveLayer('TrainPositions');
       }
     });
@@ -1541,6 +1624,7 @@ class Mapbox extends React.Component {
       this.renderOverlays();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
+        this.map.moveLayer('TrainOutlines');
         this.map.moveLayer('TrainPositions');
       }
     });
@@ -1555,6 +1639,7 @@ class Mapbox extends React.Component {
       this.renderOverlays();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
+        this.map.moveLayer('TrainOutlines');
         this.map.moveLayer('TrainPositions');
       }
     });
@@ -1569,6 +1654,7 @@ class Mapbox extends React.Component {
       this.renderOverlays();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
+        this.map.moveLayer('TrainOutlines');
         this.map.moveLayer('TrainPositions');
       }
     });
@@ -1583,6 +1669,7 @@ class Mapbox extends React.Component {
       this.renderTrainPositions();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
+
         this.map.moveLayer('TrainPositions');
       }
     });
