@@ -1048,7 +1048,7 @@ class Mapbox extends React.Component {
         "layout": {
           "text-field": ['get', 'name'],
           "text-size": {
-            "stops": [[10, 8], [11, 12]]
+            "stops": [[10, 8], [13, 12]]
           },
           "text-font": ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"],
           "text-optional": true,
