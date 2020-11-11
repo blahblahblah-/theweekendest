@@ -402,7 +402,7 @@ class Mapbox extends React.Component {
           "type": "line",
           "source": layerId,
           "layout": {
-            "line-join": "round",
+            "line-join": "miter",
             "line-cap": "round",
           },
           "paint": {
