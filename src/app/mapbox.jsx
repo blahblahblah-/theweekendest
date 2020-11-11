@@ -34,13 +34,6 @@ const trainIds = [
   '2', '3', '1', '4', '5', '6', '6X', '7', '7X', 'A', 'AL', 'C', 'E', 'F', 'FX',
   'D', 'B', 'M', 'J', 'Z', 'R', 'N', 'Q', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"
 ];
-const prioritizedStations = new Set(['101', '201', '501', '401', 'D01', '601', '213', '608', '112', '116', 'A02',
-  'A09', 'R16', '726', 'Q05', 'R01', '701', 'G14', 'G22', 'F01', 'G05', '418', 'L10', 'M01', 'L22', 'L29', 'A65',
-  'H15', 'H11', '257', '250', '247', 'R36', 'R41', 'R45', 'D43', 'S31', 'S19', 'A55']);
-
-const majorStations = new Set(['G29', 'L03', '635', 'R20', 'R23', 'Q01', 'F15', 'M18', 'A31', 'A32', 'D20', 'A41', 'A42', 'R29',
-  'R31', 'D24', '235', '120', 'R11', 'B08', '621', '631', '640', 'R15', '725', 'R16', '127', 'A27', 'A28', '128', '132',
-  'R17', 'D17', 'F23', 'F35', 'G08', '420', '712', '718', 'R09', '723', 'J27', 'L22', 'A51', 'M16', 'M11', 'M08', 'L17']);
 
 const statusColors = {
   'long-headway': '#dddddd',
@@ -70,6 +63,7 @@ class Mapbox extends React.Component {
       routingByDirection: {},
       routeStops: {},
       destinations: [],
+      transferStations: [],
       offsets: {},
       trainPositions: {},
       accessibleStations: {
@@ -206,7 +200,7 @@ class Mapbox extends React.Component {
   }
 
   processRoutings() {
-    const { routing } = this.state;
+    const { routing, stops } = this.state;
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["northStops"] = new Set();
@@ -219,6 +213,7 @@ class Mapbox extends React.Component {
     const routingByDirection = {};
     const routeStops = {};
     const destinations = new Set();
+    const transferStations = new Set();
 
     Object.keys(routing).forEach((key) => {
       const northStops = new Set();
@@ -273,7 +268,44 @@ class Mapbox extends React.Component {
       const allRoutings = northRoutings.concat(southRoutings.map((routing) => routing.slice(0).reverse()));
       processedRoutings[key] = Array.from(new Set(allRoutings.map(JSON.stringify)), JSON.parse);
     });
-    this.setState({processedRoutings: processedRoutings, routeStops: routeStops, routingByDirection: routingByDirection, destinations: [...destinations]}, this.calculateOffsets);
+
+    Object.keys(processedRoutings).forEach((key) => {
+      const routings = processedRoutings[key];
+      routings.forEach((route) => {
+        let prevStop = null;
+        let prevTrains = [];
+
+        route.forEach((stop) => {
+          const stopData = stops[stop];
+
+          if (!stopData) {
+            return;
+          }
+
+          const trains = stops[stop].trains.map((t) => t.directions.map((d) => `${t.id}-${d}`)).flat();
+
+          if (prevStop) {
+            if (trains.filter(n => !prevTrains.includes(n) && n.split('-')[0] !== key).length > 0) {
+              transferStations.add(stop);
+            }
+            if (prevTrains.filter(n => !trains.includes(n) && n.split('-')[0] !== key).length > 0) {
+              transferStations.add(prevStop)
+            }
+          }
+
+          prevStop = stop;
+          prevTrains = trains;
+        });
+      });
+    });
+
+    this.setState({
+      processedRoutings: processedRoutings,
+      routeStops: routeStops,
+      routingByDirection: routingByDirection,
+      destinations: [...destinations],
+      transferStations: [...transferStations],
+    }, this.calculateOffsets);
   }
 
   calculateOffsets() {
@@ -1058,7 +1090,10 @@ class Mapbox extends React.Component {
             "stops": [[10, 8], [13, 12]]
           },
           "text-font": ['case',
-            ['get', 'destination'],
+            ['any',
+              ['get', 'destination'],
+              ['get', 'transferStation'],
+            ],
             ['literal', ['Lato Bold', "Open Sans Bold","Arial Unicode MS Bold"]],
             ['literal', ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"]],
           ],
@@ -1081,7 +1116,10 @@ class Mapbox extends React.Component {
         },
         "paint": {
           "text-color": ['case',
-            ['get', 'destination'],
+            ['any',
+              ['get', 'destination'],
+              ['get', 'transferStation'],
+            ],
             '#ffffff',
             '#eeeeee',
           ],
@@ -1105,7 +1143,7 @@ class Mapbox extends React.Component {
   }
 
   stopsGeoJson() {
-    const { processedRoutings, arrivals, destinations, accessibleStations, displayAccessibleOnly } = this.state;
+    const { processedRoutings, arrivals, destinations, transferStations, accessibleStations, displayAccessibleOnly } = this.state;
 
     if (this.selectedTrip && arrivals) {
       const tripData = arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
@@ -1128,6 +1166,7 @@ class Mapbox extends React.Component {
           "type": "FeatureCollection",
           "features": Object.keys(stations).map((key) => {
             const destination = routing[routing.length - 1] === key;
+            const transferStation = transferStations.includes(key);
             let bearing = stations[key].bearing;
             let opacity = 0.1;
             let priority = 10;
@@ -1179,6 +1218,7 @@ class Mapbox extends React.Component {
                 "priority": priority,
                 "bearing": bearing,
                 'destination': destination,
+                'transferStation': transferStation,
               },
               "geometry": {
                 "type": "Point",
@@ -1200,6 +1240,7 @@ class Mapbox extends React.Component {
         let opacity = 1;
         let priority = 5;
         let destination = false;
+        let transferStation = false;
 
         if ((displayAccessibleOnly && !accessibleStations.north.includes(key + 'N') && !accessibleStations.south.includes(key + 'S')) ||
           (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
@@ -1215,12 +1256,9 @@ class Mapbox extends React.Component {
           || (this.selectedTrains.length > 1 && destinations.includes(key))) {
           destination = true;
           priority = 1;
-        } else if (this.selectedTrains.length > 0 && this.selectedTrains.some((train) => stations[key].stops.has(train))
-          && prioritizedStations.has(key)) {
+        } else if (transferStations.includes(key)) {
+          transferStation = true;
           priority = 3;
-        } else if (this.selectedTrains.length === 1 && this.selectedTrains.some((train) => stations[key].stops.has(train))
-          && majorStations.has(key)) {
-          priority = 4;
         }
 
         if (bearing === undefined && !["circle-15", "express-stop", "cross-15"].includes(stopTypeIcon)) {
@@ -1267,6 +1305,7 @@ class Mapbox extends React.Component {
             "priority": priority,
             "bearing": bearing,
             'destination': destination,
+            'transferStation': transferStation,
           },
           "geometry": {
             "type": "Point",
