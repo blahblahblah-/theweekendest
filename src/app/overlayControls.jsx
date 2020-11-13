@@ -15,7 +15,7 @@ class OverlayControls extends React.Component {
           <Checkbox toggle onChange={handleDisplayAccessibleOnlyToggle} checked={displayAccessibleOnly} label={
             <label>
               <Icon name='accessible' color='blue' title='This station is accessible' />
-              Accessibly Stations Only
+              Accessible Stations Only
             </label>
           } />
         </List.Item>
