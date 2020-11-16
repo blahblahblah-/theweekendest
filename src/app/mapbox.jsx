@@ -20,7 +20,8 @@ import stationData from '../data/station_details.json';
 import transfers from '../data/transfers.json';
 
 const apiUrl = 'https://www.goodservice.io/api/routes';
-const statusUrl = 'https://www.goodservice.io/api/info'
+const summaryUrl = 'https://www.goodservice.io/api/info/summary';
+const statusUrl = 'https://www.goodservice.io/api/info';
 const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
 const accessibilityUrl = 'https://www.goodservice.io/api/accessibility';
 const stations = {};
@@ -71,6 +72,7 @@ class Mapbox extends React.Component {
         south: [],
       },
       elevatorOutages: {},
+      loadFullInfo: false,
     };
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
@@ -172,6 +174,8 @@ class Mapbox extends React.Component {
   }
 
   fetchData() {
+    const { loadFullInfo } = this.state;
+
     this.setState({loading: true}, () => {
       fetch(accessibilityUrl)
         .then(response => response.json())
@@ -193,7 +197,7 @@ class Mapbox extends React.Component {
             }));
         })
 
-      fetch(statusUrl)
+      fetch(loadFullInfo ? statusUrl : summaryUrl)
         .then(response => response.json())
         .then(data => this.setState({ trains: data.routes, blogPost: data.blog_post, timestamp: data.timestamp }, this.renderOverlays));
     });
@@ -1051,7 +1055,7 @@ class Mapbox extends React.Component {
           'text-size': 1,
           'symbol-placement': 'line',
           'symbol-spacing': 10,
-          'symbol-sort-key': 10,
+          'symbol-sort-key': 1,
         },
         'paint': {
           'text-color': '#aaaaaa',
@@ -1673,9 +1677,10 @@ class Mapbox extends React.Component {
       displayProblems: checked,
       displayDelays: checked,
       displaySlowSpeeds: checked,
-      displayLongHeadways: checked
+      displayLongHeadways: checked,
+      loadFullInfo: true,
     }, () => {
-      this.renderOverlays();
+      this.fetchData();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
         this.map.moveLayer('TrainOutlines');
