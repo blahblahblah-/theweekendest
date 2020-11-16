@@ -2037,7 +2037,7 @@ class Mapbox extends React.Component {
                         <TrainDetails routing={routing[props.match.params.id]} stops={stops} stations={stations}
                           accessibleStations={accessibleStations}
                           elevatorOutages={elevatorOutages}
-                          train={trains.find((train) => train.id == props.match.params.id)}
+                          train={trains.find((train) => train.id == props.match.params.id)} trains={trains}
                           displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
                           displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
                           displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
