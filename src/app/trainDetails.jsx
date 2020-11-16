@@ -71,12 +71,13 @@ class TrainDetails extends React.Component {
     if (train.service_summaries.north) {
       out.push(<Header as='h5' key="north">{train.service_summaries.north.replace(/ - /g, "–")}</Header>)
     }
-    if (out.length < 1) {
+    const serviceChanges = this.renderServiceChanges();
+    if ((out.length < 1) && (serviceChanges.length < 1)) {
       return;
     }
     return (
       <div className="details-body">
-        { this.renderServiceChanges() }
+        { serviceChanges }
         { out }
       </div>
     );
