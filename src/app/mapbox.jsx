@@ -491,14 +491,14 @@ class Mapbox extends React.Component {
           "icon-allow-overlap": true,
           "icon-ignore-placement": true,
           "icon-size": {
-            "stops": [[10, 0.5], [11, 1.5], [12, 1.5], [13, 2]]
+            "stops": [[10, 0.5], [11, 1], [12, 1.5], [13, 2]]
           },
           "icon-rotate": ['get', 'bearing'],
           "icon-rotation-alignment": "map",
           "text-field": ['get', 'route'],
           "text-font": ['Lato Bold', "Open Sans Bold","Arial Unicode MS Bold"],
           "text-size": {
-            "stops": [[10, 6], [11, 12], [12, 12], [13, 12]]
+            "stops": [[10, 6], [11, 8], [12, 10], [13, 12]]
           },
           "text-ignore-placement": true,
           "text-allow-overlap": true,
