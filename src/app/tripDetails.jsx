@@ -65,7 +65,7 @@ class TripDetails extends React.Component {
   }
 
   render() {
-    const { trip, stops, train, stations, direction, accessibleStations, elevatorOutages } = this.props;
+    const { trip, stops, train, trains, stations, direction, accessibleStations, elevatorOutages } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     const title = `The Weekendest beta - ${name} Train - Trip ${trip.id}`;
     const destination = trip.arrival_times[trip.arrival_times.length - 1].stop_id.substr(0, 3);
@@ -199,7 +199,7 @@ class TripDetails extends React.Component {
             </Header>
           </div>
         </Responsive>
-        <TripMap trip={trip} train={train} stops={stops} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} />
+        <TripMap trip={trip} train={train} trains={trains} stops={stops} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} />
       </Segment>
     );
   }

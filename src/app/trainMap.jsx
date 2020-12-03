@@ -181,7 +181,7 @@ class TrainMap extends React.Component {
   }
 
   render() {
-    const { routing, stops, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
+    const { routing, trains, stops, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
     const segments = this.generateSegments();
     const stopPattern = this.calculateStops();
 
@@ -302,7 +302,7 @@ class TrainMap extends React.Component {
                   }
                 }
                 return (
-                  <TrainMapStop key={stopId} stop={stop} color={routing.color} southStop={stopPattern.southStops[stopId]}
+                  <TrainMapStop key={stopId} trains={trains} stop={stop} color={routing.color} southStop={stopPattern.southStops[stopId]}
                     northStop={stopPattern.northStops[stopId]} transfers={transfers} branchStops={branchStops} branchStart={branchStart}
                     branchEnd={branchEnd} activeBranches={activeBranches} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages}
                     displayAccessibleOnly={displayAccessibleOnly}

@@ -125,7 +125,7 @@ class TrainDetails extends React.Component {
   }
 
   render() {
-    const { routing, stops, train, stations, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
+    const { routing, stops, train, trains, stations, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     const title = `The Weekendest beta - ${name} Train`;
     return (
@@ -217,7 +217,7 @@ class TrainDetails extends React.Component {
         {
           this.renderSummary()
         }
-        <TrainMap routing={routing} stops={stops} train={train} stations={stations} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} />
+        <TrainMap routing={routing} stops={stops} train={train} trains={trains} stations={stations} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} />
       </Segment>
     );
   }

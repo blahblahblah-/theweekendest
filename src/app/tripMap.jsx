@@ -19,7 +19,7 @@ class TripMap extends React.Component {
   }
 
   render() {
-    const { trip, train, stops, accessibleStations, elevatorOutages } = this.props;
+    const { trip, train, trains, stops, accessibleStations, elevatorOutages } = this.props;
     const currentTime = Date.now() / 1000;
     const tripRoute = this.normalizeTrip(trip.arrival_times, currentTime);
     return(
@@ -31,7 +31,7 @@ class TripMap extends React.Component {
               const stop = stops[stopId];
               let transfers = stop && cloneDeep(stop.trains.filter(route => route.id != train.id));
               return (
-                <TrainMapStop key={stopId} stop={stop} color={train.color} southStop={true}
+                <TrainMapStop key={stopId} trains={trains} stop={stop} color={train.color} southStop={true}
                   northStop={false} transfers={transfers} branchStops={[true]} activeBranches={[true]}
                   accessibleStations={accessibleStations} elevatorOutages={elevatorOutages}
                   arrivalTime={Math.max(tripStop.estimated_time - currentTime, 1)}

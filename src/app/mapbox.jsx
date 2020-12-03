@@ -2012,7 +2012,7 @@ class Mapbox extends React.Component {
                         );
                       }
                       return (
-                        <TripDetails trip={trip} stops={stops} direction={direction} stations={stations}
+                        <TripDetails trip={trip} trains={trains} stops={stops} direction={direction} stations={stations}
                           train={trains.find((train) => train.id == props.match.params.id)}
                           accessibleStations={accessibleStations}
                           elevatorOutages={elevatorOutages}
