@@ -22,7 +22,7 @@ import transfers from '../data/transfers.json';
 const apiUrl = 'https://www.goodservice.io/api/routes';
 const summaryUrl = 'https://www.goodservice.io/api/info/summary';
 const statusUrl = 'https://www.goodservice.io/api/info';
-const arrivalsUrl = 'http://www.goodservice.io/api/arrivals';
+const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
 const accessibilityUrl = 'https://www.goodservice.io/api/accessibility';
 const stations = {};
 const stationLocations = {};
