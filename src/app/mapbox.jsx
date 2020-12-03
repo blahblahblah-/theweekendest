@@ -22,7 +22,7 @@ import transfers from '../data/transfers.json';
 const apiUrl = 'https://www.goodservice.io/api/routes';
 const summaryUrl = 'https://www.goodservice.io/api/info/summary';
 const statusUrl = 'https://www.goodservice.io/api/info';
-const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
+const arrivalsUrl = 'http://www.goodservice.io/api/arrivals';
 const accessibilityUrl = 'https://www.goodservice.io/api/accessibility';
 const stations = {};
 const stationLocations = {};
@@ -552,7 +552,7 @@ class Mapbox extends React.Component {
       return;
     }
 
-    const tripRoute = tripData.arrival_times.map((s) => s.stop_id.substr(0, 3));
+    const tripRoute = Object.keys(tripData.times).map((key) => key.substr(0, 3));
     const northboundRouting = (this.selectedTrip.direction === 'north') ? tripRoute : tripRoute.slice().reverse();
     const northboundCoordinatesArray = this.routingGeoJson(northboundRouting, [], false);
     const coords = (this.selectedTrip.direction === 'north') ? northboundCoordinatesArray : northboundCoordinatesArray.reverse();
@@ -653,16 +653,19 @@ class Mapbox extends React.Component {
         const trainArrivals = arrivalInfo.trains[direction];
 
         trainArrivals.forEach((arr) => {
-          const next = arr.arrival_times.find((stop) => stop.estimated_time > currentTime && stations[stop.stop_id.substr(0, 3)]);
-          const precedingStations = arr.arrival_times.slice(0, arr.arrival_times.indexOf(next)).reverse();
-          let prev = precedingStations.find((stop) => stop.estimated_time <= currentTime && stations[stop.stop_id.substr(0, 3)]);
+          const nextStation = Object.keys(arr.times).find((key) => arr.times[key] > currentTime && stations[key.substr(0, 3)]);
+          const nextStationEstimatedTime = arr.times[nextStation];
 
-          if (!next) {
+          const precedingStations = Object.keys(arr.times).slice(0, Object.keys(arr.times).indexOf(nextStation)).reverse();
+          let previousStation = precedingStations.find((key) => arr.times[key] <= currentTime && stations[key.substr(0, 3)]);
+          let previousStationEstimatedTime = arr.times[previousStation];
+
+          if (!nextStation) {
             return;
           }
 
-          if (!prev) {
-            const nextId = next.stop_id.substr(0, 3);
+          if (!previousStation) {
+            const nextId = nextStation.substr(0, 3);
             if (fullRoutings.some((r) => r[0] === nextId)) {
               return;
             }
@@ -673,14 +676,20 @@ class Mapbox extends React.Component {
             }
 
             const precedingStops = matchedRouting.slice(0, matchedRouting.indexOf(nextId)).reverse();
-            const prevStop = precedingStops.find((stop) => stations[stop.substr(0, 3)]);
-            let timeDiff = (next.estimated_time - currentTime) * 2;
+            previousStation = precedingStops.find((stop) => stations[stop.substr(0, 3)]);
+            let timeDiff = (nextStationEstimatedTime - currentTime) * 2;
             timeDiff = (timeDiff < 420) ? 420 : timeDiff;
+            previousStationEstimatedTime = nextStationEstimatedTime - timeDiff;
+          }
 
-            prev = {
-              stop_id: prevStop.substr(0, 3),
-              estimated_time: next.estimated_time - timeDiff
-            }
+          const next = {
+            stop_id: nextStation.substr(0, 3),
+            estimated_time: nextStationEstimatedTime,
+          };
+
+          const prev = {
+            stop_id: previousStation.substr(0, 3),
+            estimated_time: previousStationEstimatedTime,
           }
 
 
@@ -1153,7 +1162,7 @@ class Mapbox extends React.Component {
       const tripData = arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
 
       if (tripData) {
-        const routing = tripData.arrival_times.map((s) => s.stop_id.substr(0, 3));
+        const routing = Object.keys(tripData.times).map((key) => key.substr(0, 3));
         const northboundRouting = (this.selectedTrip.direction === 'north') ? routing : routing.slice().reverse();
         const northboundCoordinatesArray = this.routingGeoJson(northboundRouting, [], false);
         const coords = (this.selectedTrip.direction === 'north') ? northboundCoordinatesArray : northboundCoordinatesArray.reverse();
@@ -2006,7 +2015,7 @@ class Mapbox extends React.Component {
                         return arrivals[props.match.params.id].trains[d].includes(trip);
                       });
 
-                      if (!trip || trip.arrival_times.length < 1) {
+                      if (!trip || Object.keys(trip.times).length < 1) {
                         return (
                           <Redirect to={`/trains/${props.match.params.id}`} />
                         );

@@ -144,12 +144,15 @@ class StationDetails extends React.Component {
     const destinationsArray = Array.from(destinations);
 
     const times = arrivals[trainId].trains[actualDirection].filter((train) => {
-      return train.arrival_times.some((estimate) => estimate.stop_id.substr(0, 3) === station.id && estimate.estimated_time >= (currentTime - 59))
+      return Object.keys(train.times).some((key) => {
+        const estimatedTime = train.times[key];
+        return key.substr(0, 3) === station.id && estimatedTime >= (currentTime - 59);
+      });
     }).map((train) => {
       return {
         id: train.id,
-        time: Math.round((train.arrival_times.find((estimate) => estimate.stop_id.substr(0, 3) === station.id).estimated_time  - currentTime) / 60),
-        destination: train.arrival_times[train.arrival_times.length - 1].stop_id.substr(0, 3)
+        time: Math.round(((train.times[station.id + 'N'] || train.times[station.id + 'S'])  - currentTime) / 60),
+        destination: Object.keys(train.times)[Object.keys(train.times).length - 1].substr(0, 3),
       }
     }).sort((a, b) => a.time - b.time).slice(0, 2);
 

@@ -68,7 +68,7 @@ class TripDetails extends React.Component {
     const { trip, stops, train, trains, stations, direction, accessibleStations, elevatorOutages } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     const title = `The Weekendest beta - ${name} Train - Trip ${trip.id}`;
-    const destination = trip.arrival_times[trip.arrival_times.length - 1].stop_id.substr(0, 3);
+    const destination = Object.keys(trip.times)[Object.keys(trip.times).length - 1].substr(0, 3);
     return (
       <Segment className="details-pane">
         <Helmet>

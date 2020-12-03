@@ -4,9 +4,15 @@ import { cloneDeep } from "lodash";
 
 class TripMap extends React.Component {  
   normalizeTrip(arrivalTimes, currentTime) {
-    const times = arrivalTimes.filter((a) => a.estimated_time >= (currentTime - 59)).map((a) => {
-      a.stop_id = a.stop_id.substr(0, 3);
-      return a;
+    const times = Object.keys(arrivalTimes).filter((key) => {
+      const estimatedTime = arrivalTimes[key];
+      return estimatedTime >= (currentTime - 59);
+    }).map((key) => {
+      const estimatedTime = arrivalTimes[key];
+      return {
+        stop_id: key.substr(0, 3),
+        estimated_time: estimatedTime,
+      };
     });
 
     const firstStopInFuture = times.find((a) => a.estimated_time >= currentTime + 30);
@@ -21,7 +27,7 @@ class TripMap extends React.Component {
   render() {
     const { trip, train, trains, stops, accessibleStations, elevatorOutages } = this.props;
     const currentTime = Date.now() / 1000;
-    const tripRoute = this.normalizeTrip(trip.arrival_times, currentTime);
+    const tripRoute = this.normalizeTrip(trip.times, currentTime);
     return(
       <div>
         <ul style={{listStyleType: "none", textAlign: "left", margin: "auto", padding: 0, marginBottom: '.5em'}}>
