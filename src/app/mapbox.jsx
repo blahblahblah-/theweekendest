@@ -1120,11 +1120,18 @@ class Mapbox extends React.Component {
           },
           "icon-image": ['get', 'stopType'],
           "icon-size": {
-            "stops": [[9, 0.1], [12, 0.75]]
+            "stops": [[9, 0.1], [14, 0.75]]
           },
           "icon-rotate": ['get', 'bearing'],
           "icon-rotation-alignment": "map",
           "icon-allow-overlap": true,
+          "icon-offset": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              8, ["get", "offset"],
+              14, ["get", "offset-double"]
+            ],
           "symbol-sort-key": ['get', 'priority'],
         },
         "paint": {
@@ -1156,7 +1163,7 @@ class Mapbox extends React.Component {
   }
 
   stopsGeoJson() {
-    const { processedRoutings, arrivals, destinations, transferStations, accessibleStations, displayAccessibleOnly } = this.state;
+    const { processedRoutings, arrivals, destinations, transferStations, accessibleStations, displayAccessibleOnly, offsets } = this.state;
 
     if (this.selectedTrip && arrivals) {
       const tripData = arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
@@ -1180,6 +1187,7 @@ class Mapbox extends React.Component {
           "features": Object.keys(stations).map((key) => {
             const destination = routing[routing.length - 1] === key;
             const transferStation = transferStations.includes(key);
+            const offset = offsets[this.selectedTrip.train];
             let bearing = stations[key].bearing;
             let opacity = 0.1;
             let priority = 10;
@@ -1232,6 +1240,8 @@ class Mapbox extends React.Component {
                 "bearing": bearing,
                 'destination': destination,
                 'transferStation': transferStation,
+                'offset': [offset * 1.5, 0],
+                'offset-double': [offset * 3, 0],
               },
               "geometry": {
                 "type": "Point",
@@ -1249,6 +1259,7 @@ class Mapbox extends React.Component {
         const stopTypeIcon = this.stopTypeIcon(key);
         const stationCoords = [stations[key].longitude, stations[key].latitude];
         const stationPt = turf.helpers.point(stationCoords);
+        let offset = 0;
         let bearing = stations[key].bearing;
         let opacity = 1;
         let priority = 5;
@@ -1272,6 +1283,16 @@ class Mapbox extends React.Component {
         } else if (transferStations.includes(key)) {
           transferStation = true;
           priority = 3;
+        }
+
+        if (this.selectedTrains.length === 1) {
+          offset = offsets[this.selectedTrains[0]];
+        } else {
+          const trainsPassed = Array.from(stations[key]["passed"]);
+          const trainOffsets = trainsPassed.map((t) => offsets[t]);
+          if (trainsPassed.length > 0) {
+            offset = (Math.max(...trainOffsets) + Math.min(...trainOffsets)) / 2;
+          }
         }
 
         if (bearing === undefined && !["circle-15", "express-stop", "cross-15"].includes(stopTypeIcon)) {
@@ -1319,6 +1340,8 @@ class Mapbox extends React.Component {
             "bearing": bearing,
             'destination': destination,
             'transferStation': transferStation,
+            'offset': [offset * 1.5, 0],
+            'offset-double': [offset * 3, 0],
           },
           "geometry": {
             "type": "Point",
@@ -1361,7 +1384,7 @@ class Mapbox extends React.Component {
       "type": "Feature",
       "geometry": {
         "type": "MultiLineString",
-        "coordinates": coordinates
+        "coordinates": coordinates,
       }
     }
   }
