@@ -335,11 +335,14 @@ class Mapbox extends React.Component {
       }
 
       stops.forEach((stop) => {
-        stations[stop]["stops"].forEach((route) => {
-          if (offsets[route] != undefined) {
-            conflictingOffsets.add(offsets[route]);
-          }
-        });
+        // Skip 7 Av/53 St because there's some weirdness with how Queens Blvd/6 Av lines' notions of north is opposite of each other
+        if (stop !== 'D14') {
+          stations[stop]["stops"].forEach((route) => {
+            if (offsets[route] != undefined) {
+              conflictingOffsets.add(offsets[route]);
+            }
+          });
+        }
       });
 
       while(conflictingOffsets.has(offset)) {
