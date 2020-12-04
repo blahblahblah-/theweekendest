@@ -569,7 +569,7 @@ class Mapbox extends React.Component {
       "type": "Feature",
       "properties": {
         "color": route.color,
-        "offset": offsets[route.id],
+        "offset": (this.selectedTrip.direction === 'north') ? offsets[route.id] : offsets[route.id] * -1,
         "opacity": 1
       },
       "geometry": {
