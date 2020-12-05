@@ -1449,15 +1449,23 @@ class Mapbox extends React.Component {
 
     // Swap directions for trains stopping at 7 Av/53 St if they also stop at 5 Av/53 St
     if (stopId === 'D14') {
-      stations['F12']["southStops"].forEach((train) => {
+      stations['F12']["stops"].forEach((train) => {
+        let southStopsContainTrain = false;
+        let northStopsContainTrain = false;
+
         if (southStops.has(train)) {
-          southStops.delete(train);
+          southStopsContainTrain = true;
+        }
+        if (northStops.has(train)) {
+          northStopsContainTrain = true;
+        }
+        northStops.delete(train);
+        southStops.delete(train);
+
+        if (southStopsContainTrain) {
           northStops.add(train);
         }
-      });
-      stations['F12']["northStops"].forEach((train) => {
-        if (northStops.has(train)) {
-          northStops.delete(train);
+        if (northStopsContainTrain) {
           southStops.add(train);
         }
       });
@@ -1465,15 +1473,23 @@ class Mapbox extends React.Component {
 
     // Swap directions for trains stopping at Coney Island if they also stop at W 8 St
     if (stopId === 'D43') {
-      stations['D42']["southStops"].forEach((train) => {
+      stations['D42']["stops"].forEach((train) => {
+        let southStopsContainTrain = false;
+        let northStopsContainTrain = false;
+
         if (southStops.has(train)) {
-          southStops.delete(train);
+          southStopsContainTrain = true;
+        }
+        if (northStops.has(train)) {
+          northStopsContainTrain = true;
+        }
+        northStops.delete(train);
+        southStops.delete(train);
+
+        if (southStopsContainTrain) {
           northStops.add(train);
         }
-      });
-      stations['D42']["northStops"].forEach((train) => {
-        if (northStops.has(train)) {
-          northStops.delete(train);
+        if (northStopsContainTrain) {
           southStops.add(train);
         }
       });
