@@ -44,6 +44,14 @@ const statusColors = {
 
 const M_TRAIN_SHUFFLE = ["M18", "M16", "M14", "M13", "M12", "M11"];
 
+// Trains passing through these stations can be physically in the opposite direction of trains that are running in the same direction
+// The keys represent such stations, the values represent subsequent stations that if a train stops there, we would need to reverse its direction of the keys
+const STATIONS_TO_FLIP_DIRECTIONS = {
+  "D14": "F12",
+  "D43": "D42",
+  "A42": "G36",
+}
+
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
 class Mapbox extends React.Component {
@@ -367,13 +375,10 @@ class Mapbox extends React.Component {
 
   // Some stations have same direction trains going in opposite directions
   shouldReverseDirection(fromRouteId, toRouteId, stationId) {
-    if (stationId === 'D14') {
-      // Trains passing 7 Av / 53 St flips when it is also routed via 5 Av/53 St
-      return stations['F12'].stops.has(fromRouteId) !== stations['F12'].stops.has(toRouteId) ;
-    } else if (stationId === 'D43') {
-      // Trains passing Coney Island flips when it is also routed via W 8 St
-      return stations['D42'].stops.has(fromRouteId) !== stations['D42'].stops.has(toRouteId);
-    }
+    return Object.keys(STATIONS_TO_FLIP_DIRECTIONS).some((targetStation) => {
+      const triggerStation = STATIONS_TO_FLIP_DIRECTIONS[targetStation];
+      return stationId === targetStation && stations[triggerStation].stops.has(fromRouteId) !== stations[triggerStation].stops.has(toRouteId);
+    })
     return false;
   }
 
@@ -1447,53 +1452,31 @@ class Mapbox extends React.Component {
       }
     }
 
-    // Swap directions for trains stopping at 7 Av/53 St if they also stop at 5 Av/53 St
-    if (stopId === 'D14') {
-      stations['F12']["stops"].forEach((train) => {
-        let southStopsContainTrain = false;
-        let northStopsContainTrain = false;
+    Object.keys(STATIONS_TO_FLIP_DIRECTIONS).forEach((targetStation) => {
+      const triggerStation = STATIONS_TO_FLIP_DIRECTIONS[targetStation];
+      if (stopId === targetStation) {
+        stations[triggerStation]["stops"].forEach((train) => {
+          let southStopsContainTrain = false;
+          let northStopsContainTrain = false;
 
-        if (southStops.has(train)) {
-          southStopsContainTrain = true;
-        }
-        if (northStops.has(train)) {
-          northStopsContainTrain = true;
-        }
-        northStops.delete(train);
-        southStops.delete(train);
+          if (southStops.has(train)) {
+            southStopsContainTrain = true;
+          }
+          if (northStops.has(train)) {
+            northStopsContainTrain = true;
+          }
+          northStops.delete(train);
+          southStops.delete(train);
 
-        if (southStopsContainTrain) {
-          northStops.add(train);
-        }
-        if (northStopsContainTrain) {
-          southStops.add(train);
-        }
-      });
-    }
-
-    // Swap directions for trains stopping at Coney Island if they also stop at W 8 St
-    if (stopId === 'D43') {
-      stations['D42']["stops"].forEach((train) => {
-        let southStopsContainTrain = false;
-        let northStopsContainTrain = false;
-
-        if (southStops.has(train)) {
-          southStopsContainTrain = true;
-        }
-        if (northStops.has(train)) {
-          northStopsContainTrain = true;
-        }
-        northStops.delete(train);
-        southStops.delete(train);
-
-        if (southStopsContainTrain) {
-          northStops.add(train);
-        }
-        if (northStopsContainTrain) {
-          southStops.add(train);
-        }
-      });
-    }
+          if (southStopsContainTrain) {
+            northStops.add(train);
+          }
+          if (northStopsContainTrain) {
+            southStops.add(train);
+          }
+        });
+      }
+    })
 
     if (this.selectedTrains.length == 1) {
       const selectedTrain = this.selectedTrains[0];
