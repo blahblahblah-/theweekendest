@@ -335,14 +335,21 @@ class Mapbox extends React.Component {
       }
 
       stops.forEach((stop) => {
-        // Skip 7 Av/53 St because there's some weirdness with how Queens Blvd/6 Av lines' notions of north is opposite of each other
-        if (stop !== 'D14') {
-          stations[stop]["stops"].forEach((route) => {
-            if (offsets[route] != undefined) {
-              conflictingOffsets.add(offsets[route]);
+        stations[stop]["stops"].forEach((route) => {
+          if (offsets[route] != undefined) {
+            let offsetToUse = offsets[route];
+            if (this.shouldReverseDirection(train, route, stop)) {
+              if (offsetToUse > 0) {
+                if (offsetToUse % 2 === 1) {
+                  offsetToUse++;
+                } else {
+                  offsetToUse--;
+                }
+              }
             }
-          });
-        }
+            conflictingOffsets.add(offsetToUse);
+          }
+        });
       });
 
       while(conflictingOffsets.has(offset)) {
@@ -356,6 +363,18 @@ class Mapbox extends React.Component {
       results[key] = offsetsMap[offsets[key]];
     });
     this.setState({offsets: results}, this.renderLines);
+  }
+
+  // Some stations have same direction trains going in opposite directions
+  shouldReverseDirection(fromRouteId, toRouteId, stationId) {
+    if (stationId === 'D14') {
+      // Trains passing 7 Av / 53 St flips when it is also routed via 5 Av/53 St
+      return stations['F12'].stops.has(fromRouteId) !== stations['F12'].stops.has(toRouteId) ;
+    } else if (stationId === 'D43') {
+      // Trains passing Coney Island flips when it is also routed via W 8 St
+      return stations['D42'].stops.has(fromRouteId) !== stations['D42'].stops.has(toRouteId);
+    }
+    return false;
   }
 
   renderLines() {
@@ -1184,7 +1203,7 @@ class Mapbox extends React.Component {
           "features": Object.keys(stations).map((key) => {
             const destination = routing[routing.length - 1] === key;
             const transferStation = transferStations.includes(key);
-            const offset = offsets[this.selectedTrip.train];
+            let offset = offsets[this.selectedTrip.train];
             let bearing = stations[key].bearing;
             let opacity = 0.1;
             let priority = 10;
@@ -1197,8 +1216,12 @@ class Mapbox extends React.Component {
               priority = (routing[routing.length - 1] === key ? 1 : 5);
               stopType = this.selectedTrip.direction === 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
 
-              if (this.selectedTrip.train === 'M' && M_TRAIN_SHUFFLE.includes(key)) {
+              if (this.selectedTrip.train === 'M' && M_TRAIN_SHUFFLE.includes(key) || this.shouldReverseDirection(this.selectedTrip.train, null, key)) {
                 stopType = this.selectedTrip.direction !== 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
+              }
+
+              if (this.shouldReverseDirection(this.selectedTrip.train, null, key)) {
+                offset = offset * -1;
               }
 
               if (bearing === undefined && line) {
@@ -1253,7 +1276,7 @@ class Mapbox extends React.Component {
     return {
       "type": "FeatureCollection",
       "features": Object.keys(stations).map((key) => {
-        const stopTypeIcon = this.stopTypeIcon(key);
+        const stopTypeIcon = this.stopTypeIcon(key, this.selectedTrains[0]);
         const stationCoords = [stations[key].longitude, stations[key].latitude];
         const stationPt = turf.helpers.point(stationCoords);
         let offset = 0;
@@ -1284,9 +1307,18 @@ class Mapbox extends React.Component {
 
         if (this.selectedTrains.length === 1) {
           offset = offsets[this.selectedTrains[0]];
+
+          if (this.shouldReverseDirection(this.selectedTrains[0], null, key)) {
+            offset = offset * -1;
+          }
         } else {
           const trainsPassed = Array.from(stations[key]["passed"]);
-          const trainOffsets = trainsPassed.map((t) => offsets[t]);
+          const trainOffsets = trainsPassed.map((t) => {
+            if (this.shouldReverseDirection(t, null, key)) {
+              return offsets[t] * -1;
+            }
+            return offsets[t];
+          });
           if (trainsPassed.length > 0) {
             offset = (Math.max(...trainOffsets) + Math.min(...trainOffsets)) / 2;
           }
@@ -1413,6 +1445,38 @@ class Mapbox extends React.Component {
       if (northStopsContainM) {
         southStops.add('M');
       }
+    }
+
+    // Swap directions for trains stopping at 7 Av/53 St if they also stop at 5 Av/53 St
+    if (stopId === 'D14') {
+      stations['F12']["southStops"].forEach((train) => {
+        if (southStops.has(train)) {
+          southStops.delete(train);
+          northStops.add(train);
+        }
+      });
+      stations['F12']["northStops"].forEach((train) => {
+        if (northStops.has(train)) {
+          northStops.delete(train);
+          southStops.add(train);
+        }
+      });
+    }
+
+    // Swap directions for trains stopping at Coney Island if they also stop at W 8 St
+    if (stopId === 'D43') {
+      stations['D42']["southStops"].forEach((train) => {
+        if (southStops.has(train)) {
+          southStops.delete(train);
+          northStops.add(train);
+        }
+      });
+      stations['D42']["northStops"].forEach((train) => {
+        if (northStops.has(train)) {
+          northStops.delete(train);
+          southStops.add(train);
+        }
+      });
     }
 
     if (this.selectedTrains.length == 1) {
