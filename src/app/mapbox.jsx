@@ -105,7 +105,7 @@ class Mapbox extends React.Component {
         stations[transfer['from']]["transfers"].add(transfer['to']);
       }
     });
-    this.showAll = false;
+    this.showAll = true;
     this.checksum = null;
     this.mapLoaded = false;
     this.calculatedPaths = {};
@@ -1228,7 +1228,7 @@ class Mapbox extends React.Component {
 
   renderLineStops() {
     const { processedRoutings } = this.state;
-    let data = []
+    let data = [];
 
     Object.keys(processedRoutings).forEach((key) => {
       if (!processedRoutings[key]) {
@@ -1238,15 +1238,17 @@ class Mapbox extends React.Component {
       data.push(this.lineStopsGeoJson(key));
     });
 
+    const geojsonData = {
+      "type": "FeatureCollection",
+      "features": data.flat(),
+    };
+
     if (this.map.getSource('TrainStops')) {
-      this.map.getSource('TrainStops').setData(data);
+      this.map.getSource('TrainStops').setData(geojsonData);
     } else {
       this.map.addSource('TrainStops', {
         "type": "geojson",
-        "data": {
-          "type": "FeatureCollection",
-          "features": data.flat(),
-        }
+        "data": geojsonData,
       });
     }
 
@@ -1909,13 +1911,13 @@ class Mapbox extends React.Component {
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
-        this.map.setPaintProperty(layerId, 'line-opacity', 1);
+        this.map.setPaintProperty(layerId, 'line-opacity', ["get", "opacity"]);
       }
 
       Object.keys(statusColors).forEach((status) => {
         const l = `${layerId}-${status}`;
         if (this.map.getLayer(l)) {
-          this.map.setPaintProperty(l, 'line-opacity', 1);
+          this.map.setPaintProperty(l, 'line-opacity', ["get", "opacity"]);
         }
       });
     });
