@@ -166,13 +166,15 @@ class StationDetails extends React.Component {
       if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0].substr(0, 3)) {
         const runDestinationShort = this.shortenStationName(runDestination);
         return (
-          <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}>
+          <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}
+            className='station-details-train-arrival-estimation'>
             {timeText} ({runDestinationShort})
           </Link>
         );
       }
       return (
-        <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}>
+        <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}
+          className='station-details-train-arrival-estimation'>
           {timeText}
         </Link>);
     }).reduce((prev, curr) => [prev, ', ', curr]);
