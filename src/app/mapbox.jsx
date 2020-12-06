@@ -129,7 +129,7 @@ class Mapbox extends React.Component {
       bearing: 29,
       minZoom: 9,
       zoom: 10,
-      hash: false,
+      hash: true,
       maxBounds: [
         [-74.8113, 40.1797],
         [-73.3584, 41.1247]
@@ -445,16 +445,22 @@ class Mapbox extends React.Component {
             "line-cap": "round",
           },
           "paint": {
-            "line-width": {
-              "stops": [[8, 1], [14, 3]]
-            },
+            "line-width": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              8, 1,
+              13, 2,
+              14, 5,
+            ],
             "line-color": ["get", "color"],
             "line-offset": [
               "interpolate",
               ["linear"],
               ["zoom"],
               8, ["get", "offset"],
-              14, ["*", ["get", "offset"], 2],
+              13, ["*", ["get", "offset"], 1.5],
+              14, ["*", ["get", "offset"], 3],
             ],
             "line-opacity": ["get", "opacity"]
           }
@@ -1160,7 +1166,13 @@ class Mapbox extends React.Component {
           "icon-rotate": ['get', 'bearing'],
           "icon-rotation-alignment": "map",
           "icon-allow-overlap": true,
-          "icon-offset": ["get", "offset-double"],
+          "icon-offset": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            8, ["get", "offset"],
+            14, ["get", "offset-double"]
+          ],
           "symbol-sort-key": ['get', 'priority'],
         },
         "paint": {
@@ -1172,7 +1184,14 @@ class Mapbox extends React.Component {
             '#ffffff',
             '#eeeeee',
           ],
-          "icon-opacity": ['get', 'opacity'],
+          "icon-opacity": [
+            "interpolate",
+            ["exponential", 2],
+            ["zoom"],
+            8, ["get", "opacity"],
+            13.9, ["get", "opacity"],
+            14, 0
+          ],
           "text-opacity": ['get', 'opacity'],
         },
       }, "TrainOutlines");
