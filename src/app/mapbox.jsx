@@ -51,6 +51,14 @@ const STATIONS_TO_FLIP_DIRECTIONS = {
   "D43": "D42",
   "A42": "G36",
 }
+const STATIONS_THAT_OVERLAP_EACH_OTHER = {
+  "A12": "D13",
+  "D13": "A12",
+  "A32": "D20",
+  "D20": "A32",
+  "718": "R09",
+  "R09": "718",
+}
 
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
@@ -1499,7 +1507,13 @@ class Mapbox extends React.Component {
       return "circle-15";
     }
 
-    const passed = Array.from(stations[stopId]["passed"]);
+    let passed = Array.from(stations[stopId].passed);
+    let stationOverlapped = STATIONS_THAT_OVERLAP_EACH_OTHER[stopId];
+    if (stationOverlapped) {
+      passed = passed.concat(Array.from(stations[stationOverlapped].passed));
+      passed = passed.filter((t) => !stations[stationOverlapped].stops.has(t));
+    }
+
     if (stations[stopId]["stops"].size == 0) {
       return "cross-15";
     }
