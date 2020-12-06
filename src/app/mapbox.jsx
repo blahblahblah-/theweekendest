@@ -129,7 +129,7 @@ class Mapbox extends React.Component {
       bearing: 29,
       minZoom: 9,
       zoom: 10,
-      hash: true,
+      hash: false,
       maxBounds: [
         [-74.8113, 40.1797],
         [-73.3584, 41.1247]
@@ -571,7 +571,7 @@ class Mapbox extends React.Component {
   }
 
   renderTrip(callback) {
-    const { offsets, routing, trainPositions, arrivals } = this.state;
+    const { offsets, routing, trainPositions, arrivals, processedRoutings } = this.state;
 
     if (!this.mapLoaded) {
       this.map.on('load', () => {
@@ -634,20 +634,26 @@ class Mapbox extends React.Component {
         "type": "line",
         "source": "SelectedTrip",
         "layout": {
-          "line-join": "round",
+          "line-join": "miter",
           "line-cap": "round",
         },
         "paint": {
-          "line-width": {
-            "stops": [[8, 1], [14, 3]]
-          },
+          "line-width": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              8, 1,
+              13, 2,
+              14, 5,
+            ],
           "line-color": ["get", "color"],
           "line-offset": [
             "interpolate",
             ["linear"],
             ["zoom"],
             8, ["get", "offset"],
-            14, ["*", ["get", "offset"], 2],
+            13, ["*", ["get", "offset"], 1.5],
+            14, ["*", ["get", "offset"], 3],
           ],
           "line-opacity": ["get", "opacity"]
         }
@@ -658,6 +664,11 @@ class Mapbox extends React.Component {
       if (this.map.getLayer("Stops")) {
         this.map.moveLayer("Stops")
       }
+      Object.keys(processedRoutings).forEach((key) => {
+        if (this.map.getLayer(`${key}-train-stops`)) {
+          this.map.moveLayer(`${key}-train-stops`)
+        }
+      })
       if (this.map.getLayer("TrainOutlines")) {
         this.map.moveLayer("TrainOutlines")
       }
@@ -1084,11 +1095,11 @@ class Mapbox extends React.Component {
 
   renderStops() {
     if (this.map.getSource("TrainOutlines")) {
-      this.map.getSource("TrainOutlines").setData(this.lineOutlineGeojson());
+      this.map.getSource("TrainOutlines").setData(this.lineOutlineGeoJson());
     } else {
       this.map.addSource("TrainOutlines", {
         "type": "geojson",
-        "data": this.lineOutlineGeojson()
+        "data": this.lineOutlineGeoJson()
       });
     }
     if (!this.map.getLayer("TrainOutlines")) {
@@ -1157,7 +1168,7 @@ class Mapbox extends React.Component {
           "text-padding": 1,
           "text-variable-anchor": ["bottom-right", "top-right", "bottom-left", "top-left", "right", "left", "bottom"],
           "text-radial-offset": {
-            "stops":  [[9, 0.25], [12, 0.75], [14, 1]],
+            "stops":  [[9, 0.25], [12, 0.75], [14, 1.5]],
           },
           "icon-image": ['get', 'stopType'],
           "icon-size": {
@@ -1189,8 +1200,12 @@ class Mapbox extends React.Component {
             ["exponential", 2],
             ["zoom"],
             8, ["get", "opacity"],
-            13.9, ["get", "opacity"],
-            14, 0
+            13, ["get", "opacity"],
+            14, ['case',
+              ['==', ['get', 'stopType'], 'cross-15'],
+              ["get", "opacity"],
+              0
+            ]
           ],
           "text-opacity": ['get', 'opacity'],
         },
@@ -1207,7 +1222,71 @@ class Mapbox extends React.Component {
         this.map.getCanvas().style.cursor = '';
       }).bind(this));
     }
+    this.renderLineStops();
     this.map.moveLayer('TrainOutlines');
+  }
+
+  renderLineStops() {
+    const { processedRoutings } = this.state;
+
+    Object.keys(processedRoutings).forEach((key) => {
+      const layerId = `${key}-train-stops`;
+
+      if (!processedRoutings[key]) {
+        if (this.map.getLayer(layerId)) {
+          this.map.removeLayer(layerId);
+        }
+        return;
+      }
+
+      const data = this.lineStopsGeoJson(key);
+
+      if (this.map.getSource(layerId)) {
+        this.map.getSource(layerId).setData(data);
+      } else {
+        this.map.addSource(layerId, {
+          "type": "geojson",
+          "data": data
+        });
+      }
+
+      if (!this.map.getLayer(layerId)) {
+        this.map.addLayer({
+          "id": layerId,
+          "type": "symbol",
+          "source": layerId,
+          "minzoom": 13,
+          "layout": {
+            "icon-image": ['get', 'stopType'],
+            "icon-size": 0.65,
+            "icon-rotate": ['get', 'bearing'],
+            "icon-rotation-alignment": "map",
+            "icon-allow-overlap": true,
+            "icon-offset": ["get", "offset"],
+          },
+          "paint": {
+            "icon-opacity": [
+              "interpolate",
+              ["exponential", 2],
+              ["zoom"],
+              13, 0,
+              14, ["get", "opacity"],
+            ]
+          }
+        }, "TrainOutlines");
+        this.map.on('click', layerId, e => {
+          const path = `/stations/${e.features[0].properties.id}`;
+          this.debounceLayerNavigate(path);
+          e.originalEvent.stopPropagation();
+        });
+        this.map.on('mouseenter', layerId, (() => {
+          this.map.getCanvas().style.cursor = 'pointer';
+        }).bind(this));
+        this.map.on('mouseleave', layerId, (() => {
+          this.map.getCanvas().style.cursor = '';
+        }).bind(this));
+      }
+    });
   }
 
   stopsGeoJson() {
@@ -1413,7 +1492,7 @@ class Mapbox extends React.Component {
     };
   }
 
-  lineOutlineGeojson() {
+  lineOutlineGeoJson() {
     const { routing, processedRoutings } = this.state;
     const coordinates = [];
     let trainsToDisplay = Object.keys(routing);
@@ -1448,6 +1527,72 @@ class Mapbox extends React.Component {
         "coordinates": coordinates,
       }
     }
+  }
+
+  lineStopsGeoJson(trainId) {
+    const { processedRoutings, offsets, displayAccessibleOnly, accessibleStations, elevatorOutages } = this.state;
+    const trainStations = Array.from(new Set(processedRoutings[trainId].flat()));
+    const offset = offsets[trainId];
+
+    return {
+      "type": "FeatureCollection",
+      "features": trainStations.map((stopId) => {
+        const bearing = stations[stopId].bearing || this.map.getBearing();
+        const flip = (STATIONS_TO_FLIP_DIRECTIONS[stopId] && stations[STATIONS_TO_FLIP_DIRECTIONS[stopId]].stops.has(trainId)) ||
+          trainId === 'M' && M_TRAIN_SHUFFLE.includes(stopId);
+        let stopTypeIcon = 'express-stop';
+        let opacity = 1;
+        let stopOffset = offset * 5; 
+
+        if (displayAccessibleOnly) {
+          if (elevatorOutages[stopId]) {
+            stopTypeIcon = 'stop-with-issues';
+          } else if (accessibleStations.south.includes(stopId + 'S')) {
+            if (!accessibleStations.north.includes(stopId + 'N')) {
+              stopTypeIcon = 'all-downtown-trains';
+            }
+          } else if (accessibleStations.north.includes(stopId + 'N')) {
+            stopTypeIcon = 'all-uptown-trains';
+          } else {
+            opacity = 0;
+          }
+        } else {
+          if (!stations[stopId].southStops.has(trainId)) {
+            stopTypeIcon = 'all-uptown-trains';
+          } else if (!stations[stopId].northStops.has(trainId)) {
+            stopTypeIcon = 'all-downtown-trains';
+          }
+        }
+
+        if (flip) {
+          if (stopTypeIcon === 'all-uptown-trains') {
+            stopTypeIcon = 'all-downtown-trains';
+          } else if (stopTypeIcon === 'all-downtown-trains') {
+            stopTypeIcon = 'all-uptown-trains';
+          }
+          stopOffset *= -1;
+        }
+
+        if (!this.selectedTrains.includes(trainId) && this.selectedTrip?.train !== trainId) {
+          opacity = 0.1;
+        }
+
+        return {
+          "type": "Feature",
+          "properties": {
+            "id": stopId,
+            "stopType": stopTypeIcon,
+            "bearing": bearing,
+            "offset": [stopOffset, 0],
+            "opacity": opacity,
+          },
+          "geometry": {
+            "type": "Point",
+            "coordinates": [stations[stopId].longitude, stations[stopId].latitude],
+          }
+        }
+      })
+    };
   }
 
   stopTypeIcon(stopId) {
