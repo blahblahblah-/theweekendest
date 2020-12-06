@@ -664,11 +664,11 @@ class Mapbox extends React.Component {
       if (this.map.getLayer("Stops")) {
         this.map.moveLayer("Stops")
       }
-      Object.keys(processedRoutings).forEach((key) => {
-        if (this.map.getLayer(`${key}-train-stops`)) {
-          this.map.moveLayer(`${key}-train-stops`)
-        }
-      })
+
+      if (this.map.getLayer("TrainStops")) {
+        this.map.moveLayer("TrainStops")
+      }
+
       if (this.map.getLayer("TrainOutlines")) {
         this.map.moveLayer("TrainOutlines")
       }
@@ -1228,65 +1228,64 @@ class Mapbox extends React.Component {
 
   renderLineStops() {
     const { processedRoutings } = this.state;
+    let data = []
 
     Object.keys(processedRoutings).forEach((key) => {
-      const layerId = `${key}-train-stops`;
-
       if (!processedRoutings[key]) {
-        if (this.map.getLayer(layerId)) {
-          this.map.removeLayer(layerId);
-        }
         return;
       }
 
-      const data = this.lineStopsGeoJson(key);
-
-      if (this.map.getSource(layerId)) {
-        this.map.getSource(layerId).setData(data);
-      } else {
-        this.map.addSource(layerId, {
-          "type": "geojson",
-          "data": data
-        });
-      }
-
-      if (!this.map.getLayer(layerId)) {
-        this.map.addLayer({
-          "id": layerId,
-          "type": "symbol",
-          "source": layerId,
-          "minzoom": 13,
-          "layout": {
-            "icon-image": ['get', 'stopType'],
-            "icon-size": 0.65,
-            "icon-rotate": ['get', 'bearing'],
-            "icon-rotation-alignment": "map",
-            "icon-allow-overlap": true,
-            "icon-offset": ["get", "offset"],
-          },
-          "paint": {
-            "icon-opacity": [
-              "interpolate",
-              ["exponential", 2],
-              ["zoom"],
-              13, 0,
-              14, ["get", "opacity"],
-            ]
-          }
-        }, "TrainOutlines");
-        this.map.on('click', layerId, e => {
-          const path = `/stations/${e.features[0].properties.id}`;
-          this.debounceLayerNavigate(path);
-          e.originalEvent.stopPropagation();
-        });
-        this.map.on('mouseenter', layerId, (() => {
-          this.map.getCanvas().style.cursor = 'pointer';
-        }).bind(this));
-        this.map.on('mouseleave', layerId, (() => {
-          this.map.getCanvas().style.cursor = '';
-        }).bind(this));
-      }
+      data.push(this.lineStopsGeoJson(key));
     });
+
+    if (this.map.getSource('TrainStops')) {
+      this.map.getSource('TrainStops').setData(data);
+    } else {
+      this.map.addSource('TrainStops', {
+        "type": "geojson",
+        "data": {
+          "type": "FeatureCollection",
+          "features": data.flat(),
+        }
+      });
+    }
+
+    if (!this.map.getLayer('TrainStops')) {
+      this.map.addLayer({
+        "id": 'TrainStops',
+        "type": "symbol",
+        "source": 'TrainStops',
+        "minzoom": 13,
+        "layout": {
+          "icon-image": ['get', 'stopType'],
+          "icon-size": 0.65,
+          "icon-rotate": ['get', 'bearing'],
+          "icon-rotation-alignment": "map",
+          "icon-allow-overlap": true,
+          "icon-offset": ["get", "offset"],
+        },
+        "paint": {
+          "icon-opacity": [
+            "interpolate",
+            ["exponential", 2],
+            ["zoom"],
+            13, 0,
+            14, ["get", "opacity"],
+          ]
+        }
+      }, "TrainOutlines");
+      this.map.on('click', 'TrainStops', e => {
+        const path = `/stations/${e.features[0].properties.id}`;
+        this.debounceLayerNavigate(path);
+        e.originalEvent.stopPropagation();
+      });
+      this.map.on('mouseenter', 'TrainStops', (() => {
+        this.map.getCanvas().style.cursor = 'pointer';
+      }).bind(this));
+      this.map.on('mouseleave', 'TrainStops', (() => {
+        this.map.getCanvas().style.cursor = '';
+      }).bind(this));
+    }
   }
 
   stopsGeoJson() {
@@ -1534,65 +1533,62 @@ class Mapbox extends React.Component {
     const trainStations = Array.from(new Set(processedRoutings[trainId].flat()));
     const offset = offsets[trainId];
 
-    return {
-      "type": "FeatureCollection",
-      "features": trainStations.map((stopId) => {
-        const bearing = stations[stopId].bearing || this.map.getBearing();
-        const flip = (STATIONS_TO_FLIP_DIRECTIONS[stopId] && stations[STATIONS_TO_FLIP_DIRECTIONS[stopId]].stops.has(trainId)) ||
-          trainId === 'M' && M_TRAIN_SHUFFLE.includes(stopId);
-        let stopTypeIcon = 'express-stop';
-        let opacity = 1;
-        let stopOffset = offset * 5; 
+    return trainStations.map((stopId) => {
+      const bearing = stations[stopId].bearing || this.map.getBearing();
+      const flip = (STATIONS_TO_FLIP_DIRECTIONS[stopId] && stations[STATIONS_TO_FLIP_DIRECTIONS[stopId]].stops.has(trainId)) ||
+        trainId === 'M' && M_TRAIN_SHUFFLE.includes(stopId);
+      let stopTypeIcon = 'express-stop';
+      let opacity = 1;
+      let stopOffset = offset * 5;
 
-        if (displayAccessibleOnly) {
-          if (elevatorOutages[stopId]) {
-            stopTypeIcon = 'stop-with-issues';
-          } else if (accessibleStations.south.includes(stopId + 'S')) {
-            if (!accessibleStations.north.includes(stopId + 'N')) {
-              stopTypeIcon = 'all-downtown-trains';
-            }
-          } else if (accessibleStations.north.includes(stopId + 'N')) {
-            stopTypeIcon = 'all-uptown-trains';
-          } else {
-            opacity = 0;
+      if (displayAccessibleOnly) {
+        if (elevatorOutages[stopId]) {
+          stopTypeIcon = 'stop-with-issues';
+        } else if (accessibleStations.south.includes(stopId + 'S')) {
+          if (!accessibleStations.north.includes(stopId + 'N')) {
+            stopTypeIcon = 'all-downtown-trains';
           }
+        } else if (accessibleStations.north.includes(stopId + 'N')) {
+          stopTypeIcon = 'all-uptown-trains';
         } else {
-          if (!stations[stopId].southStops.has(trainId)) {
-            stopTypeIcon = 'all-uptown-trains';
-          } else if (!stations[stopId].northStops.has(trainId)) {
-            stopTypeIcon = 'all-downtown-trains';
-          }
+          opacity = 0;
         }
+      } else {
+        if (!stations[stopId].southStops.has(trainId)) {
+          stopTypeIcon = 'all-uptown-trains';
+        } else if (!stations[stopId].northStops.has(trainId)) {
+          stopTypeIcon = 'all-downtown-trains';
+        }
+      }
 
-        if (flip) {
-          if (stopTypeIcon === 'all-uptown-trains') {
-            stopTypeIcon = 'all-downtown-trains';
-          } else if (stopTypeIcon === 'all-downtown-trains') {
-            stopTypeIcon = 'all-uptown-trains';
-          }
-          stopOffset *= -1;
+      if (flip) {
+        if (stopTypeIcon === 'all-uptown-trains') {
+          stopTypeIcon = 'all-downtown-trains';
+        } else if (stopTypeIcon === 'all-downtown-trains') {
+          stopTypeIcon = 'all-uptown-trains';
         }
+        stopOffset *= -1;
+      }
 
-        if (!this.selectedTrains.includes(trainId) && this.selectedTrip?.train !== trainId) {
-          opacity = 0.1;
-        }
+      if (!this.selectedTrains.includes(trainId) && this.selectedTrip?.train !== trainId) {
+        opacity = 0.1;
+      }
 
-        return {
-          "type": "Feature",
-          "properties": {
-            "id": stopId,
-            "stopType": stopTypeIcon,
-            "bearing": bearing,
-            "offset": [stopOffset, 0],
-            "opacity": opacity,
-          },
-          "geometry": {
-            "type": "Point",
-            "coordinates": [stations[stopId].longitude, stations[stopId].latitude],
-          }
+      return {
+        "type": "Feature",
+        "properties": {
+          "id": stopId,
+          "stopType": stopTypeIcon,
+          "bearing": bearing,
+          "offset": [stopOffset, 0],
+          "opacity": opacity,
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [stations[stopId].longitude, stations[stopId].latitude],
         }
-      })
-    };
+      }
+    });
   }
 
   stopTypeIcon(stopId) {
