@@ -1563,6 +1563,14 @@ class Mapbox extends React.Component {
         }
       }
 
+      if (this.selectedTrip?.train === trainId) {
+        if (this.selectedTrip.direction === 'north') {
+          stopTypeIcon = 'all-uptown-trains';
+        } else {
+          stopTypeIcon = 'all-uptown-trains';
+        }
+      }
+
       if (flip) {
         if (stopTypeIcon === 'all-uptown-trains') {
           stopTypeIcon = 'all-downtown-trains';
@@ -1911,13 +1919,13 @@ class Mapbox extends React.Component {
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
-        this.map.setPaintProperty(layerId, 'line-opacity', ["get", "opacity"]);
+        this.map.setPaintProperty(layerId, 'line-opacity', 1);
       }
 
       Object.keys(statusColors).forEach((status) => {
         const l = `${layerId}-${status}`;
         if (this.map.getLayer(l)) {
-          this.map.setPaintProperty(l, 'line-opacity', ["get", "opacity"]);
+          this.map.setPaintProperty(l, 'line-opacity', 1);
         }
       });
     });

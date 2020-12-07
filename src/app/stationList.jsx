@@ -18,6 +18,7 @@ const resultRenderer = ({ title }) => <Label content={title} />
 class StationList extends React.Component {
   constructor(props) {
     super(props);
+    this.stations = [];
 
     this.state = { stationsDisplayed: [] };
   }
