@@ -1531,9 +1531,12 @@ class Mapbox extends React.Component {
   }
 
   lineStopsGeoJson(trainId) {
-    const { processedRoutings, offsets, displayAccessibleOnly, accessibleStations, elevatorOutages } = this.state;
+    const { processedRoutings, arrivals, offsets, displayAccessibleOnly, accessibleStations, elevatorOutages } = this.state;
     const trainStations = Array.from(new Set(processedRoutings[trainId].flat()));
     const offset = offsets[trainId];
+    const isTripThisTrain = this.selectedTrip?.train === trainId;
+    const tripData = isTripThisTrain && arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
+    const tripRouting = isTripThisTrain ? Object.keys(tripData.times).map((key) => key.substr(0, 3)) : null;
 
     return trainStations.map((stopId) => {
       const bearing = stations[stopId].bearing || this.map.getBearing();
@@ -1563,11 +1566,11 @@ class Mapbox extends React.Component {
         }
       }
 
-      if (this.selectedTrip?.train === trainId) {
+      if (tripRouting?.includes(stopId)) {
         if (this.selectedTrip.direction === 'north') {
           stopTypeIcon = 'all-uptown-trains';
         } else {
-          stopTypeIcon = 'all-uptown-trains';
+          stopTypeIcon = 'all-downtown-trains';
         }
       }
 
@@ -1580,7 +1583,7 @@ class Mapbox extends React.Component {
         stopOffset *= -1;
       }
 
-      if (!this.selectedTrains.includes(trainId) && this.selectedTrip?.train !== trainId) {
+      if ((!this.selectedTrains.includes(trainId) && !this.selectedTrip) || (this.selectedTrip && !tripRouting?.includes(stopId))) {
         opacity = 0.1;
       }
 
