@@ -922,6 +922,10 @@ class Mapbox extends React.Component {
       this.map.moveLayer("Stops");
     }
 
+    if (this.map.getLayer("TrainStops")) {
+      this.map.moveLayer("TrainStops");
+    }
+
     if (this.map.getLayer("TrainOutlines")) {
       this.map.moveLayer("TrainOutlines")
     }
@@ -1962,6 +1966,7 @@ class Mapbox extends React.Component {
       this.fetchData();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
+        this.map.moveLayer('TrainStops');
         this.map.moveLayer('TrainOutlines');
         this.map.moveLayer('TrainPositions');
       }
@@ -1977,6 +1982,7 @@ class Mapbox extends React.Component {
       this.renderOverlays();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
+        this.map.moveLayer('TrainStops');
         this.map.moveLayer('TrainOutlines');
         this.map.moveLayer('TrainPositions');
       }
@@ -1992,6 +1998,7 @@ class Mapbox extends React.Component {
       this.renderOverlays();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
+        this.map.moveLayer('TrainStops');
         this.map.moveLayer('TrainOutlines');
         this.map.moveLayer('TrainPositions');
       }
@@ -2007,6 +2014,7 @@ class Mapbox extends React.Component {
       this.renderOverlays();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
+        this.map.moveLayer('TrainStops');
         this.map.moveLayer('TrainOutlines');
         this.map.moveLayer('TrainPositions');
       }
@@ -2022,7 +2030,8 @@ class Mapbox extends React.Component {
       this.renderTrainPositions();
       if (this.mapLoaded) {
         this.map.moveLayer('Stops');
-
+        this.map.moveLayer('TrainStops');
+        this.map.moveLayer('TrainOutlines');
         this.map.moveLayer('TrainPositions');
       }
     });
