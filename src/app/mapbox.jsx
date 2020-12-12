@@ -1181,13 +1181,7 @@ class Mapbox extends React.Component {
           "icon-rotate": ['get', 'bearing'],
           "icon-rotation-alignment": "map",
           "icon-allow-overlap": true,
-          "icon-offset": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            8, ["get", "offset"],
-            14, ["get", "offset-double"]
-          ],
+          "icon-offset": ["get", "offset-double"],
           "symbol-sort-key": ['get', 'priority'],
         },
         "paint": {
