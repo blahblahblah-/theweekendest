@@ -1543,6 +1543,7 @@ class Mapbox extends React.Component {
       let stopTypeIcon = 'express-stop';
       let opacity = 1;
       let stopOffset = offset * 5;
+      let verticalOffset = 0;
 
       if (displayAccessibleOnly) {
         if (elevatorOutages[stopId]) {
@@ -1550,33 +1551,41 @@ class Mapbox extends React.Component {
         } else if (accessibleStations.south.includes(stopId + 'S')) {
           if (!accessibleStations.north.includes(stopId + 'N')) {
             stopTypeIcon = 'all-downtown-trains';
+            verticalOffset = 2.5;
           }
         } else if (accessibleStations.north.includes(stopId + 'N')) {
           stopTypeIcon = 'all-uptown-trains';
+          verticalOffset = -2.5;
         } else {
           opacity = 0;
         }
       } else {
         if (!stations[stopId].southStops.has(trainId)) {
           stopTypeIcon = 'all-uptown-trains';
+          verticalOffset = -2.5;
         } else if (!stations[stopId].northStops.has(trainId)) {
           stopTypeIcon = 'all-downtown-trains';
+          verticalOffset = 2.5;
         }
       }
 
       if (tripRouting?.includes(stopId)) {
         if (this.selectedTrip.direction === 'north') {
           stopTypeIcon = 'all-uptown-trains';
+          verticalOffset = -2.5;
         } else {
           stopTypeIcon = 'all-downtown-trains';
+          verticalOffset = 2.5;
         }
       }
 
       if (flip) {
         if (stopTypeIcon === 'all-uptown-trains') {
           stopTypeIcon = 'all-downtown-trains';
+          verticalOffset = 2.5;
         } else if (stopTypeIcon === 'all-downtown-trains') {
           stopTypeIcon = 'all-uptown-trains';
+          verticalOffset = -2.5;
         }
         stopOffset *= -1;
       }
@@ -1591,7 +1600,7 @@ class Mapbox extends React.Component {
           "id": stopId,
           "stopType": stopTypeIcon,
           "bearing": bearing,
-          "offset": [stopOffset, 0],
+          "offset": [stopOffset, verticalOffset],
           "opacity": opacity,
         },
         "geometry": {
