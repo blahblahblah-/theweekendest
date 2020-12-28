@@ -2,7 +2,7 @@ import React from 'react';
 import TrainMapStop from './trainMapStop.jsx';
 import { cloneDeep } from "lodash";
 
-const M_TRAIN_SHUFFLE = ["M18", "M16", "M14", "M13", "M12", "M11"];
+const M_TRAIN_SHUFFLE = ["M21", "M20", "M19", "M18", "M16", "M14", "M13", "M12", "M11"];
 
 class TrainMap extends React.Component {
   calculateStops() {

@@ -14,7 +14,7 @@ import TrainBullet from './trainBullet.jsx';
 import Cross from "./icons/cross-15.svg";
 
 // M train directions are reversed between Essex St and Myrtle Av to match with J/Z trains
-const M_TRAIN_SHUFFLE = ["M18", "M16", "M14", "M13", "M12", "M11"];
+const M_TRAIN_SHUFFLE = ["M21", "M20", "M19", "M18", "M16", "M14", "M13", "M12", "M11"];
 
 const STATIONS_EXEMPT_FROM_UPTOWN_DOWNTOWN_DIRECTIONS = new Set(
   ['901', '902', '723', '724', '725', '726', 'L06', 'L05', 'L03', 'L02', 'L01']

@@ -42,7 +42,7 @@ const statusColors = {
   'delay': '#ff8093'
 }
 
-const M_TRAIN_SHUFFLE = ["M18", "M16", "M14", "M13", "M12", "M11"];
+const M_TRAIN_SHUFFLE = ["M21", "M20", "M19", "M18", "M16", "M14", "M13", "M12", "M11"];
 
 // Trains passing through these stations can be physically in the opposite direction of trains that are running in the same direction
 // The keys represent such stations, the values represent subsequent stations that if a train stops there, we would need to reverse its direction of the keys
