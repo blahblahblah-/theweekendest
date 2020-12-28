@@ -3,7 +3,7 @@ require 'json'
 
 stations = {}
 
-stations_csv = File.read('files/stations.csv')
+stations_csv = File.read(File.join(File.dirname(__FILE__), 'files/stations.csv'))
 csv = CSV.parse(stations_csv, headers: true)
 csv.each do |row|
   stations[row['GTFS Stop ID']] = {
@@ -19,7 +19,7 @@ end
 puts "Compiled Stations"
 
 ["1", "2", "3", "4", "5", "6", "7", "A-1", "A-2", "B", "C", "D-1", "D-2", "D-3", "E", "F", "FS", "G", "GS", "H", "J", "L", "M", "N-1", "N-2", "Q", "R", "SI"].each do |filename|
-  shape_csv = File.read("shapes/#{filename}.csv")
+  shape_csv = File.read(File.join(File.dirname(__FILE__), 'shapes/#{filename}.csv'))
   csv = CSV.parse(shape_csv, headers: false)
   last_stations = []
   path = []
@@ -45,6 +45,6 @@ end
 
 puts "Writing to JSON file"
 
-file = File.open("station_details.json", "w")
+file = File.open(File.join(File.dirname(__FILE__), 'station_details.json'), "w")
 file.puts stations.to_json
 file.close

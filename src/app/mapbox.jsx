@@ -15,6 +15,7 @@ import TrainDetails from './trainDetails.jsx';
 import TripDetails from './tripDetails.jsx';
 import StationList from './stationList.jsx';
 import StationDetails from './stationDetails.jsx';
+import TripPlanner from './tripPlanner.jsx';
 
 import stationData from '../data/station_details.json';
 import transfers from '../data/transfers.json';
@@ -100,9 +101,9 @@ class Mapbox extends React.Component {
       stations[key]["transfers"] = new Set();
       stationLocations[`${stationData[key].longitude}-${stationData[key].latitude}`] = key
     });
-    transfers.forEach((transfer) => {
-      if (stations[transfer['from']]) {
-        stations[transfer['from']]["transfers"].add(transfer['to']);
+    Object.keys(transfers).forEach((t) => {
+      if (stations[t]) {
+        stations[t].transfers = new Set(Object.keys(transfers[t]));
       }
     });
     this.showAll = true;
@@ -1181,7 +1182,13 @@ class Mapbox extends React.Component {
           "icon-rotate": ['get', 'bearing'],
           "icon-rotation-alignment": "map",
           "icon-allow-overlap": true,
-          "icon-offset": ["get", "offset-double"],
+          "icon-offset": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            8, ["get", "offset"],
+            9, ["get", "offset-double"]
+          ],
           "symbol-sort-key": ['get', 'priority'],
         },
         "paint": {
@@ -2364,6 +2371,9 @@ class Mapbox extends React.Component {
                   } else {
                     return this.renderListings(1);
                   }
+                }} />
+                <Route path="/trip" render={(props) => {
+                  return (<TripPlanner arrivals={arrivals} stations={stations} />);
                 }} />
                 <Route path="/starred" render={() => {
                   return this.renderListings(2);
