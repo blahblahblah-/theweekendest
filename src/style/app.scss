@@ -52,53 +52,21 @@ h1.yellow a, h3.yellow a {
 .infobox {
   display: block;
   position: absolute !important;
-  top: 70px;
+  top: 10px;
   left: 10px;
   bottom: auto;
   width: 300px;
   padding: 10px !important;
   max-height: 90%;
   border-radius: 1rem !important;
-
-  @media only screen and (max-width: 767px) {
-    top: 30px;
-  }
 }
 
 .mapbox {
-  top: 60px;
+  top: 0px;
   bottom: 0;
   left: 0;
   right: 0;
   position: absolute;
-
-  @media only screen and (max-width: 767px) {
-    top: 20px;
-  }
-}
-
-.ui.message.toast {
-  padding: 9px 20px;
-  text-align: center;
-
-  a {
-    font-weight: bold;
-  }
-
-  @media only screen and (max-width: 767px) {
-    padding: 1px 9px;
-    text-align: left;
-
-    .header {
-      display: inline;
-    }
-    .header::after {
-      content: " - ";
-    }
-    p {
-      display: inline;
-    }
-  }
 }
 
 @media only screen and (min-width: 768px) {
