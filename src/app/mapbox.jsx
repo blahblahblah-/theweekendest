@@ -1472,7 +1472,7 @@ class Mapbox extends React.Component {
           "type": "Feature",
           "properties": {
             "id": stations[key].id,
-            "name": stations[key].name.replace(/ - /g, "\n").replace(/ \(/g, "\n("),
+            "name": stations[key].name.replace(/ - /g, "\n").replace(/ \(/g, "\n(").replace(/Av\//g,"Av\n"),
             "stopType": stopTypeIcon,
             "opacity": opacity,
             "priority": priority,
