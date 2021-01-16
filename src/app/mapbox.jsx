@@ -462,7 +462,7 @@ class Mapbox extends React.Component {
               13, ["*", ["get", "offset"], 1.5],
               14, ["*", ["get", "offset"], 3],
             ],
-            "line-opacity": ["get", "opacity"]
+            "line-opacity": ["get", "opacity"],
           }
         };
 
@@ -1115,12 +1115,13 @@ class Mapbox extends React.Component {
           'text-field': '-',
           'text-padding': 0,
           'text-line-height': {
-            "stops": [[10, 0.1], [12.5, 8]]
+            "stops": [[10, 1], [12.5, 8]]
           },
           'text-size': 1,
           'symbol-placement': 'line',
           'symbol-spacing': 10,
           'symbol-sort-key': 1,
+          'text-offset': ['get', 'offset'],
         },
         'paint': {
           'text-color': '#aaaaaa',
@@ -1492,7 +1493,7 @@ class Mapbox extends React.Component {
   }
 
   lineOutlineGeoJson() {
-    const { routing, processedRoutings } = this.state;
+    const { routing, processedRoutings, offsets } = this.state;
     const coordinates = [];
     let trainsToDisplay = Object.keys(routing);
 
@@ -1502,29 +1503,27 @@ class Mapbox extends React.Component {
       trainsToDisplay = this.selectedTrains;
     }
 
-    trainsToDisplay.forEach((key) => {
-      if (!processedRoutings[key]) {
-        return;
-      }
-
+    const trainFeatures = trainsToDisplay.filter((key) => processedRoutings[key] && this.map.getSource(`${key}-train`)).map((key) => {
       const layerId = `${key}-train`;
       const source = this.map.getSource(layerId);
 
-      if (!source) {
-        return;
-      }
       const data = source._data;
-      data.geometry.coordinates.forEach((a) => {
-        coordinates.push(a);
-      });
+
+      return {
+        "type": "Feature",
+        "properties": {
+          "offset": [offsets[key] * 2, 0],
+        },
+        "geometry": {
+          "type": "MultiLineString",
+          "coordinates": [...data.geometry.coordinates]
+        }
+      }
     });
 
     return {
-      "type": "Feature",
-      "geometry": {
-        "type": "MultiLineString",
-        "coordinates": coordinates,
-      }
+      "type": "FeatureCollection",
+      "features": trainFeatures,
     }
   }
 
