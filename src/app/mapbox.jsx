@@ -26,7 +26,7 @@ const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
 const accessibilityUrl = 'https://www.goodservice.io/api/accessibility';
 const stations = {};
 const stationLocations = {};
-const center = [-74.003683, 40.7079445]
+const center = [-73.98119, 40.75855]
 const defaultBounds = [
   [-74.251961, 40.512764],
   [-73.755405, 40.903125]
@@ -128,7 +128,7 @@ class Mapbox extends React.Component {
       center: center,
       bearing: 29,
       minZoom: 9,
-      zoom: 10,
+      zoom: 14,
       hash: false,
       maxBounds: [
         [-74.8113, 40.1797],
@@ -181,11 +181,6 @@ class Mapbox extends React.Component {
 
     this.geoControl.on('geolocate', (e) => {
       this.setState({geoLocation: e.coords});
-    });
-
-    this.map.fitBounds(defaultBounds, {
-      bearing: 29,
-      padding: 100
     });
   }
 
@@ -1917,7 +1912,11 @@ class Mapbox extends React.Component {
         bearing: (bearing === undefined) ? 29 : bearing,
       });
     } else {
-      this.map.fitBounds(defaultBounds, { bearing: 29});
+      this.map.easeTo({
+        center: center,
+        zoom: 14,
+        bearing: 29,
+      });
     }
 
     this.selectedTrains = trainIds;
@@ -2137,7 +2136,11 @@ class Mapbox extends React.Component {
   }
 
   handleRealignMap = () => {
-    this.map.fitBounds(defaultBounds, { bearing: 29});
+    this.map.easeTo({
+      center: center,
+      zoom: 14,
+      bearing: 29,
+    });
   }
 
   panes() {
