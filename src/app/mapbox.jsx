@@ -1168,7 +1168,7 @@ class Mapbox extends React.Component {
           "text-padding": 1,
           "text-variable-anchor": ["bottom-right", "top-right", "bottom-left", "top-left", "right", "left", "bottom"],
           "text-radial-offset": {
-            "stops":  [[9, 0.25], [12, 0.75], [14, 1.5]],
+            "stops":  [[9, 0.25], [12, 0.75], [14, 2]],
           },
           "icon-image": ['get', 'stopType'],
           "icon-size": {
@@ -1254,7 +1254,7 @@ class Mapbox extends React.Component {
         "minzoom": 13,
         "layout": {
           "icon-image": ['get', 'stopType'],
-          "icon-size": 0.65,
+          "icon-size": 0.60,
           "icon-rotate": ['get', 'bearing'],
           "icon-rotation-alignment": "map",
           "icon-allow-overlap": true,
