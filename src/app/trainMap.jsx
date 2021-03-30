@@ -14,15 +14,13 @@ class TrainMap extends React.Component {
       return;
     }
 
-    routing.routings.south.forEach((r) => {
-      r.forEach((obj) => {
-        const stopId = obj.substring(0, 3);
+    routing.south.forEach((r) => {
+      r.forEach((stopId) => {
         southStops[stopId] = true;
       });
     });
-    routing.routings.north.forEach((r) => {
-      r.forEach((obj) => {
-        const stopId = obj.substring(0, 3);
+    routing.north.forEach((r) => {
+      r.forEach((stopId) => {
         northStops[stopId] = true;
       });
     }); 
@@ -37,16 +35,10 @@ class TrainMap extends React.Component {
       return;
     }
 
-    const southRoutings = routing.routings.south.map((obj) => {
-      return obj.map((stop) => {
-        return stop.substring(0, 3);
-      });
-    });
+    const southRoutings = routing.south;
 
-    const northRoutings = routing.routings.north.map((obj) => {
-      return obj.map((stop) => {
-        return stop.substring(0, 3);
-      }).reverse();
+    const northRoutings = routing.north.map((obj) => {
+      return [...obj].reverse();
     });
 
     const allRoutings = southRoutings.concat(northRoutings).sort((a, b) => {
@@ -59,8 +51,8 @@ class TrainMap extends React.Component {
       return;
     }
 
-    const lines = allRoutings.filter((routing) => {
-      return routing.every(station => !longestLine.includes(station));
+    const lines = allRoutings.filter((r) => {
+      return r.every(station => !longestLine.includes(station));
     });
 
     lines.push(longestLine);
@@ -181,12 +173,12 @@ class TrainMap extends React.Component {
   }
 
   render() {
-    const { routing, trains, stops, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
+    const { train, trains, stops, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
     const segments = this.generateSegments();
     const stopPattern = this.calculateStops();
 
     let currentBranches = [0];
-    if (segments) {
+    if (segments && stops) {
       return(
         <div>
           <ul style={{listStyleType: "none", textAlign: "left", margin: "auto", padding: 0, marginBottom: '.5em'}}>
@@ -198,8 +190,19 @@ class TrainMap extends React.Component {
                 let count = 0;
                 const stop = stops[stopId];
                 const currentMaxBranch = currentBranches[currentBranches.length - 1];
-                let transfers = stop && cloneDeep(stop.trains.filter(route => route.id != routing.id));
-
+                let transfersObj = Object.assign({}, stops[stopId]?.routes);
+                if (stop?.transfers) {
+                  stop?.transfers.forEach((s) => {
+                    transfersObj = Object.assign(transfersObj, stops[s]?.routes);
+                  });
+                }
+                delete transfersObj[train.id];
+                let transfers = Object.keys(transfersObj).map((routeId) => {
+                  return {
+                    id: routeId,
+                    directions: transfersObj[routeId],
+                  };
+                });
                 if (stopId === "") {
                   segments.branches.splice(0, 1);
                   currentBranches = [];
@@ -271,7 +274,7 @@ class TrainMap extends React.Component {
                   return isStopping || segments.branches[index].length > 0;
                 });
                 if (M_TRAIN_SHUFFLE.includes(stopId)) {
-                  if (routing.id === 'M') {
+                  if (train.id === 'M') {
                     transfers = transfers.map((t) => {
                       if (t.directions.length === 1) {
                         if (t.directions[0] === 'north') {
@@ -302,7 +305,7 @@ class TrainMap extends React.Component {
                   }
                 }
                 return (
-                  <TrainMapStop key={stopId} trains={trains} stop={stop} color={routing.color} southStop={stopPattern.southStops[stopId]}
+                  <TrainMapStop key={stopId} trains={trains} stop={stop} color={train.color} southStop={stopPattern.southStops[stopId]}
                     northStop={stopPattern.northStops[stopId]} transfers={transfers} branchStops={branchStops} branchStart={branchStart}
                     branchEnd={branchEnd} activeBranches={activeBranches} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages}
                     displayAccessibleOnly={displayAccessibleOnly}

@@ -32,7 +32,7 @@ class TrainDetails extends React.Component {
       return 'green';
     } else if (status == 'Service Change') {
       return 'orange';
-    } else if (status == 'Not Good') {
+    } else if (status == 'Not Good' || status == 'Slow') {
       return 'yellow';
     } else if (status == 'Delay') {
       return 'red';
@@ -42,13 +42,13 @@ class TrainDetails extends React.Component {
   renderServiceChanges() {
     const { train, trains } = this.props;
 
-    return train.service_change_summary.map((change, i) => {
+    return ['both', 'north', 'south'].flatMap((direction) => train.service_change_summaries[direction]?.map((change, i) => {
       let tmp = [change.replace(/ - /g, "–")];
       let matched;
       while (matched = tmp.find((c) => typeof c === 'string' && c.match(/\<[A-Z0-9]*\>/))) {
         const regexResult = matched.match(/\<([A-Z0-9]*)\>/);
         let j = tmp.indexOf(matched);
-        const selectedTrain = trains.find((t) => t.id === regexResult[1]);
+        const selectedTrain = trains[regexResult[1]];
         const selectedTrainBullet = (<TrainBullet name={selectedTrain.name} color={selectedTrain.color}
               textColor={selectedTrain.text_color} style={{display: "inline-block"}} key={selectedTrain.id} size='small' />);
         const parts = matched.split(regexResult[0]);
@@ -58,8 +58,8 @@ class TrainDetails extends React.Component {
         tmp = tmp.flat();
       }
 
-      return (<Header as='h5' key={i}>{tmp}</Header>);
-    });
+      return (<Header as='h5' key={`${direction}-${i}`}>{tmp}</Header>);
+    }));
   }
 
   renderSummary() {
@@ -169,7 +169,7 @@ class TrainDetails extends React.Component {
             </div>
             <div className="status">
               <Header as='h4' color={this.statusColor(train.status)}>
-                { train.secondary_status }
+                { train.status }
               </Header>
               <div></div>
               <Header as='h6'>
@@ -204,7 +204,7 @@ class TrainDetails extends React.Component {
             </Header>
           }
           <Header as='h4' color={this.statusColor(train.status)} style={{margin: "0 2px 0 0", flexGrow: 1, textAlign: "right"}}>
-            { train.secondary_status }
+            { train.status }
           </Header>
           <div></div>
           <Button icon title="Center map" onClick={this.handleRealignMap}>
@@ -217,7 +217,7 @@ class TrainDetails extends React.Component {
         {
           this.renderSummary()
         }
-        <TrainMap routing={routing} stops={stops} train={train} trains={trains} stations={stations} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} />
+        <TrainMap routing={train.actual_routings} stops={stops} train={train} trains={trains} stations={stations} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} />
       </Segment>
     );
   }

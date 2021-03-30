@@ -4,13 +4,13 @@ import { cloneDeep } from "lodash";
 
 class TripMap extends React.Component {  
   normalizeTrip(arrivalTimes, currentTime) {
-    const times = Object.keys(arrivalTimes).filter((key) => {
+    const times = Object.keys(arrivalTimes).sort((a, b) => arrivalTimes[a] - arrivalTimes[b]).filter((key) => {
       const estimatedTime = arrivalTimes[key];
       return estimatedTime >= (currentTime - 59);
     }).map((key) => {
       const estimatedTime = arrivalTimes[key];
       return {
-        stop_id: key.substr(0, 3),
+        stop_id: key,
         estimated_time: estimatedTime,
       };
     });
@@ -27,7 +27,7 @@ class TripMap extends React.Component {
   render() {
     const { trip, train, trains, stops, accessibleStations, elevatorOutages } = this.props;
     const currentTime = Date.now() / 1000;
-    const tripRoute = this.normalizeTrip(trip.times, currentTime);
+    const tripRoute = this.normalizeTrip(trip.stops, currentTime);
     return(
       <div>
         <ul style={{listStyleType: "none", textAlign: "left", margin: "auto", padding: 0, marginBottom: '.5em'}}>
@@ -35,7 +35,19 @@ class TripMap extends React.Component {
             tripRoute.map((tripStop) => {
               const stopId = tripStop.stop_id
               const stop = stops[stopId];
-              let transfers = stop && cloneDeep(stop.trains.filter(route => route.id != train.id));
+              let transfersObj = Object.assign({}, stops[stopId]?.routes);
+              if (stop?.transfers) {
+                stop?.transfers.forEach((s) => {
+                  transfersObj = Object.assign(transfersObj, stops[s]?.routes);
+                });
+              }
+              delete transfersObj[train.id];
+              const transfers = Object.keys(transfersObj).map((routeId) => {
+                return {
+                  id: routeId,
+                  directions: transfersObj[routeId],
+                };
+              });
               return (
                 <TrainMapStop key={stopId} trains={trains} stop={stop} color={train.color} southStop={true}
                   northStop={false} transfers={transfers} branchStops={[true]} activeBranches={[true]}

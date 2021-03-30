@@ -2,8 +2,8 @@ import React from 'react';
 import { Icon } from "semantic-ui-react";
 
 export const accessibilityIcon = (accessibleStations, elevatorOutages, stationId) => {
-  const accessibleNorth = accessibleStations.north.includes(`${stationId}N`);
-  const accessibleSouth = accessibleStations.south.includes(`${stationId}S`);
+  const accessibleNorth = accessibleStations.north.includes(stationId);
+  const accessibleSouth = accessibleStations.south.includes(stationId);
   const outages = elevatorOutages[stationId];
 
   if (outages) {
