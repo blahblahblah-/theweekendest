@@ -19,11 +19,8 @@ import StationDetails from './stationDetails.jsx';
 import stationData from '../data/station_details.json';
 import transfers from '../data/transfers.json';
 
-const apiUrl = 'https://www.goodservice.io/api/routes';
-const summaryUrl = 'https://www.goodservice.io/api/info/summary';
-const statusUrl = 'https://www.goodservice.io/api/info';
-const arrivalsUrl = 'https://www.goodservice.io/api/arrivals';
-const accessibilityUrl = 'https://www.goodservice.io/api/accessibility';
+const apiUrl = 'https://preview.goodservice.io/api/routes/?detailed=1';
+const stopsUrl = 'https://preview.goodservice.io/api/stops/';
 const stations = {};
 const stationLocations = {};
 const center = [-73.98119, 40.75855]
@@ -39,7 +36,7 @@ const trainIds = [
 const statusColors = {
   'long-headway': '#dddddd',
   'slow': '#fbfb08',
-  'delay': '#ff8093'
+  'delayed': '#ff8093'
 }
 
 const M_TRAIN_SHUFFLE = ["M21", "M20", "M19", "M18", "M16", "M14", "M13", "M12", "M11"];
@@ -66,9 +63,6 @@ class Mapbox extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      trains: [],
-      arrivals: {},
-      routing: {},
       displayAccessibleOnly: false,
       displayProblems: false,
       displayDelays: false,
@@ -106,8 +100,8 @@ class Mapbox extends React.Component {
       }
     });
     this.showAll = true;
-    this.checksum = null;
     this.mapLoaded = false;
+    this.initialized = false;
     this.calculatedPaths = {};
     this.props.history.listen((location) => {
       gtag('config', 'UA-127585516-1', {'page_path': location.pathname});
@@ -149,7 +143,7 @@ class Mapbox extends React.Component {
 
     this.map.on('load', () => {
       this.mapLoaded = true;
-      this.dataTimer = setInterval(this.fetchData.bind(this), 30000);
+      this.dataTimer = setInterval(this.fetchData.bind(this), 15000);
     });
 
     this.map.on('rotateend', () => {
@@ -188,34 +182,45 @@ class Mapbox extends React.Component {
     const { loadFullInfo } = this.state;
 
     this.setState({loading: true}, () => {
-      fetch(accessibilityUrl)
+      fetch(stopsUrl)
         .then(response => response.json())
-        .then(data => this.setState({ accessibleStations: data.accessible_stations, elevatorOutages: data.outages }))
+        .then(data => {
+          const accessibleStations = { north: [], south: [] };
+          const outages = {};
+          const stops = {}
+          data.stops.forEach((stop) => {
+            if (stop.accessibility) {
+              stop.accessibility.directions.forEach((direction) => {
+                accessibleStations[direction].push(stop.id);
+              });
+              if (stop.accessibility.advisories.length > 0) {
+                outages[stop.id] = stop.accessibility.advisories;
+              }
+            }
+            stops[stop.id] = stop;
+          });
+          this.setState({ stops: stops, accessibleStations: accessibleStations, elevatorOutages: outages }, this.processRoutings);
+        });
 
       fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
-          if (this.checksum !== data.checksum) {
-            this.setState({routing: data.routes, stops: data.stops}, this.processRoutings);
-          }
-          this.checksum = data.checksum;
-        })
-        .then(() => {
-          fetch(arrivalsUrl)
-            .then(response => response.json())
-            .then(data => this.setState({ arrivals: data.routes, loading: false }, () => {
-              this.renderTrainPositions();
-            }));
-        })
-
-      fetch(loadFullInfo ? statusUrl : summaryUrl)
-        .then(response => response.json())
-        .then(data => this.setState({ trains: data.routes, blogPost: data.blog_post, timestamp: data.timestamp }, this.renderOverlays));
+          this.setState({
+            trains: data.routes,
+            blogPost: data.blog_post,
+            timestamp: data.timestamp,
+            loading: false
+          }, this.processRoutings);
+        }
+      );
     });
   }
 
   processRoutings() {
-    const { routing, stops } = this.state;
+    const { trains, stops } = this.state;
+    if (!trains || !stops) {
+      return;
+    }
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
       stations[key]["northStops"] = new Set();
@@ -230,47 +235,33 @@ class Mapbox extends React.Component {
     const destinations = new Set();
     const transferStations = new Set();
 
-    Object.keys(routing).forEach((key) => {
+    Object.keys(trains).forEach((key) => {
       const northStops = new Set();
       const southStops = new Set();
-      const route = routing[key];
+      const route = trains[key];
       routeStops[key] = new Set();
-      const northRoutings = route.routings.north.filter((r) => {
-        return r.every((stopId) => {
-          return stopId.substr(3, 1) == 'N';
-        })
-      }).map((r) => {
+      const northRoutings = route.actual_routings?.north?.map((r) => {
         return r.map((stopId) => {
-          const stopIdPrefix = stopId.substr(0, 3);
-          if (stations[stopIdPrefix]) {
-            stations[stopIdPrefix].northStops.add(key);
-            stations[stopIdPrefix].stops.add(key);
-            routeStops[key].add(stopIdPrefix);
-            northStops.add(stopIdPrefix);
+          if (stations[stopId]) {
+            stations[stopId].northStops.add(key);
+            stations[stopId].stops.add(key);
+            routeStops[key].add(stopId);
+            northStops.add(stopId);
           }
-          return stopIdPrefix;
-        }).filter((stopId) => {
-          return stations[stopId];
+          return stopId;
         });
-      });
-      const southRoutings = route.routings.south.filter((r) => {
-        return r.every((stopId) => {
-          return stopId.substr(3, 1) == 'S';
-        })
-      }).map((r) => {
+      }) || [];
+      const southRoutings = route.actual_routings?.south?.map((r) => {
         return r.map((stopId) => {
-          const stopIdPrefix = stopId.substr(0, 3);
-          if (stations[stopIdPrefix]) {
-            stations[stopIdPrefix].southStops.add(key);
-            stations[stopIdPrefix].stops.add(key);
-            routeStops[key].add(stopIdPrefix);
-            southStops.add(stopIdPrefix);
+          if (stations[stopId]) {
+            stations[stopId].southStops.add(key);
+            stations[stopId].stops.add(key);
+            routeStops[key].add(stopId);
+            southStops.add(stopId);
           }
-          return stopIdPrefix;
-        }).filter((stopId) => {
-          return stations[stopId];
+          return stopId;
         });
-      });
+      }) || [];
       routingByDirection[key] = {
         "north": northRoutings,
         "south": southRoutings
@@ -297,7 +288,7 @@ class Mapbox extends React.Component {
             return;
           }
 
-          const trains = stops[stop].trains.map((t) => t.directions.map((d) => `${t.id}-${d}`)).flat();
+          const trains = Object.keys(stops[stop].routes).flatMap((r) => stops[stop].routes[r].map((d) => `${r}-${d}`));
 
           if (prevStop) {
             if (trains.filter(n => !prevTrains.includes(n) && n.split('-')[0] !== key).length > 0) {
@@ -386,17 +377,17 @@ class Mapbox extends React.Component {
   }
 
   renderLines() {
-    const { routing, processedRoutings, offsets } = this.state;
+    const { trains, processedRoutings, offsets } = this.state;
 
-    Object.keys(routing).forEach((key) => {
+    Object.keys(trains).forEach((key) => {
       if (!processedRoutings[key]) {
         return;
       }
 
-      const route = routing[key];
+      const route = trains[key];
       const layerId = `${key}-train`;
       const coordinates = processedRoutings[key].map((r) => {
-        return this.routingGeoJson(r, [], false)
+        return this.routingGeoJson(r)
       });
 
       coordinates.forEach((r) => {
@@ -480,6 +471,7 @@ class Mapbox extends React.Component {
     });
     this.renderOverlays();
     this.renderStops();
+    this.renderTrainPositions();
   }
 
   renderTrainPositions(callback) {
@@ -561,12 +553,13 @@ class Mapbox extends React.Component {
     }
 
     this.map.setLayoutProperty("TrainPositions", "visibility", "visible");
+    this.map.moveLayer("TrainPositions");
 
-    this.map.moveLayer("TrainPositions")
+    this.initialized = true;
   }
 
   renderTrip(callback) {
-    const { offsets, routing, trainPositions, arrivals, processedRoutings } = this.state;
+    const { trains, offsets, trainPositions, processedRoutings } = this.state;
 
     if (!this.mapLoaded) {
       this.map.on('load', () => {
@@ -582,22 +575,22 @@ class Mapbox extends React.Component {
       return;
     }
 
-    const tripData = arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
+    const tripData = trains[this.selectedTrip.train].trips[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
 
     if (!tripData) {
       return;
     }
 
-    const tripRoute = Object.keys(tripData.times).map((key) => key.substr(0, 3));
+    const tripRoute = Object.keys(tripData.stops).sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key);
     const northboundRouting = (this.selectedTrip.direction === 'north') ? tripRoute : tripRoute.slice().reverse();
-    const northboundCoordinatesArray = this.routingGeoJson(northboundRouting, [], false);
+    const northboundCoordinatesArray = this.routingGeoJson(northboundRouting);
     const coords = (this.selectedTrip.direction === 'north') ? northboundCoordinatesArray : northboundCoordinatesArray.reverse();
 
     if (coords.length < 2) {
       return coords;
     }
 
-    const route = routing[this.selectedTrip.train];
+    const route = trains[this.selectedTrip.train];
     const line = turf.helpers.lineString(coords);
     const lineSlice = trainPositions[this.selectedTrip.id] ? turf.lineSlice(turf.helpers.point(trainPositions[this.selectedTrip.id]), turf.helpers.point(coords[coords.length - 1]), line) : line;
 
@@ -681,15 +674,15 @@ class Mapbox extends React.Component {
   }
 
   calculateTrainPositions(currentTime) {
-    const { arrivals, routing, routingByDirection } = this.state;
+    const { trains, routingByDirection } = this.state;
     const trainPositions = [];
 
-    if (!arrivals || !routing || !routingByDirection) {
+    if (!trains || !routingByDirection) {
       return;
     }
 
-    Object.keys(arrivals).forEach((routeId) => {
-      const arrivalInfo = arrivals[routeId];
+    Object.keys(trains).forEach((routeId) => {
+      const arrivalInfo = trains[routeId].trips;
 
       if (!arrivalInfo) {
         return;
@@ -697,22 +690,27 @@ class Mapbox extends React.Component {
 
       ['north', 'south'].forEach((direction) => {
         const fullRoutings = routingByDirection[routeId] && routingByDirection[routeId][direction];
-        const trainArrivals = arrivalInfo.trains[direction];
+        const trainArrivals = arrivalInfo[direction] || [];
+
+        if (!fullRoutings) {
+          return;
+        }
 
         trainArrivals.forEach((arr) => {
-          const nextStation = Object.keys(arr.times).find((key) => arr.times[key] > currentTime && stations[key.substr(0, 3)]);
-          const nextStationEstimatedTime = arr.times[nextStation];
+          const arrivalTimes = Object.keys(arr.stops).sort((a, b) => arr.stops[a] - arr.stops[b]);
+          const nextStation = arrivalTimes.find((key) => arr.stops[key] > currentTime && stations[key]);
+          const nextStationEstimatedTime = arr.stops[nextStation];
 
-          const precedingStations = Object.keys(arr.times).slice(0, Object.keys(arr.times).indexOf(nextStation)).reverse();
-          let previousStation = precedingStations.find((key) => arr.times[key] <= currentTime && stations[key.substr(0, 3)]);
-          let previousStationEstimatedTime = arr.times[previousStation];
+          const precedingStations = arrivalTimes.slice(0, arrivalTimes.indexOf(nextStation)).reverse();
+          let previousStation = precedingStations.find((key) => arr.stops[key] <= currentTime && stations[key]);
+          let previousStationEstimatedTime = arr.stops[previousStation];
 
           if (!nextStation) {
             return;
           }
 
           if (!previousStation) {
-            const nextId = nextStation.substr(0, 3);
+            const nextId = nextStation;
             if (fullRoutings.some((r) => r[0] === nextId)) {
               return;
             }
@@ -723,26 +721,26 @@ class Mapbox extends React.Component {
             }
 
             const precedingStops = matchedRouting.slice(0, matchedRouting.indexOf(nextId)).reverse();
-            previousStation = precedingStops.find((stop) => stations[stop.substr(0, 3)]);
+            previousStation = precedingStops.find((stop) => stations[stop]);
             let timeDiff = (nextStationEstimatedTime - currentTime) * 2;
             timeDiff = (timeDiff < 420) ? 420 : timeDiff;
             previousStationEstimatedTime = nextStationEstimatedTime - timeDiff;
           }
 
           const next = {
-            stop_id: nextStation.substr(0, 3),
+            stop_id: nextStation,
             estimated_time: nextStationEstimatedTime,
           };
 
           const prev = {
-            stop_id: previousStation.substr(0, 3),
+            stop_id: previousStation,
             estimated_time: previousStationEstimatedTime,
           }
 
 
           trainPositions.push({
             route: routeId,
-            routeName: routing[routeId].name,
+            routeName: trains[routeId].name,
             id: arr.id,
             direction: direction,
             prev: prev,
@@ -756,20 +754,20 @@ class Mapbox extends React.Component {
   }
 
   trainPositionGeoJson(currentTime, trainPositions, callback) {
-    const { routing } = this.state;
+    const { trains } = this.state;
     const trainPositionsObj = {};
 
-    if (!routing) {
+    if (!trains) {
       return;
     }
 
     const results = {
       "type": "FeatureCollection",
       "features": trainPositions.map((pos) => {
-        const prev = pos.prev.stop_id.substr(0, 3);
-        const next = pos.next.stop_id.substr(0, 3);
+        const prev = pos.prev.stop_id;
+        const next = pos.next.stop_id;
         const array = pos.direction === 'north' ? [prev, next] : [next, prev];
-        const geoJson = this.routingGeoJson(array, [], false);
+        const geoJson = this.routingGeoJson(array);
         const lineSegment = turf.helpers.lineString(pos.direction === 'north' ? geoJson : geoJson.reverse());
         const lineLength = turf.length(lineSegment);
         const diffTime = pos.next.estimated_time - pos.prev.estimated_time;
@@ -799,9 +797,9 @@ class Mapbox extends React.Component {
           "routeId": pos.route,
           "tripId": pos.id,
           "direction": pos.direction,
-          "color": routing[pos.route].color,
-          "icon": pos.routeName.endsWith('X') ? `train-pos-x-${routing[pos.route].color.slice(1).toLowerCase()}` : `train-pos-${routing[pos.route].color.slice(1).toLowerCase()}`,
-          "text-color": routing[pos.route].color.toLowerCase() === '#fbbd08' ? '#000000' : '#ffffff',
+          "color": trains[pos.route].color,
+          "icon": pos.routeName.endsWith('X') ? `train-pos-x-${trains[pos.route].color.slice(1).toLowerCase()}` : `train-pos-${trains[pos.route].color.slice(1).toLowerCase()}`,
+          "text-color": trains[pos.route].color.toLowerCase() === '#fbbd08' ? '#000000' : '#ffffff',
           "bearing": bearing,
           "text-rotate": textRotate,
           "offset": [Math.sin(bearingInRads) * -0.3, Math.cos(bearingInRads) * 0.3],
@@ -819,16 +817,16 @@ class Mapbox extends React.Component {
   }
 
   renderOverlays() {
-    const { routing, displayDelays, displaySlowSpeeds, displayLongHeadways, processedRoutings, offsets } = this.state;
+    const { trains, displayDelays, displaySlowSpeeds, displayLongHeadways, processedRoutings, offsets } = this.state;
     const statusSpacing = {
       'long-headway': 11,
       'slow': 7,
-      'delay': 5
+      'delayed': 5
     }
     const statusVisability = {
       'long-headway': displayLongHeadways,
       'slow': displaySlowSpeeds,
-      'delay': displayDelays
+      'delayed': displayDelays
     }
 
     if (!this.mapLoaded) {
@@ -838,12 +836,12 @@ class Mapbox extends React.Component {
       return;
     }
 
-    Object.keys(routing).forEach((key) => {
+    Object.keys(trains).forEach((key) => {
       if (!processedRoutings[key]) {
         return;
       }
 
-      const route = routing[key];
+      const route = trains[key];
       const layerIdPrefix = `${key}-train`;
 
       Object.keys(statusColors).forEach((status) => {
@@ -854,9 +852,15 @@ class Mapbox extends React.Component {
         }
 
         const problemSections = this.calculateProblemSections(route.id, status);
-        const coordinates = processedRoutings[key].map((r) => {
-          return this.routingGeoJson(r, problemSections, true)
-        }).flat();
+        const coordinates = processedRoutings[key].flatMap((r) => {
+          return problemSections.map((problemSection) => {
+            const begin = r.indexOf(problemSection.begin);
+            const end = r.indexOf(problemSection.end);
+            if (begin > -1 && end -1) {
+              return this.routingGeoJson(r.slice(begin, end + 1));
+            }
+          });
+        }).filter((s) => s);
 
         const geojson = {
         "type": "Feature",
@@ -886,21 +890,27 @@ class Mapbox extends React.Component {
             "source": layerId,
             "layout": {
               "visibility": statusVisability[status] ? 'visible' : 'none',
-              "line-join": "round",
+              "line-join": "miter",
               "line-cap": "round",
             },
             "paint": {
-              "line-width": {
-                "stops": [[8, 1], [14, 3]]
-              },
+                "line-width": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                8, 1,
+                13, 2,
+                14, 5,
+              ],
               "line-color": statusColors[status],
               "line-dasharray": [2, statusSpacing[status]],
-              "line-offset": [
+             "line-offset": [
                 "interpolate",
                 ["linear"],
                 ["zoom"],
                 8, ["get", "offset"],
-                14, ["*", ["get", "offset"], 2],
+                13, ["*", ["get", "offset"], 1.5],
+                14, ["*", ["get", "offset"], 3],
               ],
               "line-opacity": ["get", "opacity"]
             }
@@ -946,26 +956,14 @@ class Mapbox extends React.Component {
     'trailing': true
   });
 
-  routingGeoJson(routing, problemSections, filterByProblems) {
-    const relevantProblemSections =
-      problemSections.filter((ps) => routing.some((s) => ps.first_stops.includes(s)) && routing.some((s) => ps.last_stops.includes(s)));
+  routingGeoJson(routing) {
     const r = routing.slice(0);
 
-    if (filterByProblems && relevantProblemSections.length === 0) {
-      return [];
-    }
-
     let path = []
-    let filteredPaths = [];
-    let cumulativePath = [];
     let prev = r.splice(0, 1)[0];
-    let currentProblemSection = null;
 
     r.forEach((stopId, index) => {
       let tempPath = [];
-      if (!currentProblemSection) {
-        currentProblemSection = relevantProblemSections.find((ps) => ps.first_stops.includes(prev));
-      }
       tempPath.push([stations[prev].longitude, stations[prev].latitude]);
       let potentialPath = this.findPath(prev, stopId, 0, []);
       if (potentialPath) {
@@ -975,84 +973,35 @@ class Mapbox extends React.Component {
       }
       tempPath.push([stations[stopId].longitude, stations[stopId].latitude]);
       path = path.concat(tempPath);
-      if (currentProblemSection) {
-        cumulativePath = cumulativePath.concat(tempPath);
-      }
 
       prev = stopId;
-      if (currentProblemSection && currentProblemSection.last_stops.includes(stopId) &&
-        !r.slice(index + 1).some((s) => currentProblemSection.last_stops.includes(s))) {
-        filteredPaths.push(cumulativePath);
-        cumulativePath = [];
-        currentProblemSection = null;
-      }
     });
 
-    if (filterByProblems) {
-      return filteredPaths;
-    }
     return path;
   }
 
   calculateProblemSections(routeId, status) {
     const { trains } = this.state;
-    const train = trains.find((t) => t.id === routeId);
+    const train = trains[routeId];
     const results = [];
+    const statusKey = `${status.replace('-', '_')}_sections`;
 
-    if (!train) {
+    if (!train || !train[statusKey]) {
       return [];
     }
 
-    const northLinesDirections = train.north.map((obj) => {
-      return {
-        name: obj.name,
-        parent_name: obj.parent_name,
-        max_actual_headway: obj.max_actual_headway,
-        max_scheduled_headway: obj.max_scheduled_headway,
-        delay: obj.delay,
-        travel_time: obj.travel_time,
-        headway_gap: obj.headway_gap,
-        slow: obj.slow,
-        delayed: obj.delayed,
-        first_stops: obj.first_stops.map((s) => s.substr(0, 3)),
-        last_stops: obj.last_stops.map((s) => s.substr(0, 3))
-      };
+    train[statusKey].north?.forEach((section) => {
+      const obj = Object.assign(section, { type: status});
+      results.push(obj);
     });
 
-    const southLineDirections = train.south.map((obj) => {
-      return {
-        name: obj.name,
-        parent_name: obj.parent_name,
-        max_actual_headway: obj.max_actual_headway,
-        max_scheduled_headway: obj.max_scheduled_headway,
-        delay: obj.delay,
-        travel_time: obj.travel_time,
-        headway_gap: obj.headway_gap,
-        slow: obj.slow,
-        delayed: obj.delayed,
-        first_stops: obj.last_stops.map((s) => s.substr(0, 3)),
-        last_stops: obj.first_stops.map((s) => s.substr(0, 3))
-      };
-    });
-
-    northLinesDirections.forEach((obj) => {
-      if (
-        (status === 'long-headway' && obj.headway_gap) ||
-        (status === 'slow' && obj.slow) ||
-        (status === 'delay' && obj.delayed)
-      ) {
-        results.push(obj);
-      }
-    });
-
-    southLineDirections.forEach((obj) => {
-      if (
-        (status === 'long-headway' && obj.headway_gap) ||
-        (status === 'slow' && obj.slow) ||
-        (status === 'delay' && obj.delayed)
-      ) {
-        results.push(obj);
-      }
+    train[statusKey].south?.forEach((section) => {
+      const begin = section.begin;
+      const end = section.end;
+      const obj = Object.assign(section, { type: status});
+      obj['begin'] = end;
+      obj['end'] = begin;
+      results.push(obj);
     });
 
     return results;
@@ -1285,15 +1234,15 @@ class Mapbox extends React.Component {
   }
 
   stopsGeoJson() {
-    const { processedRoutings, arrivals, destinations, transferStations, accessibleStations, displayAccessibleOnly, offsets } = this.state;
+    const { processedRoutings, trains, destinations, transferStations, accessibleStations, displayAccessibleOnly, offsets } = this.state;
 
-    if (this.selectedTrip && arrivals) {
-      const tripData = arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
+    if (this.selectedTrip && trains) {
+      const tripData = trains[this.selectedTrip.train].trips[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
 
       if (tripData) {
-        const routing = Object.keys(tripData.times).map((key) => key.substr(0, 3));
+        const routing = Object.keys(tripData.stops).sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key);
         const northboundRouting = (this.selectedTrip.direction === 'north') ? routing : routing.slice().reverse();
-        const northboundCoordinatesArray = this.routingGeoJson(northboundRouting, [], false);
+        const northboundCoordinatesArray = this.routingGeoJson(northboundRouting);
         const coords = (this.selectedTrip.direction === 'north') ? northboundCoordinatesArray : northboundCoordinatesArray.reverse();
 
         let line;
@@ -1392,7 +1341,7 @@ class Mapbox extends React.Component {
         let destination = false;
         let transferStation = false;
 
-        if ((displayAccessibleOnly && !accessibleStations.north.includes(key + 'N') && !accessibleStations.south.includes(key + 'S')) ||
+        if ((displayAccessibleOnly && !accessibleStations.north.includes(key) && !accessibleStations.south.includes(key)) ||
           (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
           !this.selectedStations.includes(key) && (this.selectedTrains.length === 1 || stations[key].stops.size > 0))) {
           opacity = 0.1;
@@ -1438,7 +1387,7 @@ class Mapbox extends React.Component {
             if (i < (matchedRouting.length - 1)) {
               const nextNorthStation = matchedRouting[i + 1];
               const pair = [key, nextNorthStation];
-              const coordinatesArray = this.routingGeoJson(pair, [], false);
+              const coordinatesArray = this.routingGeoJson(pair);
               const line = turf.helpers.lineString(coordinatesArray);
               const pointAhead = turf.along(line, 0.01);
 
@@ -1446,7 +1395,7 @@ class Mapbox extends React.Component {
             } else {
               const nextSouthStation = matchedRouting[i - 1];
               const pair = [nextSouthStation, key];
-              const coordinatesArray = this.routingGeoJson(pair, [], false);
+              const coordinatesArray = this.routingGeoJson(pair);
               const line = turf.helpers.lineString(coordinatesArray);
               const lineLength = turf.length(line);
               const pointBehind = turf.along(line, lineLength - 0.01);
@@ -1488,9 +1437,9 @@ class Mapbox extends React.Component {
   }
 
   lineOutlineGeoJson() {
-    const { routing, processedRoutings, offsets } = this.state;
+    const { trains, processedRoutings, offsets } = this.state;
     const coordinates = [];
-    let trainsToDisplay = Object.keys(routing);
+    let trainsToDisplay = Object.keys(trains);
 
     if (this.selectedTrip) {
       trainsToDisplay = [this.selectedTrip.train];
@@ -1523,12 +1472,12 @@ class Mapbox extends React.Component {
   }
 
   lineStopsGeoJson(trainId) {
-    const { processedRoutings, arrivals, offsets, displayAccessibleOnly, accessibleStations, elevatorOutages } = this.state;
+    const { processedRoutings, trains, offsets, displayAccessibleOnly, accessibleStations, elevatorOutages } = this.state;
     const trainStations = Array.from(new Set(processedRoutings[trainId].flat()));
     const offset = offsets[trainId];
     const isTripThisTrain = this.selectedTrip?.train === trainId;
-    const tripData = isTripThisTrain && arrivals[this.selectedTrip.train].trains[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
-    const tripRouting = isTripThisTrain ? Object.keys(tripData.times).map((key) => key.substr(0, 3)) : null;
+    const tripData = isTripThisTrain && trains[this.selectedTrip.train].trips[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
+    const tripRouting = isTripThisTrain ? Object.keys(tripData.stops).sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key) : null;
 
     return trainStations.map((stopId) => {
       const bearing = stations[stopId].bearing || this.map.getBearing();
@@ -1542,12 +1491,12 @@ class Mapbox extends React.Component {
       if (displayAccessibleOnly) {
         if (elevatorOutages[stopId]) {
           stopTypeIcon = 'stop-with-issues';
-        } else if (accessibleStations.south.includes(stopId + 'S')) {
-          if (!accessibleStations.north.includes(stopId + 'N')) {
+        } else if (accessibleStations.south.includes(stopId)) {
+          if (!accessibleStations.north.includes(stopId)) {
             stopTypeIcon = 'all-downtown-trains';
             verticalOffset = 2.5;
           }
-        } else if (accessibleStations.north.includes(stopId + 'N')) {
+        } else if (accessibleStations.north.includes(stopId)) {
           stopTypeIcon = 'all-uptown-trains';
           verticalOffset = -2.5;
         } else {
@@ -1610,8 +1559,8 @@ class Mapbox extends React.Component {
 
     let southStops = new Set(stations[stopId]["southStops"]);
     let northStops = new Set(stations[stopId]["northStops"]);
-    const southAccessible = accessibleStations.south.includes(stopId + 'S');
-    const northAccessible = accessibleStations.north.includes(stopId + 'N');
+    const southAccessible = accessibleStations.south.includes(stopId);
+    const northAccessible = accessibleStations.north.includes(stopId);
 
     if (M_TRAIN_SHUFFLE.includes(stopId)) {
       let southStopsContainM = false;
@@ -1759,7 +1708,7 @@ class Mapbox extends React.Component {
   }
 
   goToTrip(trip, direction, train) {
-    const { width, arrivals } = this.state;
+    const { width } = this.state;
 
     this.selectTrip(trip, direction, train, (coords) => {
       if (coords[0]) {
@@ -2170,7 +2119,7 @@ class Mapbox extends React.Component {
   }
 
   renderListings(index) {
-    const { trains, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly } = this.state;
+    const { trains, stops, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly } = this.state;
     return (
       <div>
         <Helmet>
@@ -2234,7 +2183,7 @@ class Mapbox extends React.Component {
           </Grid>
         </Responsive>
         <Segment className="selection-pane">
-          { trains && trains.length > 1 &&
+          { trains && stops &&
             <Tab menu={{secondary: true, pointing: true}} panes={this.panes()} activeIndex={index} />
           }
         </Segment>
@@ -2243,14 +2192,14 @@ class Mapbox extends React.Component {
   }
 
   render() {
-    const { loading, trains, arrivals, routing, stops, timestamp, blogPost, accessibleStations, elevatorOutages,
+    const { loading, trains, stops, timestamp, blogPost, accessibleStations, elevatorOutages,
       displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly } = this.state;
     return (
       <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
         <div ref={el => this.mapContainer = el} className='mapbox'>
         </div>
         <Segment inverted vertical className="infobox">
-          { trains.length > 1 &&
+          { trains && stops &&
             <Responsive as={Button} maxWidth={Responsive.onlyMobile.maxWidth} icon
               className="mobile-pane-control" onClick={this.handleToggleMobilePane}
               title="Expand/Collapse">
@@ -2287,25 +2236,25 @@ class Mapbox extends React.Component {
           </Responsive>
           <div ref={el => this.infoBox = el} className="inner-infobox open">
             {
-              trains.length > 1 &&
+              this.initialized &&
               <Switch>
                 <Route path="/trains/:id?/:tripId?" render={(props) => {
                   if (props.match.params.id) {
-                    if (arrivals && arrivals[props.match.params.id] && props.match.params.tripId) {
+                    if (trains[props.match.params.id] && props.match.params.tripId) {
                       const tripId = props.match.params.tripId.replace('-', '..');
-                      const trip = _.map(arrivals[props.match.params.id].trains, (d) => d.find((t) => t.id === tripId)).find(x => x);
-                      const direction = Object.keys(arrivals[props.match.params.id].trains).find((d) => {
-                        return arrivals[props.match.params.id].trains[d].includes(trip);
+                      const trip = _.map(trains[props.match.params.id].trips, (d) => d.find((t) => t.id === tripId)).find(x => x);
+                      const direction = Object.keys(trains[props.match.params.id].trips).find((d) => {
+                        return trains[props.match.params.id].trips[d].includes(trip);
                       });
 
-                      if (!trip || Object.keys(trip.times).length < 1) {
+                      if (!trip || Object.keys(trip.stops).length < 1) {
                         return (
                           <Redirect to={`/trains/${props.match.params.id}`} />
                         );
                       }
                       return (
                         <TripDetails trip={trip} trains={trains} stops={stops} direction={direction} stations={stations}
-                          train={trains.find((train) => train.id == props.match.params.id)}
+                          train={trains[props.match.params.id]}
                           accessibleStations={accessibleStations}
                           elevatorOutages={elevatorOutages}
                           handleResetMap={this.handleResetMap}
@@ -2326,10 +2275,10 @@ class Mapbox extends React.Component {
                       }
 
                       return (
-                        <TrainDetails routing={routing[props.match.params.id]} stops={stops} stations={stations}
+                        <TrainDetails stops={stops} stations={stations}
                           accessibleStations={accessibleStations}
                           elevatorOutages={elevatorOutages}
-                          train={trains.find((train) => train.id == props.match.params.id)} trains={trains}
+                          train={trains[props.match.params.id]} trains={trains}
                           displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
                           displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
                           displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
@@ -2348,8 +2297,7 @@ class Mapbox extends React.Component {
                 <Route path="/stations/:id?" render={(props) => {
                   if (props.match.params.id) {
                     return (
-                      <StationDetails routings={routing} trains={trains} station={stations[props.match.params.id]} stations={stations}
-                        arrivals={arrivals}
+                      <StationDetails trains={trains} station={stations[props.match.params.id]} stations={stations}
                         accessibleStations={accessibleStations}
                         elevatorOutages={elevatorOutages}
                         displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
@@ -2378,7 +2326,7 @@ class Mapbox extends React.Component {
                 <Route render={() => <Redirect to="/trains" /> } />
               </Switch>
             }
-            <Loader active={!(trains && trains.length)} />
+            <Loader active={!(trains && Object.keys(trains.length > 0))} />
             <Header inverted as='h5' floated='left' style={{margin: "10px 5px"}}>
               Last updated {timestamp && (new Date(timestamp)).toLocaleTimeString('en-US')}.<br />
               { blogPost &&

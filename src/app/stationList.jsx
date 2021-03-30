@@ -42,7 +42,7 @@ class StationList extends React.Component {
     const { stations, displayAccessibleOnly, accessibleStations } = this.props;
     // Sort by numbers first before alpha
     this.stations = Object.values(stations).filter((station) => {
-      return !displayAccessibleOnly || accessibleStations.north.includes(station.id + 'N') || accessibleStations.south.includes(station.id + 'S');
+      return !displayAccessibleOnly || accessibleStations.north.includes(station.id) || accessibleStations.south.includes(station.id);
     }).sort((a, b) => {
       const matchA = a.name.match(/^(\d+)/g);
       const matchB = b.name.match(/^(\d+)/g);
@@ -178,7 +178,7 @@ class StationList extends React.Component {
     }, 300);
   }
 
-  renderListItem(station, trainMap) {
+  renderListItem(station, trains) {
     const { accessibleStations, elevatorOutages } = this.props;
     return(
       <List.Item as={Link} key={station.id} className='station-list-item' to={`/stations/${station.id}`}>
@@ -198,7 +198,7 @@ class StationList extends React.Component {
         <List.Content floated='right'>
           {
             Array.from(station.stops).sort().map((trainId) => {
-              const train = trainMap[trainId];
+              const train = trains[trainId];
               const directions = [];
               if (station.northStops.has(trainId)) {
                 directions.push("north")
@@ -224,15 +224,10 @@ class StationList extends React.Component {
   render() {
     const { stations, trains, starred, advisories, nearby } = this.props;
     const { stationsDisplayed } = this.state;
-    const trainMap = {};
     const stationsWithoutService = advisories && this.stationsWithoutService();
     const stationsWithOneWayService = advisories && this.stationsWithOneWayService();
     const stationsWithElevatorOutages = advisories && this.stationsWithElevatorOutages();
     const stationsNearby = nearby && this.stationsNearby();
-
-    trains.forEach((train) => {
-      trainMap[train.id] = train;
-    });
     return (
       <div>
         {
@@ -258,7 +253,7 @@ class StationList extends React.Component {
             <List divided relaxed selection style={{marginTop: 0}}>
               {
                 stationsDisplayed && stationsDisplayed.map((station) => {
-                  return this.renderListItem(station, trainMap);
+                  return this.renderListItem(station, trains);
                 })
               }
               {
@@ -289,7 +284,7 @@ class StationList extends React.Component {
             <List divided relaxed selection style={{marginTop: 0}}>
               {
                 stationsNearby && stationsNearby.map((station) => {
-                  return this.renderListItem(station, trainMap);
+                  return this.renderListItem(station, trains);
                 })
               }
               {
@@ -326,7 +321,7 @@ class StationList extends React.Component {
                 <List divided relaxed selection attached="true" style={{marginTop: 0}}>
                   {
                     stationsWithoutService.map((station) => {
-                      return this.renderListItem(station, trainMap);
+                      return this.renderListItem(station, trains);
                     })
                   }
                 </List>
@@ -341,7 +336,7 @@ class StationList extends React.Component {
                 <List divided relaxed selection attached="true" style={{marginTop: 0}}>
                   {
                     stationsWithOneWayService.map((station) => {
-                      return this.renderListItem(station, trainMap);
+                      return this.renderListItem(station, trains);
                     })
                   }
                 </List>
@@ -356,7 +351,7 @@ class StationList extends React.Component {
                 <List divided relaxed selection attached="true" style={{marginTop: 0}}>
                   {
                     stationsWithElevatorOutages.map((station) => {
-                      return this.renderListItem(station, trainMap);
+                      return this.renderListItem(station, trains);
                     })
                   }
                 </List>

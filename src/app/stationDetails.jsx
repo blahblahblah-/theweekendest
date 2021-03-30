@@ -69,7 +69,7 @@ class StationDetails extends React.Component {
       return 'green';
     } else if (status == 'Service Change') {
       return 'orange';
-    } else if (status == 'Not Good') {
+    } else if (status == 'Not Good' || status == 'Slow') {
       return 'yellow';
     } else if (status == 'Delay') {
       return 'red';
@@ -120,7 +120,7 @@ class StationDetails extends React.Component {
   }
 
   renderArrivalTimes(trainId, direction) {
-    const { station, arrivals, routings, stations } = this.props;
+    const { station, trains, stations } = this.props;
     const currentTime = Date.now() / 1000;
     let actualDirection = direction;
 
@@ -128,31 +128,32 @@ class StationDetails extends React.Component {
       actualDirection = direction === "north" ? "south" : "north";
     }
 
-    if (!arrivals[trainId] || !arrivals[trainId].trains[actualDirection]) {
+    if (!trains[trainId] || !trains[trainId].trips[actualDirection]) {
       return;
     }
 
     const destinations = new Set();
-    const trainRoutingInfo = routings[trainId];
+    const trainRoutingInfo = trains[trainId].actual_routings;
 
-    trainRoutingInfo.routings[actualDirection].forEach((routing) => {
-      if (routing.includes(station.id + actualDirection[0].toUpperCase())) {
+    trainRoutingInfo[actualDirection].forEach((routing) => {
+      if (routing.includes(station.id)) {
         destinations.add(routing[routing.length - 1]);
       }
     })
 
     const destinationsArray = Array.from(destinations);
 
-    const times = arrivals[trainId].trains[actualDirection].filter((train) => {
-      return Object.keys(train.times).some((key) => {
-        const estimatedTime = train.times[key];
-        return key.substr(0, 3) === station.id && estimatedTime >= (currentTime - 59);
+    const times = trains[trainId].trips[actualDirection].filter((trip) => {
+      return Object.keys(trip.stops).some((key) => {
+        const estimatedTime = trip.stops[key];
+        return key === station.id && estimatedTime >= (currentTime - 59);
       });
-    }).map((train) => {
+    }).map((trip) => {
+      const destination = Object.keys(trip.stops).sort((a, b) => trip.stops[b] - trip.stops[a])[0];
       return {
-        id: train.id,
-        time: Math.round(((train.times[station.id + 'N'] || train.times[station.id + 'S'])  - currentTime) / 60),
-        destination: Object.keys(train.times)[Object.keys(train.times).length - 1].substr(0, 3),
+        id: trip.id,
+        time: Math.round((trip.stops[station.id]  - currentTime) / 60),
+        destination: destination,
       }
     }).sort((a, b) => a.time - b.time).slice(0, 2);
 
@@ -161,9 +162,9 @@ class StationDetails extends React.Component {
     }
 
     return times.map((estimate) => {
-      const runDestination = stations[estimate.destination.substr(0, 3)].name.replace(/ - /g, "–");
+      const runDestination = stations[estimate.destination].name.replace(/ - /g, "–");
       const timeText = estimate.time < 1 ? "Due" : `${estimate.time} min`;
-      if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0].substr(0, 3)) {
+      if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0]) {
         const runDestinationShort = this.shortenStationName(runDestination);
         return (
           <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}
@@ -181,13 +182,13 @@ class StationDetails extends React.Component {
   }
 
   southDestinations(link) {
-    const { routings, station } = this.props;
+    const { trains, station } = this.props;
     let destinations = [];
-    Object.keys(routings).forEach((key) => {
-      const route = routings[key];
+    Object.keys(trains).forEach((key) => {
+      const train = trains[key];
       if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
-        route.routings.south.forEach((routing) => {
-          if (routing.includes(station.id + "S")) {
+        train.actual_routings?.south?.forEach((routing) => {
+          if (routing.includes(station.id)) {
             destinations.push(routing[routing.length - 1]);
           }
         })
@@ -195,9 +196,9 @@ class StationDetails extends React.Component {
     })
 
     if (M_TRAIN_SHUFFLE.includes(station.id)) {
-      const route = routings["M"];
-      route.routings.north.forEach((routing) => {
-        if (routing.includes(station.id + "N")) {
+      const train = trains["M"];
+      train.actual_routings?.north?.forEach((routing) => {
+        if (routing.includes(station.id)) {
           destinations.push(routing[routing.length - 1]);
         }
       })
@@ -207,7 +208,7 @@ class StationDetails extends React.Component {
   }
 
   southDirection() {
-    const { routings, stations, station } = this.props;
+    const { trains, stations, station } = this.props;
     const currentBorough = station.borough;
 
     if (STATIONS_EXEMPT_FROM_SOUTH_DIRECTIONS.has(station.id)) {
@@ -216,13 +217,13 @@ class StationDetails extends React.Component {
 
     let manhattanDirection = null;
     let adjacentBoroughs = new Set();
-    Object.keys(routings).forEach((key) => {
-      const route = routings[key];
+    Object.keys(trains).forEach((key) => {
+      const train = trains[key];
       if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
-        route.routings.south.forEach((routing) => {
-          if (routing.includes(station.id + "S")) {
-            routing.slice(routing.indexOf(station.id + "S") + 1).forEach((stationId) => {
-              const s = stations[stationId.substr(0, 3)];
+        train.actual_routings?.south?.forEach((routing) => {
+          if (routing.includes(station.id)) {
+            routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
+              const s = stations[stationId];
               if (s.borough !== currentBorough) {
                 adjacentBoroughs.add(s.borough);
               } else {
@@ -239,11 +240,11 @@ class StationDetails extends React.Component {
     })
 
     if (M_TRAIN_SHUFFLE.includes(station.id)) {
-      const route = routings["M"];
-      route.routings.north.forEach((routing) => {
-        if (routing.includes(station.id + "N")) {
-          routing.slice(routing.indexOf(station.id + "N") + 1).forEach((stationId) => {
-            const s = stations[stationId.substr(0, 3)];
+      const train = trains["M"];
+      train.actual_routings?.north?.forEach((routing) => {
+        if (routing.includes(station.id)) {
+          routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
+            const s = stations[stationId];
             if (s.borough !== currentBorough) {
               adjacentBoroughs.add(s.borough);
             }
@@ -283,13 +284,13 @@ class StationDetails extends React.Component {
   }
 
   northDestinations(link) {
-    const { routings, station } = this.props;
+    const { trains, station } = this.props;
     let destinations = [];
-    Object.keys(routings).forEach((key) => {
-      const route = routings[key];
+    Object.keys(trains).forEach((key) => {
+      const train = trains[key];
       if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
-        route.routings.north.forEach((routing) => {
-          if (routing.includes(station.id + "N")) {
+        train.actual_routings?.north?.forEach((routing) => {
+          if (routing.includes(station.id)) {
             destinations.push(routing[routing.length - 1]);
           }
         })
@@ -297,9 +298,9 @@ class StationDetails extends React.Component {
     })
 
     if (M_TRAIN_SHUFFLE.includes(station.id)) {
-      const route = routings["M"];
-      route.routings.south.forEach((routing) => {
-        if (routing.includes(station.id + "S")) {
+      const train = trains["M"];
+      train.actual_routings?.south?.forEach((routing) => {
+        if (routing.includes(station.id)) {
           destinations.push(routing[routing.length - 1]);
         }
       })
@@ -309,17 +310,17 @@ class StationDetails extends React.Component {
   }
 
   northDirection() {
-    const { routings, stations, station } = this.props;
+    const { trains, stations, station } = this.props;
     const currentBorough = station.borough;
     let manhattanDirection = null;
     let adjacentBoroughs = new Set();
-    Object.keys(routings).forEach((key) => {
-      const route = routings[key];
+    Object.keys(trains).forEach((key) => {
+      const train = trains[key];
       if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
-        route.routings.north.forEach((routing) => {
-          if (routing.includes(station.id + "N")) {
-            routing.slice(routing.indexOf(station.id + "N") + 1).forEach((stationId) => {
-              const s = stations[stationId.substr(0, 3)];
+        train.actual_routings?.north?.forEach((routing) => {
+          if (routing.includes(station.id)) {
+            routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
+              const s = stations[stationId];
               if (s.borough !== currentBorough) {
                 adjacentBoroughs.add(s.borough);
               } else {
@@ -336,11 +337,11 @@ class StationDetails extends React.Component {
     })
 
     if (M_TRAIN_SHUFFLE.includes(station.id)) {
-      const route = routings["M"];
-      route.routings.south.forEach((routing) => {
-        if (routing.includes(station.id + "S")) {
-          routing.slice(routing.indexOf(station.id + "S") + 1).forEach((stationId) => {
-            const s = stations[stationId.substr(0, 3)];
+      const train = trains["M"];
+      train.actual_routings?.south?.forEach((routing) => {
+        if (routing.includes(station.id)) {
+          routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
+            const s = stations[stationId];
             if (s.borough !== currentBorough) {
               adjacentBoroughs.add(s.borough);
             }
@@ -387,14 +388,14 @@ class StationDetails extends React.Component {
     }
 
     return Array.from(new Set(destinations)).sort((a, b) => {
-      const first = stations[a.substring(0, 3)].name;
-      const second = stations[b.substring(0, 3)].name;
+      const first = stations[a].name;
+      const second = stations[b].name;
 
       if (first < second) { return -1; }
       if (first > second) { return 1; }
       return 0;
     }).map((s) => {
-      const st = stations[s.substring(0, 3)];
+      const st = stations[s];
       if (st) {
         if (!link) {
           return st.name.replace(/ - /g, "–");
@@ -421,7 +422,7 @@ class StationDetails extends React.Component {
       return stationName;
     } else if (['Far Rockaway', 'Rockaway Park'].includes(stationNameArray[0])) {
       return stationNameArray[0];
-    } else if (stationNameArray[0] === 'Jamaica') {
+    } else if (stationNameArray[0] === 'Jamaica' || stationNameArray[0] === 'Mets') {
       return stationName;
     } else if (STREET_NANE_SUFFIXES.some((s) => stationNameArray[1].endsWith(s))) {
       return stationNameArray[1];
@@ -501,14 +502,14 @@ class StationDetails extends React.Component {
             </span>
           }
           {
-            accessibleStations.north.includes(station.id + 'N') && !accessibleStations.south.includes(station.id + 'S') &&
+            accessibleStations.north.includes(station.id) && !accessibleStations.south.includes(station.id) &&
             <div>
               <Icon name='accessible' color='blue' title='This station is accessible' />
               { this.northDirection()?.slice(0, -2) || ((this.northDestinations(false) || "North") + '-bound') }-only
             </div>
           }
           {
-            !accessibleStations.north.includes(station.id + 'N') && accessibleStations.south.includes(station.id + 'S') &&
+            !accessibleStations.north.includes(station.id) && accessibleStations.south.includes(station.id) &&
             <div>
               <Icon name='accessible' color='blue' title='This station is accessible' />
               { this.southDirection()?.slice(0, -2) || ((this.southDestinations(false) || "South") + '-bound') }-only
@@ -562,14 +563,14 @@ class StationDetails extends React.Component {
           </Button>
         </Responsive>
         {
-          accessibleStations.north.includes(station.id + 'N') && !accessibleStations.south.includes(station.id + 'S') &&
+          accessibleStations.north.includes(station.id) && !accessibleStations.south.includes(station.id) &&
           <Responsive {...Responsive.onlyMobile} as='div' className='details-body'>
             <Icon name='accessible' color='blue' title='This station is accessible' />
             { this.northDirection()?.slice(0, -2) || ((this.northDestinations(false) || "North") + '-bound') }-only
           </Responsive>
         }
         {
-          !accessibleStations.north.includes(station.id + 'N') && accessibleStations.south.includes(station.id + 'S') &&
+          !accessibleStations.north.includes(station.id) && accessibleStations.south.includes(station.id) &&
           <Responsive {...Responsive.onlyMobile} as='div' className='details-body'>
             <Icon name='accessible' color='blue' title='This station is accessible' />
             { this.southDirection()?.slice(0, -2) || ((this.southDestinations(false) || "South") + '-bound') }-only
@@ -595,9 +596,7 @@ class StationDetails extends React.Component {
               <List divided relaxed className="stop-times">
                 {
                   this.southStops().sort().map((trainId) => {
-                    const train = trains.find((t) => {
-                      return t.id === trainId;
-                    });
+                    const train = trains[trainId];
                     return (
                       <List.Item key={trainId}>
                         <List.Content floated='left' className="bullet-container">
@@ -619,7 +618,7 @@ class StationDetails extends React.Component {
                             (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
                             <Link to={`/trains/${trainId}/`}>
                               <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
-                                { train.direction_secondary_statuses.south }
+                                { train.direction_statuses.south }
                               </Header>
                             </Link>
                           }
@@ -627,7 +626,7 @@ class StationDetails extends React.Component {
                             trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id) &&
                             <Link to={`/trains/${trainId}/`}>
                               <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
-                                { train.direction_secondary_statuses.north }
+                                { train.direction_statuses.north }
                               </Header>
                             </Link>
                           }
@@ -647,9 +646,7 @@ class StationDetails extends React.Component {
               <List divided relaxed className="stop-times">
                 {
                   this.northStops().sort().map((trainId) => {
-                    const train = trains.find((t) => {
-                      return t.id === trainId;
-                    });
+                    const train = trains[trainId];
                     return (
                       <List.Item key={trainId}>
                         <List.Content floated='left' className="bullet-container">
@@ -671,7 +668,7 @@ class StationDetails extends React.Component {
                             (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
                             <Link to={`/trains/${trainId}/`}>
                               <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
-                                { train.direction_secondary_statuses.north }
+                                { train.direction_statuses.north }
                               </Header>
                             </Link>
                           }
@@ -679,7 +676,7 @@ class StationDetails extends React.Component {
                             trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id) &&
                             <Link to={`/trains/${trainId}/`}>
                               <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
-                                { train.direction_secondary_statuses.south }
+                                { train.direction_statuses.south }
                               </Header>
                             </Link>
                           }
@@ -722,9 +719,7 @@ class StationDetails extends React.Component {
                       <List.Content floated='right'>
                         {
                           Array.from(stop.stops).sort().map((trainId) => {
-                            const train = trains.find((t) => {
-                              return t.id == trainId;
-                            });
+                            const train = trains[trainId];
                             const directions = [];
                             if (stop.northStops.has(trainId)) {
                               directions.push("north")

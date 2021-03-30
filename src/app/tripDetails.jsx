@@ -30,7 +30,7 @@ class TripDetails extends React.Component {
       return 'green';
     } else if (status == 'Service Change') {
       return 'orange';
-    } else if (status == 'Not Good') {
+    } else if (status == 'Not Good' || status == 'Slow') {
       return 'yellow';
     } else if (status == 'Delay') {
       return 'red';
@@ -68,7 +68,7 @@ class TripDetails extends React.Component {
     const { trip, stops, train, trains, stations, direction, accessibleStations, elevatorOutages } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     const title = `The Weekendest beta - ${name} Train - Trip ${trip.id}`;
-    const destination = Object.keys(trip.times)[Object.keys(trip.times).length - 1].substr(0, 3);
+    const destination = Object.keys(trip.stops).sort((a, b) => trip.stops[a] - trip.stops[b])[0];
     return (
       <Segment className="details-pane">
         <Helmet>
@@ -128,7 +128,7 @@ class TripDetails extends React.Component {
               </Header>
               <Link to={`/trains/${train.id}/`}>
                 <Header as='h4' color={this.statusColor(train.direction_statuses[direction])} style={{marginTop: 0}}>
-                  { train.direction_secondary_statuses[direction] }
+                  { train.direction_statuses[direction] }
                 </Header>
                 <div></div>
               </Link>

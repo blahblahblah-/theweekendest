@@ -9,8 +9,8 @@ class TrainMapStop extends React.Component {
 
   renderStop() {
     const { southStop, northStop, stop, accessibleStations, displayAccessibleOnly } = this.props;
-    const accessibleNorth = accessibleStations.north.includes(stop.id + 'N');
-    const accessibleSouth = accessibleStations.south.includes(stop.id + 'S');
+    const accessibleNorth = accessibleStations.north.includes(stop.id);
+    const accessibleSouth = accessibleStations.south.includes(stop.id);
     const accessible = accessibleNorth || accessibleSouth;
 
     const opacity = !displayAccessibleOnly || accessible ? 1 : 0.2;
@@ -119,7 +119,7 @@ class TrainMapStop extends React.Component {
   render() {
     const { stop, transfers, trains, activeBranches, branchStart, branchEnd, arrivalTime, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
     const eta = arrivalTime && Math.round(arrivalTime / 60);
-    const opacity = !stop || !displayAccessibleOnly || accessibleStations.north.includes(stop.id + 'N') || accessibleStations.south.includes(stop.id + 'S') ? 1 : 0.2;
+    const opacity = !stop || !displayAccessibleOnly || accessibleStations.north.includes(stop.id) || accessibleStations.south.includes(stop.id) ? 1 : 0.2;
     return (
       <li>
         <div style={{minHeight: "50px", display: "flex"}}>
@@ -156,7 +156,7 @@ class TrainMapStop extends React.Component {
           <div style={{display: "inline-block", margin: "auto 0", opacity: opacity}}>
             {
               transfers && transfers.map((route) => {
-                const train = trains.find((t) => t.id === route.id);
+                const train = trains[route.id];
                 return (
                   <TrainBullet link={true} id={route.id} key={train.name} name={train.name} color={train.color}
                     textColor={train.text_color} size='small' directions={route.directions} />

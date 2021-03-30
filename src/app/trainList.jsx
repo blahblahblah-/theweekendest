@@ -17,7 +17,7 @@ class TrainList extends React.Component {
       return 'green';
     } else if (status == 'Service Change') {
       return 'orange';
-    } else if (status == 'Not Good') {
+    } else if (status == 'Not Good' || status == 'Slow') {
       return 'yellow';
     } else if (status == 'Delay') {
       return 'red';
@@ -29,7 +29,8 @@ class TrainList extends React.Component {
     return (
       <List divided relaxed selection className="train-list">
         {
-          trains.filter((train) => train.visible || train.status !== 'Not Scheduled').map((train) => {
+          Object.keys(trains).filter((trainId) => trains[trainId].visible || trains[trainId].status !== 'Not Scheduled').map((trainId) => {
+            const train = trains[trainId];
             return (
               <List.Item as={Link} key={train.id} to={`/trains/${train.id}`}>
                 <List.Content floated='left' className="bullet-container">
@@ -44,7 +45,7 @@ class TrainList extends React.Component {
                 }
                 <List.Content floated='right'>
                   <Header as='h4' color={this.statusColor(train.status)}>
-                    { train.secondary_status }
+                    { train.status }
                   </Header>
                 </List.Content>
               </List.Item>
