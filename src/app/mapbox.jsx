@@ -82,7 +82,6 @@ class Mapbox extends React.Component {
         south: [],
       },
       elevatorOutages: {},
-      loadFullInfo: false,
     };
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
@@ -179,41 +178,37 @@ class Mapbox extends React.Component {
   }
 
   fetchData() {
-    const { loadFullInfo } = this.state;
-
-    this.setState({loading: true}, () => {
-      fetch(stopsUrl)
-        .then(response => response.json())
-        .then(data => {
-          const accessibleStations = { north: [], south: [] };
-          const outages = {};
-          const stops = {}
-          data.stops.forEach((stop) => {
-            if (stop.accessibility) {
-              stop.accessibility.directions.forEach((direction) => {
-                accessibleStations[direction].push(stop.id);
-              });
-              if (stop.accessibility.advisories.length > 0) {
-                outages[stop.id] = stop.accessibility.advisories;
-              }
+    fetch(stopsUrl)
+      .then(response => response.json())
+      .then(data => {
+        const accessibleStations = { north: [], south: [] };
+        const outages = {};
+        const stops = {}
+        data.stops.forEach((stop) => {
+          if (stop.accessibility) {
+            stop.accessibility.directions.forEach((direction) => {
+              accessibleStations[direction].push(stop.id);
+            });
+            if (stop.accessibility.advisories.length > 0) {
+              outages[stop.id] = stop.accessibility.advisories;
             }
-            stops[stop.id] = stop;
-          });
-          this.setState({ stops: stops, accessibleStations: accessibleStations, elevatorOutages: outages }, this.processRoutings);
+          }
+          stops[stop.id] = stop;
         });
+        this.setState({ stops: stops, accessibleStations: accessibleStations, elevatorOutages: outages }, this.processRoutings);
+      });
 
-      fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-          this.setState({
-            trains: data.routes,
-            blogPost: data.blog_post,
-            timestamp: data.timestamp,
-            loading: false
-          }, this.processRoutings);
-        }
-      );
-    });
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        this.setState({
+          trains: data.routes,
+          blogPost: data.blog_post,
+          timestamp: data.timestamp,
+          loading: false
+        }, this.processRoutings);
+      }
+    );
   }
 
   processRoutings() {
@@ -1910,15 +1905,6 @@ class Mapbox extends React.Component {
       displayDelays: checked,
       displaySlowSpeeds: checked,
       displayLongHeadways: checked,
-      loadFullInfo: true,
-    }, () => {
-      this.fetchData();
-      if (this.mapLoaded) {
-        this.map.moveLayer('Stops');
-        this.map.moveLayer('TrainStops');
-        this.map.moveLayer('TrainOutlines');
-        this.map.moveLayer('TrainPositions');
-      }
     });
     gtag('event', 'toggle', {
       'event_category': 'displayProblems',
@@ -1927,15 +1913,7 @@ class Mapbox extends React.Component {
   }
 
   handleDisplayDelaysToggle = (e, {checked}) => {
-    this.setState({displayDelays: checked}, () => {
-      this.renderOverlays();
-      if (this.mapLoaded) {
-        this.map.moveLayer('Stops');
-        this.map.moveLayer('TrainStops');
-        this.map.moveLayer('TrainOutlines');
-        this.map.moveLayer('TrainPositions');
-      }
-    });
+    this.setState({displayDelays: checked}, this.renderOverlays);
     gtag('event', 'toggle', {
       'event_category': 'displayDelays',
       'event_label': checked.toString()
@@ -1943,15 +1921,7 @@ class Mapbox extends React.Component {
   }
 
   handleDisplaySlowSpeedsToggle = (e, {checked}) => {
-    this.setState({displaySlowSpeeds: checked}, () => {
-      this.renderOverlays();
-      if (this.mapLoaded) {
-        this.map.moveLayer('Stops');
-        this.map.moveLayer('TrainStops');
-        this.map.moveLayer('TrainOutlines');
-        this.map.moveLayer('TrainPositions');
-      }
-    });
+    this.setState({displaySlowSpeeds: checked}, this.renderOverlays);
     gtag('event', 'toggle', {
       'event_category': 'displaySlowSpeeds',
       'event_label': checked.toString()
@@ -1959,15 +1929,7 @@ class Mapbox extends React.Component {
   }
 
   handleDisplayLongHeadwaysToggle = (e, {checked}) => {
-    this.setState({displayLongHeadways: checked}, () => {
-      this.renderOverlays();
-      if (this.mapLoaded) {
-        this.map.moveLayer('Stops');
-        this.map.moveLayer('TrainStops');
-        this.map.moveLayer('TrainOutlines');
-        this.map.moveLayer('TrainPositions');
-      }
-    });
+    this.setState({displayLongHeadways: checked}, this.renderOverlays);
     gtag('event', 'toggle', {
       'event_category': 'displayLongHeadways',
       'event_label': checked.toString()
@@ -1975,15 +1937,7 @@ class Mapbox extends React.Component {
   }
 
   handleDisplayTrainPositionsToggle = (e, {checked}) => {
-    this.setState({displayTrainPositions: checked}, () => {
-      this.renderTrainPositions();
-      if (this.mapLoaded) {
-        this.map.moveLayer('Stops');
-        this.map.moveLayer('TrainStops');
-        this.map.moveLayer('TrainOutlines');
-        this.map.moveLayer('TrainPositions');
-      }
-    });
+    this.setState({displayTrainPositions: checked}, this.renderTrainPositions);
     gtag('event', 'toggle', {
       'event_category': 'displayTrainPositions',
       'event_label': checked.toString()
@@ -1991,9 +1945,7 @@ class Mapbox extends React.Component {
   }
 
   handleDisplayAccessibleOnlyToggle = (e, {checked}) => {
-    this.setState({displayAccessibleOnly: checked}, () => {
-      this.renderStops();
-    });
+    this.setState({displayAccessibleOnly: checked}, this.renderStops);
     gtag('event', 'toggle', {
       'event_category': 'displayAccessibleOnly',
       'event_label': checked.toString()
