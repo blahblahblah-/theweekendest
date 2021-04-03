@@ -849,73 +849,79 @@ class Mapbox extends React.Component {
         }
 
         const problemSections = this.calculateProblemSections(route.id, status);
-        const coordinates = processedRoutings[key].flatMap((r) => {
-          return problemSections.map((problemSection) => {
-            const begin = r.indexOf(problemSection.begin);
-            const end = r.indexOf(problemSection.end);
-            if (begin > -1 && end -1) {
-              return this.routingGeoJson(r.slice(begin, end + 1));
-            }
-          });
-        }).filter((s) => s);
 
-        const geojson = {
-        "type": "Feature",
-          "properties": {
-            "offset": offsets[key],
-            "opacity": this.selectedTrains.includes(key) ? 1 : 0.1
-          },
-          "geometry": {
-            "type": "MultiLineString",
-            "coordinates": coordinates
-          }
-        }
+        if (statusVisability[status] && problemSections.length > 0) {
+          const coordinates = processedRoutings[key].flatMap((r) => {
+            return problemSections.map((problemSection) => {
+              const begin = r.indexOf(problemSection.begin);
+              const end = r.indexOf(problemSection.end);
+              if (begin > -1 && end -1) {
+                return this.routingGeoJson(r.slice(begin, end + 1));
+              }
+            });
+          }).filter((s) => s);
 
-        if (this.map.getSource(layerId)) {
-          this.map.getSource(layerId).setData(geojson);
-        } else {
-          this.map.addSource(layerId, {
-            "type": "geojson",
-            "data": geojson
-          });
-        }
-
-        if (!this.map.getLayer(layerId)) {
-          const layer = {
-            "id": layerId,
-            "type": "line",
-            "source": layerId,
-            "layout": {
-              "visibility": statusVisability[status] ? 'visible' : 'none',
-              "line-join": "miter",
-              "line-cap": "round",
+          const geojson = {
+            "type": "Feature",
+            "properties": {
+              "offset": offsets[key],
+              "opacity": this.selectedTrains.includes(key) ? 1 : 0.1
             },
-            "paint": {
-                "line-width": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                8, 1,
-                13, 2,
-                14, 5,
-              ],
-              "line-color": statusColors[status],
-              "line-dasharray": [2, statusSpacing[status]],
-             "line-offset": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                8, ["get", "offset"],
-                13, ["*", ["get", "offset"], 1.5],
-                14, ["*", ["get", "offset"], 3],
-              ],
-              "line-opacity": ["get", "opacity"]
+            "geometry": {
+              "type": "MultiLineString",
+              "coordinates": coordinates
             }
-          };
+          }
 
-          this.map.addLayer(layer);
+          if (this.map.getSource(layerId)) {
+            this.map.getSource(layerId).setData(geojson);
+          } else {
+            this.map.addSource(layerId, {
+              "type": "geojson",
+              "data": geojson
+            });
+          }
+
+          if (!this.map.getLayer(layerId)) {
+            const layer = {
+              "id": layerId,
+              "type": "line",
+              "source": layerId,
+              "layout": {
+                "line-join": "miter",
+                "line-cap": "round",
+              },
+              "paint": {
+                  "line-width": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  8, 1,
+                  13, 2,
+                  14, 5,
+                ],
+                "line-color": statusColors[status],
+                "line-dasharray": [2, statusSpacing[status]],
+               "line-offset": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  8, ["get", "offset"],
+                  13, ["*", ["get", "offset"], 1.5],
+                  14, ["*", ["get", "offset"], 3],
+                ],
+                "line-opacity": ["get", "opacity"]
+              }
+            };
+            this.map.addLayer(layer);
+          }
         } else {
-          this.map.setLayoutProperty(layerId, "visibility", statusVisability[status] ? "visible" : "none");
+          if (this.map.getLayer(layerId)) {
+            this.map.removeLayer(layerId);
+          }
+          if (this.map.getSource(layerId)) {
+            this.map.removeSource(layerId);
+          }
         }
       });
     });
