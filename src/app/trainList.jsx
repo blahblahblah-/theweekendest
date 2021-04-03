@@ -24,12 +24,28 @@ class TrainList extends React.Component {
     }
   }
 
+  sortFunction = (a, b) => {
+    const { trains } = this.props;
+    const aTrain = trains[a];
+    const bTrain = trains[b];
+    const aName = `${aTrain.name} - ${aTrain.alternate_name}`;
+    const bName = `${bTrain.name} - ${bTrain.alternate_name}`;
+
+    if (aName < bName) {
+      return -1;
+    }
+    if (bName > aName) {
+      return 1;
+    }
+    return 0;
+  }
+
   render() {
     const { trains } = this.props;
     return (
       <List divided relaxed selection className="train-list">
         {
-          Object.keys(trains).filter((trainId) => trains[trainId].visible || trains[trainId].status !== 'Not Scheduled').map((trainId) => {
+          Object.keys(trains).sort(this.sortFunction).filter((trainId) => trains[trainId].visible || trains[trainId].status !== 'Not Scheduled').map((trainId) => {
             const train = trains[trainId];
             return (
               <List.Item as={Link} key={train.id} to={`/trains/${train.id}`}>
