@@ -152,8 +152,10 @@ class StationDetails extends React.Component {
       const destination = Object.keys(trip.stops).sort((a, b) => trip.stops[b] - trip.stops[a])[0];
       return {
         id: trip.id,
-        time: Math.round((trip.stops[station.id]  - currentTime) / 60),
+        time: (trip.stops[station.id]  - currentTime),
         destination: destination,
+        delayed: trip.is_delayed,
+        scheduleDiscrepancy: trip.schedule_discrepancy,
       }
     }).sort((a, b) => a.time - b.time).slice(0, 2);
 
@@ -163,7 +165,14 @@ class StationDetails extends React.Component {
 
     return times.map((estimate) => {
       const runDestination = stations[estimate.destination].name.replace(/ - /g, "–");
-      const timeText = estimate.time < 1 ? "Due" : `${estimate.time} min`;
+      const roundedTime = Math.round(estimate.time / 60);
+      let timeText = estimate.time <= 60 ? "Due" : `${roundedTime} min`;
+      if (estimate.is_delayed) {
+        timeText = 'Delayed';
+      } else if (estimate.scheduleDiscrepancy < -120) {
+        const upperbound = Math.round((estimate.time - estimate.scheduleDiscrepancy) / 60);
+        timeText = `${roundedTime} - ${upperbound} min`;
+      }
       if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0]) {
         const runDestinationShort = this.shortenStationName(runDestination);
         return (

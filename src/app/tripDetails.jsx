@@ -68,7 +68,13 @@ class TripDetails extends React.Component {
     const { trip, stops, train, trains, stations, direction, accessibleStations, elevatorOutages } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     const title = `The Weekendest beta - ${name} Train - Trip ${trip.id}`;
-    const destination = Object.keys(trip.stops).sort((a, b) => trip.stops[a] - trip.stops[b])[0];
+    const destination = Object.keys(trip.stops).sort((a, b) => trip.stops[b] - trip.stops[a])[0];
+    const scheduleDiscrepancy = Math.round(trip.schedule_discrepancy / 60);
+    const scheduleDiscrepancyText = scheduleDiscrepancy > 0 ? `${scheduleDiscrepancy} min behind schedule` : `${Math.abs(scheduleDiscrepancy)} min ahead of schedule`;
+    const delayed = trip.delayed_time > 300;
+    const effectiveDelayedTime = Math.max(Math.min(trip.schedule_discrepancy, trip.delayed_time), 0);
+    const delayedTime = trip.is_delayed ? effectiveDelayedTime : trip.delayed_time;
+    const delayInfo = delayed ? `${trip.is_delayed ? 'Delayed' : 'Held'} for ${Math.round(delayedTime / 60)} mins` : '';
     return (
       <Segment className="details-pane">
         <Helmet>
@@ -124,6 +130,14 @@ class TripDetails extends React.Component {
                   <Link to={`/stations/${stations[destination].id}`}>
                     { stations[destination].name.replace(/ - /g, "–") }
                   </Link>
+                }<br />
+                { scheduleDiscrepancyText }
+                {
+                  delayed &&
+                  <React.Fragment>
+                    <br />
+                    { delayInfo }
+                  </React.Fragment>
                 }
               </Header>
               <Link to={`/trains/${train.id}/`}>
@@ -133,7 +147,7 @@ class TripDetails extends React.Component {
                 <div></div>
               </Link>
               <Header as='h6'>
-                Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
+                Powered by <a href={`https://www.goodservice.io/trains/${train.id}/${direction[0].toUpperCase()}/${trip.id}`} target="_blank">goodservice.io</a>
               </Header>
             </div>
           </div>
@@ -195,7 +209,7 @@ class TripDetails extends React.Component {
               </Header>
             </Link>
             <Header as='h6' style={{margin: 0}}>
-              Powered by <a href={`https://www.goodservice.io/trains/${train.id}/status`} target="_blank">goodservice.io</a>
+              Powered by <a href={`https://www.goodservice.io/trains/${train.id}/${direction[0].toUpperCase()}/${trip.id}`} target="_blank">goodservice.io</a>
             </Header>
           </div>
         </Responsive>
