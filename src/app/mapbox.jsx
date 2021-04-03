@@ -178,37 +178,39 @@ class Mapbox extends React.Component {
   }
 
   fetchData() {
-    fetch(stopsUrl)
-      .then(response => response.json())
-      .then(data => {
-        const accessibleStations = { north: [], south: [] };
-        const outages = {};
-        const stops = {}
-        data.stops.forEach((stop) => {
-          if (stop.accessibility) {
-            stop.accessibility.directions.forEach((direction) => {
-              accessibleStations[direction].push(stop.id);
-            });
-            if (stop.accessibility.advisories.length > 0) {
-              outages[stop.id] = stop.accessibility.advisories;
+    this.setState({loading: true}, () => {
+      fetch(stopsUrl)
+        .then(response => response.json())
+        .then(data => {
+          const accessibleStations = { north: [], south: [] };
+          const outages = {};
+          const stops = {}
+          data.stops.forEach((stop) => {
+            if (stop.accessibility) {
+              stop.accessibility.directions.forEach((direction) => {
+                accessibleStations[direction].push(stop.id);
+              });
+              if (stop.accessibility.advisories.length > 0) {
+                outages[stop.id] = stop.accessibility.advisories;
+              }
             }
-          }
-          stops[stop.id] = stop;
+            stops[stop.id] = stop;
+          });
+          this.setState({ stops: stops, accessibleStations: accessibleStations, elevatorOutages: outages }, this.processRoutings);
         });
-        this.setState({ stops: stops, accessibleStations: accessibleStations, elevatorOutages: outages }, this.processRoutings);
-      });
 
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => {
-        this.setState({
-          trains: data.routes,
-          blogPost: data.blog_post,
-          timestamp: data.timestamp,
-          loading: false
-        }, this.processRoutings);
-      }
-    );
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          this.setState({
+            trains: data.routes,
+            blogPost: data.blog_post,
+            timestamp: data.timestamp,
+            loading: false
+          }, this.processRoutings);
+        }
+      );
+    });
   }
 
   processRoutings() {
