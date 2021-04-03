@@ -1907,7 +1907,7 @@ class Mapbox extends React.Component {
       displayDelays: checked,
       displaySlowSpeeds: checked,
       displayLongHeadways: checked,
-    });
+    }, this.renderOverlays);
     gtag('event', 'toggle', {
       'event_category': 'displayProblems',
       'event_label': checked.toString()
