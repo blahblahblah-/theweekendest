@@ -2328,7 +2328,7 @@ class Mapbox extends React.Component {
             }
             <Loader active={!(trains && Object.keys(trains.length > 0))} />
             <Header inverted as='h5' floated='left' style={{margin: "10px 5px"}}>
-              Last updated {timestamp && (new Date(timestamp)).toLocaleTimeString('en-US')}.<br />
+              Last updated {timestamp && (new Date(timestamp * 1000)).toLocaleTimeString('en-US')}.<br />
               { blogPost &&
                 <span>
                   Latest blog post: <a href={blogPost.link} target="_blank">{blogPost.title}</a>.<br />
