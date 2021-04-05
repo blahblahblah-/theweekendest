@@ -173,7 +173,7 @@ class TrainDetails extends React.Component {
               </Header>
               <div></div>
               <Header as='h6'>
-                Powered by <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>
+                More info on <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>.
               </Header>
             </div>
           </div>
@@ -212,7 +212,7 @@ class TrainDetails extends React.Component {
           </Button>
         </Responsive>
         <Responsive maxWidth={Responsive.onlyMobile.maxWidth} as='h6' className="mobile-goodservice">
-          Powered by <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>
+          More info on <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>.
         </Responsive>
         {
           this.renderSummary()
