@@ -1,6 +1,6 @@
 # theweekendest
 
-This is a React app that relies heavily on [goodservice.io](https://github.com/blahblahblah-/goodservice)'s APIs to dynamically generate real-time route maps for the New York City subway with the help of Mapbox, particularly useful when service changes regularly occur on weekends and overnights.
+This is a React app that relies heavily on [goodservice.io](https://github.com/blahblahblah-/goodservice-v2)'s APIs to dynamically generate real-time route maps for the New York City subway with the help of Mapbox, particularly useful when service changes regularly occur on weekends and overnights.
 
 A Mapbox theme was created for this project and has been made public.
 
