@@ -25,18 +25,6 @@ class TripDetails extends React.Component {
     }
   }
 
-  statusColor(status) {
-    if (status == 'Good Service') {
-      return 'green';
-    } else if (status == 'Service Change') {
-      return 'orange';
-    } else if (status == 'Not Good' || status == 'Slow') {
-      return 'yellow';
-    } else if (status == 'Delay') {
-      return 'red';
-    }
-  }
-
   handleBack = _ => {
     this.props.history.goBack();
   }
@@ -140,14 +128,8 @@ class TripDetails extends React.Component {
                   </React.Fragment>
                 }
               </Header>
-              <Link to={`/trains/${train.id}/`}>
-                <Header as='h4' color={this.statusColor(train.direction_statuses[direction])} style={{marginTop: 0}}>
-                  { train.direction_statuses[direction] }
-                </Header>
-                <div></div>
-              </Link>
               <Header as='h6'>
-                Powered by <a href={`https://www.goodservice.io/trains/${train.id}/${direction[0].toUpperCase()}/${trip.id}`} target="_blank">goodservice.io</a>
+                More info on <a href={`https://www.goodservice.io/trains/${train.id}/${direction[0].toUpperCase()}/${trip.id}`} target="_blank">goodservice.io</a>.
               </Header>
             </div>
           </div>
@@ -173,8 +155,8 @@ class TripDetails extends React.Component {
               </Button>
             }
           </Popup>
-          <TrainBullet name={train.name} id={train.id} color={train.color} textColor={train.text_color} size='small' style={{display: "inline-block", flexGrow: 0, margin: 0}} link />
-          <Header as='h4' style={{margin: "0 2px 0 0", flexGrow: 1, textAlign: "right"}}>
+          <TrainBullet name={train.name} id={train.id} color={train.color} textColor={train.text_color} size='small' style={{display: "inline-block", flexGrow: 0, margin: 0, minWidth: '1.5em'}} link />
+          <Header as='h4' style={{margin: "0 2px 0 0", flexGrow: 1, textAlign: "right", overflowX: 'hidden', textOverflow: 'ellipsis'}}>
             ID: {trip.id}
           </Header>
           <Button icon title="Center map" onClick={this.handleRealignMap}>
@@ -201,15 +183,18 @@ class TripDetails extends React.Component {
                 <Link to={`/stations/${stations[destination].id}`}>
                   { stations[destination].name.replace(/ - /g, "–") }
                 </Link>
+              }<br />
+              { scheduleDiscrepancyText }
+              {
+                delayed &&
+                <React.Fragment>
+                  <br />
+                  { delayInfo }
+                </React.Fragment>
               }
             </Header>
-            <Link to={`/trains/${train.id}/`}>
-              <Header as='h5' color={this.statusColor(train.status)} style={{margin: 0}}>
-                { train.secondary_status }
-              </Header>
-            </Link>
             <Header as='h6' style={{margin: 0}}>
-              Powered by <a href={`https://www.goodservice.io/trains/${train.id}/${direction[0].toUpperCase()}/${trip.id}`} target="_blank">goodservice.io</a>
+              More info on <a href={`https://www.goodservice.io/trains/${train.id}/${direction[0].toUpperCase()}/${trip.id}`} target="_blank">goodservice.io</a>.
             </Header>
           </div>
         </Responsive>
