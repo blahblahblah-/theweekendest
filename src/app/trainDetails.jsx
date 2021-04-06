@@ -42,7 +42,7 @@ class TrainDetails extends React.Component {
   renderServiceChanges() {
     const { train, trains } = this.props;
 
-    return ['both', 'north', 'south'].flatMap((direction) => train.service_change_summaries[direction]?.map((change, i) => {
+    return ['both', 'north', 'south'].flatMap((direction) => train.service_change_summaries && train.service_change_summaries[direction]?.map((change, i) => {
       let tmp = [change.replace(/ - /g, "–")];
       let matched;
       while (matched = tmp.find((c) => typeof c === 'string' && c.match(/\<[A-Z0-9]*\>/))) {
@@ -65,10 +65,10 @@ class TrainDetails extends React.Component {
   renderSummary() {
     const { train } = this.props;
     let out = [];
-    if (train.service_summaries.south) {
+    if (train.service_summaries?.south) {
       out.push(<Header as='h5' key="south">{train.service_summaries.south.replace(/ - /g, "–")}</Header>)
     }
-    if (train.service_summaries.north) {
+    if (train.service_summaries?.north) {
       out.push(<Header as='h5' key="north">{train.service_summaries.north.replace(/ - /g, "–")}</Header>)
     }
     const serviceChanges = this.renderServiceChanges();

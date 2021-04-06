@@ -19,8 +19,8 @@ import StationDetails from './stationDetails.jsx';
 import stationData from '../data/station_details.json';
 import transfers from '../data/transfers.json';
 
-const apiUrl = 'https://preview.goodservice.io/api/routes/?detailed=1';
-const stopsUrl = 'https://preview.goodservice.io/api/stops/';
+const apiUrl = 'https://www.goodservice.io/api/routes/?detailed=1';
+const stopsUrl = 'https://www.goodservice.io/api/stops/';
 const stations = {};
 const stationLocations = {};
 const center = [-73.98119, 40.75855]
