@@ -143,6 +143,7 @@ class Mapbox extends React.Component {
     this.map.on('load', () => {
       this.mapLoaded = true;
       this.dataTimer = setInterval(this.fetchData.bind(this), 15000);
+      this.geoControl.trigger();
     });
 
     this.map.on('rotateend', () => {
@@ -2194,7 +2195,7 @@ class Mapbox extends React.Component {
               <Icon loading={loading} name='refresh' />
             </Button>
           </Responsive>
-          <div ref={el => this.infoBox = el} className="inner-infobox open">
+          <div ref={el => this.infoBox = el} className="inner-infobox">
             {
               this.initialized &&
               <Switch>
