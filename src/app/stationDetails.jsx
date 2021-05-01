@@ -169,7 +169,7 @@ class StationDetails extends React.Component {
       let timeText = estimate.time <= 60 ? "Due" : `${roundedTime} min`;
       if (estimate.delayed) {
         timeText = 'Delayed';
-      } else if (estimate.scheduleDiscrepancy < -120) {
+      } else if (estimate.scheduleDiscrepancy < -120 && timeText !== "Due") {
         const upperbound = Math.round((estimate.time - estimate.scheduleDiscrepancy) / 60);
         timeText = `${roundedTime} - ${upperbound} min`;
       }
