@@ -215,6 +215,7 @@ class TrainDetails extends React.Component {
           </Button>
         </Responsive>
         <Responsive maxWidth={Responsive.onlyMobile.maxWidth} as='h6' className="mobile-goodservice">
+          { twitterLink(train.id) }
           More info on <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>.
         </Responsive>
         {
