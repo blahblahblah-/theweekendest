@@ -9,6 +9,8 @@ import OverlayControls from './overlayControls.jsx';
 import TrainMap from './trainMap.jsx';
 import TrainBullet from './trainBullet.jsx';
 
+import { twitterLink } from './utils/twitterLink.jsx';
+
 class TrainDetails extends React.Component {
   componentDidMount() {
     const { handleOnMount, train, coords, zoom, infoBox, handleDisplayTrainPositionsToggle } = this.props;
@@ -173,6 +175,7 @@ class TrainDetails extends React.Component {
               </Header>
               <div></div>
               <Header as='h6'>
+                { twitterLink(train.id) }
                 More info on <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>.
               </Header>
             </div>
