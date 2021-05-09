@@ -6,7 +6,7 @@ const TWITTER_FEEDS_MAPPED_TRAINS = {
   '6X': '6',
   '7X': '7',
   'FX': 'F',
-  'H': 'A,'
+  'H': 'A',
 }
 
 export const twitterLink = (trainId) => {
