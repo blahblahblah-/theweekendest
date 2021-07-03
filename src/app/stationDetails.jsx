@@ -601,56 +601,6 @@ class StationDetails extends React.Component {
         <div className="details-body">
           <Segment>
             <Header as="h5" style={{whiteSpace: "pre-line"}}>
-              { this.southDirection() }To { this.southDestinations(true) }
-            </Header>
-            <div>
-              <List divided relaxed className="stop-times">
-                {
-                  this.southStops().sort().map((trainId) => {
-                    const train = trains[trainId];
-                    return (
-                      <List.Item key={trainId}>
-                        <List.Content floated='left' className="bullet-container">
-                          <TrainBullet name={train.name} id={trainId} color={train.color}
-                            textColor={train.text_color} size='small' link />
-                        </List.Content>
-                        { train.alternate_name &&
-                          <Link to={`/trains/${trainId}/`}>
-                            <List.Content floated='left' className="alternate-name">
-                              { train.alternate_name.replace(" Shuttle", "") }
-                            </List.Content>
-                          </Link>
-                        }
-                        <List.Content floated='right' className="station-details-route-status">
-                          <Header as="h5">
-                            { this.renderArrivalTimes(trainId, "south") }
-                          </Header>
-                          {
-                            (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
-                            <Link to={`/trains/${trainId}/`}>
-                              <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
-                                { train.direction_statuses.south }
-                              </Header>
-                            </Link>
-                          }
-                          {
-                            trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id) &&
-                            <Link to={`/trains/${trainId}/`}>
-                              <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
-                                { train.direction_statuses.north }
-                              </Header>
-                            </Link>
-                          }
-                        </List.Content>
-                      </List.Item>
-                    );
-                  })
-                }
-              </List>
-            </div>
-          </Segment>
-          <Segment>
-            <Header as="h5" style={{whiteSpace: "pre-line"}}>
               { this.northDirection() }To { this.northDestinations(true) }
             </Header>
             <div>
@@ -688,6 +638,56 @@ class StationDetails extends React.Component {
                             <Link to={`/trains/${trainId}/`}>
                               <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
                                 { train.direction_statuses.south }
+                              </Header>
+                            </Link>
+                          }
+                        </List.Content>
+                      </List.Item>
+                    );
+                  })
+                }
+              </List>
+            </div>
+          </Segment>
+          <Segment>
+            <Header as="h5" style={{whiteSpace: "pre-line"}}>
+              { this.southDirection() }To { this.southDestinations(true) }
+            </Header>
+            <div>
+              <List divided relaxed className="stop-times">
+                {
+                  this.southStops().sort().map((trainId) => {
+                    const train = trains[trainId];
+                    return (
+                      <List.Item key={trainId}>
+                        <List.Content floated='left' className="bullet-container">
+                          <TrainBullet name={train.name} id={trainId} color={train.color}
+                            textColor={train.text_color} size='small' link />
+                        </List.Content>
+                        { train.alternate_name &&
+                          <Link to={`/trains/${trainId}/`}>
+                            <List.Content floated='left' className="alternate-name">
+                              { train.alternate_name.replace(" Shuttle", "") }
+                            </List.Content>
+                          </Link>
+                        }
+                        <List.Content floated='right' className="station-details-route-status">
+                          <Header as="h5">
+                            { this.renderArrivalTimes(trainId, "south") }
+                          </Header>
+                          {
+                            (trainId !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) &&
+                            <Link to={`/trains/${trainId}/`}>
+                              <Header as='h4' color={this.statusColor(train.direction_statuses.south)}>
+                                { train.direction_statuses.south }
+                              </Header>
+                            </Link>
+                          }
+                          {
+                            trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id) &&
+                            <Link to={`/trains/${trainId}/`}>
+                              <Header as='h4' color={this.statusColor(train.direction_statuses.north)}>
+                                { train.direction_statuses.north }
                               </Header>
                             </Link>
                           }
