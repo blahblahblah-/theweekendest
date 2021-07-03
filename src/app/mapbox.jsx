@@ -1677,6 +1677,7 @@ class Mapbox extends React.Component {
 
   goToTrain(train, coords, zoom) {
     const { width } = this.state;
+    this.map.stop();
     this.selectTrain(train);
 
     if (coords && zoom) {
@@ -1713,7 +1714,7 @@ class Mapbox extends React.Component {
 
   goToTrip(trip, direction, train) {
     const { width } = this.state;
-
+    this.map.stop();
     this.selectTrip(trip, direction, train, (coords) => {
       if (coords[0]) {
         const bounds = coords.reduce((bounds, coord) => {
@@ -1793,6 +1794,8 @@ class Mapbox extends React.Component {
     const stationsData = selectedStations.map((s) => stations[s]);
     const selectedTrains = includeTrains ? trainIds.filter((t) => stationsData.some((station) => station.stops.has(t))) : [];
 
+    this.map.stop();
+
     this.selectedTrains = selectedTrains;
     this.selectedStations = selectedStations;
     this.selectedTrip = null;
@@ -1857,6 +1860,8 @@ class Mapbox extends React.Component {
     if (this.showAll) {
       return;
     }
+
+    this.map.stop();
 
     if (coords && zoom) {
       this.map.easeTo({
