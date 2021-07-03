@@ -221,10 +221,14 @@ class Mapbox extends React.Component {
     }
     Object.keys(stationData).forEach((key) => {
       stations[key] = stationData[key];
-      stations[key]["northStops"] = new Set();
-      stations[key]["southStops"] = new Set();
       stations[key]["passed"] = new Set();
-      stations[key]["stops"] = new Set();
+      stations[key]["stops"] = new Set(Object.keys(stops[key].routes));
+      stations[key]["northStops"] = new Set(Object.keys(stops[key].routes).filter((trainId) => {
+        return stops[key].routes[trainId].includes('north');
+      }));
+      stations[key]["southStops"] = new Set(Object.keys(stops[key].routes).filter((trainId) => {
+        return stops[key].routes[trainId].includes('south');
+      }));
     });
 
     const processedRoutings = {};
@@ -241,8 +245,6 @@ class Mapbox extends React.Component {
       const northRoutings = route.actual_routings?.north?.map((r) => {
         return r.map((stopId) => {
           if (stations[stopId]) {
-            stations[stopId].northStops.add(key);
-            stations[stopId].stops.add(key);
             routeStops[key].add(stopId);
             northStops.add(stopId);
           }
@@ -252,8 +254,6 @@ class Mapbox extends React.Component {
       const southRoutings = route.actual_routings?.south?.map((r) => {
         return r.map((stopId) => {
           if (stations[stopId]) {
-            stations[stopId].southStops.add(key);
-            stations[stopId].stops.add(key);
             routeStops[key].add(stopId);
             southStops.add(stopId);
           }
