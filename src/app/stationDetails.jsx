@@ -423,7 +423,9 @@ class StationDetails extends React.Component {
     if (stationNameArray.length === 1) {
       return stationNameArray[0];
     }
-    if (stationNameArray[0].endsWith('Sq')) {
+    if (stationNameArray[0] === 'W 4 St') {
+      return stationNameArray[0];
+    } else if (stationNameArray[0].endsWith('Sq')) {
       return stationNameArray[0];
     } else if (stationNameArray[1].endsWith('Sq')) {
       return stationNameArray[1];
