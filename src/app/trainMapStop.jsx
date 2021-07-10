@@ -81,6 +81,7 @@ class TrainMapStop extends React.Component {
     }
 
     if (lineSkippedBranching && index > 0) {
+      minWidth = "100px";
       margin = "0";
     }
 
