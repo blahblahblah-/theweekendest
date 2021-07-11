@@ -176,8 +176,9 @@ h1.yellow a, h3.yellow a {
 
 .branch-corner {
   overflow: hidden;
-  width: 40px;
+  min-width: 62px;
   display: inline-block;
+  margin: 0 7px 0 0;
 }
 
 .branch-start {
@@ -443,5 +444,18 @@ h4.ui.top.attached.header.advisories-header {
   h5 {
     margin-top: 0.5em;
     margin-bottom: 0;
+  }
+}
+
+.train-map {
+  list-style-type: none;
+  text-align: left;
+  padding: 0;
+  margin-bottom: '.5em';
+  margin-top: 0;
+  margin-right: 0;
+
+  @media only screen and (min-width: 768px) {
+    margin-left: 20px;
   }
 }

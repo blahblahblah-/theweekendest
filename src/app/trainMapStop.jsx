@@ -62,28 +62,42 @@ class TrainMapStop extends React.Component {
     const stopExists = branchStops[index];
     const branchStartHere = branchStart !== null && branchStart === index;
     const branchEndHere = branchEnd !== null && branchEnd === index;
-    const marginValue = "20px";
+    let marginValue = "20px";
     const branching = branchStartHere || branchEndHere;
     // Skipped branching is where branching occurs from second-to-last branch instead of the last
     const skippedBranching = branchStart !== null && (index === branchStart - 1 && !branchStops[index + 1]);
     const lineSkippedBranching = branchStart !== null && !branchStops[index];
     const branchingConnectedToPrevLine = branchStartHere && !branchStops[index];
-    let margin = branching || skippedBranching ? ("0 0 0 " + marginValue) : (arrivalTime ? ("0 10px") : ("0 " + marginValue));
-    let minWidth = (arrivalTime ? "45px" : "60px");
+
+    if (index === 0) {
+      marginValue = "20px";
+    }
+
+    let margin = arrivalTime ? ("0 10px") : '0';
+    let minWidthValue = (arrivalTime ? 45 : 40);
     let background;
 
     if (branching) {
-      minWidth = "120px";
+      minWidthValue = 120;
     }
 
     if (skippedBranching) {
-      minWidth = "80px";
+      minWidthValue = 80;
     }
 
     if (lineSkippedBranching && index > 0) {
-      minWidth = "100px";
+      minWidthValue = 100;
       margin = "0";
     }
+
+    let minWidth;
+
+    if (index === 0) {
+      minWidth = '40px';
+    } else {
+      minWidth = minWidthValue + 'px';
+    }
+
 
     if (stopExists) {
       let topStripeColor;
@@ -110,16 +124,6 @@ class TrainMapStop extends React.Component {
       <div key={index} style={{minWidth: minWidth, display: "flex"}}>
         {
           this.renderMainLine(background, margin, stopExists)
-        }
-        {
-          branching && !branchingConnectedToPrevLine &&
-          <div style={{margin: "15px 0", height: "20px", width: marginValue, backgroundColor: color, display: "inline-block", alignSelf: "flex-start"}}>
-          </div>
-        }
-        {
-          branching && branchingConnectedToPrevLine &&
-          <div style={{margin: "15px 0", height: "20px", width: marginValue, backgroundColor: color, display: "inline-block", alignSelf: "flex-start", borderLeft: "1px solid white"}}>
-          </div>
         }
         {
           skippedBranching &&
