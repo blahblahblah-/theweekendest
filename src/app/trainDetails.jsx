@@ -221,7 +221,7 @@ class TrainDetails extends React.Component {
         {
           this.renderSummary()
         }
-        <TrainMap routing={train.actual_routings} stops={stops} train={train} trains={trains} stations={stations} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} />
+        <TrainMap routing={train.actual_routings} scheduledRoutings={train.scheduled_routings} stops={stops} train={train} trains={trains} stations={stations} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} />
       </Segment>
     );
   }

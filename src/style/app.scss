@@ -458,4 +458,36 @@ h4.ui.top.attached.header.advisories-header {
   @media only screen and (min-width: 768px) {
     margin-left: 20px;
   }
+
+  .station-name {
+    display: inline;
+    margin: auto 0;
+    cursor: pointer;
+
+    .secondary-name {
+      font-weight: normal;
+      font-size: 12px;
+      margin: 0 .5em;
+    }
+  }
+}
+
+.trip-map {
+  list-style-type: none;
+  text-align: left;
+  margin: auto;
+  padding: 0;
+  margin-bottom: .5em;
+
+  .station-name {
+    display: inline;
+    margin: auto 0;
+    cursor: pointer;
+
+    .secondary-name {
+      font-weight: normal;
+      font-size: 12px;
+      margin: 0 .5em;
+    }
+  }
 }

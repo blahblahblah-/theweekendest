@@ -975,10 +975,12 @@ class Mapbox extends React.Component {
           tempPath.push(coord);
         });
       }
-      tempPath.push([stations[stopId].longitude, stations[stopId].latitude]);
-      path = path.concat(tempPath);
+      if (stations[stopId]) {
+        tempPath.push([stations[stopId].longitude, stations[stopId].latitude]);
+        path = path.concat(tempPath);
 
-      prev = stopId;
+        prev = stopId;
+      }
     });
 
     return path;

@@ -149,7 +149,7 @@ class TrainMapStop extends React.Component {
   }
 
   render() {
-    const { stop, transfers, trains, activeBranches, branchStart, branchEnd, arrivalTime, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
+    const { stop, transfers, trains, activeBranches, branchStart, branchEnd, arrivalTime, accessibleStations, elevatorOutages, displayAccessibleOnly, showSecondaryName } = this.props;
     const eta = arrivalTime && Math.round(arrivalTime / 60);
     const opacity = !stop || !displayAccessibleOnly || accessibleStations.north.includes(stop.id) || accessibleStations.south.includes(stop.id) ? 1 : 0.2;
     return (
@@ -175,12 +175,17 @@ class TrainMapStop extends React.Component {
               return this.renderLine(obj, index, branchStart, branchEnd);
             })
           }
-          <Header as='h5'
-            style={{display: "inline", margin: "auto 0", cursor: "pointer", opacity: opacity}}>
+          <Header as='h5' className='station-name' style={{opacity: opacity}}>
             {
               stop &&
               <Link to={`/stations/${stop.id}`}>
                 { stop.name.replace(/ - /g, "–") }
+                {
+                  showSecondaryName &&
+                  <span className='secondary-name'>
+                    {stop.secondary_name}
+                  </span>
+                }
                 { accessibilityIcon(accessibleStations, elevatorOutages, stop.id) }
               </Link>
             }
