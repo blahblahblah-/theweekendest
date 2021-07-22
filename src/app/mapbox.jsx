@@ -1486,6 +1486,9 @@ class Mapbox extends React.Component {
     const tripRouting = isTripThisTrain ? Object.keys(tripData.stops).sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key) : null;
 
     return trainStations.map((stopId) => {
+      if (!stations[stopId]) {
+        return;
+      }
       const bearing = stations[stopId].bearing || this.map.getBearing();
       const flip = (STATIONS_TO_FLIP_DIRECTIONS[stopId] && stations[STATIONS_TO_FLIP_DIRECTIONS[stopId]].stops.has(trainId)) ||
         trainId === 'M' && M_TRAIN_SHUFFLE.includes(stopId);
