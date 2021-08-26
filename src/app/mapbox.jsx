@@ -1699,15 +1699,17 @@ class Mapbox extends React.Component {
           return bounds.extend(coord);
         }, new mapboxgl.LngLatBounds(coordinatesArray[0][0], coordinatesArray[0][0]));
 
-        this.map.fitBounds(bounds, {
-          padding: {
-            top: (width >= Responsive.onlyTablet.minWidth) ? 30 : 0,
-            right: (width >= Responsive.onlyTablet.minWidth) ? 0 : 30,
-            left: (width >= Responsive.onlyTablet.minWidth) ? 450 : 30,
-            bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : 0,
-          },
-          bearing: 29,
-        });
+        if (!bounds.isEmpty()) {
+          this.map.fitBounds(bounds, {
+            padding: {
+              top: (width >= Responsive.onlyTablet.minWidth) ? 30 : 0,
+              right: (width >= Responsive.onlyTablet.minWidth) ? 0 : 30,
+              left: (width >= Responsive.onlyTablet.minWidth) ? 450 : 30,
+              bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : 0,
+            },
+            bearing: 29,
+          });
+        }
       }
     }
     this.showAll = false;
