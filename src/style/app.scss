@@ -429,7 +429,45 @@ h4.ui.top.attached.header.advisories-header {
       line-height: 2em;
     }
   }
+
+  @media only screen and (max-width: 767px) {
+    display: none;
+  }
 }
+
+.ui.list.train-list {
+  .item .content {
+    &.bullet-container {
+      margin-right: 0.3em;
+    }
+
+    &.alternate-name {
+      line-height: 2em;
+    }
+  }
+
+  @media only screen and (max-width: 767px) {
+    display: none;
+  }
+}
+
+.ui.grid.mobile-train-grid {
+  max-width: 100%;
+  margin-left: -.5rem;
+
+  i {
+    position: absolute;
+    left: auto;
+    top: auto;
+    bottom: .1rem;
+    right: 0;
+  }
+
+  @media only screen and (min-width: 768px) {
+    display: none;
+  }
+}
+
 
 .accessible-icon {
   margin-left: .2em;
