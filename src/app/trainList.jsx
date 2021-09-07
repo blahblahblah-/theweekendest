@@ -8,7 +8,6 @@ class TrainList extends React.Component {
   componentDidMount() {
     const { handleOnMount, infoBox } = this.props;
     handleOnMount();
-    infoBox.classList.remove('open');
     infoBox.scrollTop = 0;
   }
 
