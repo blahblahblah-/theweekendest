@@ -20,18 +20,21 @@ class StationList extends React.Component {
     super(props);
     this.stations = [];
 
-    this.state = { stationsDisplayed: [] };
+    this.state = { stationsDisplayed: [], query: '' };
   }
 
   componentDidMount() {
     this.updateMap();
     this.filterAndSortStations();
+    this.queryInput?.focus();
   }
 
   componentDidUpdate(prevProps) {
     const { advisories, starred, nearby, displayAccessibleOnly } = this.props;
     if (starred !== prevProps.starred || advisories !== prevProps.advisories || nearby !== prevProps.nearby) {
       this.updateMap();
+      this.setState({ query: '' });
+      this.queryInput?.focus();
     }
     if (displayAccessibleOnly !== prevProps.displayAccessibleOnly) {
       this.filterAndSortStations();
@@ -165,7 +168,7 @@ class StationList extends React.Component {
 
   handleChange = (e, data) => {
     if (data.value.length < 1) {
-      return this.setState({stationsDisplayed: this.stations});
+      return this.setState({stationsDisplayed: this.stations, query: ''});
     }
 
     const query = data.value.replace(/[^0-9a-z]/gi, '').toUpperCase();
@@ -173,9 +176,22 @@ class StationList extends React.Component {
     this.setState({
       stationsDisplayed: this.stations.filter((station) =>
         station.name.replace(/[^0-9a-z]/gi, '').toUpperCase().indexOf(query) > -1 || station.secondary_name?.replace(/[^0-9a-z]/gi, '').toUpperCase().indexOf(query) > -1
-      )
+      ),
+      query: data.value,
     });
   }
+
+  handleClear = (e) => {
+    e.target.parentElement.children[0].value = '';
+    this.setState({stationsDisplayed: this.stations, query: ''});
+  };
+
+  handleKeyUp = (e) => {
+    if (e.key === "Escape") {
+      e.target.value = '';
+      this.setState({stationsDisplayed: this.stations, query: ''});
+    }
+  };
 
   renderListItem(station, trains) {
     const { accessibleStations, elevatorOutages } = this.props;
@@ -222,17 +238,18 @@ class StationList extends React.Component {
 
   render() {
     const { stations, trains, starred, advisories, nearby } = this.props;
-    const { stationsDisplayed } = this.state;
+    const { stationsDisplayed, query } = this.state;
     const stationsWithoutService = advisories && this.stationsWithoutService();
     const stationsWithOneWayService = advisories && this.stationsWithOneWayService();
     const stationsWithElevatorOutages = advisories && this.stationsWithElevatorOutages();
     const stationsNearby = nearby && this.stationsNearby();
+    const icon = query.length > 0 ? { name: 'close', link: true, onClick: this.handleClear} : 'search';
     return (
       <div>
         {
           !starred && !advisories && !nearby &&
           <div>
-            <Input icon='search' placeholder='Search...' onChange={this.handleChange} className="station-search" />
+            <Input icon={icon} placeholder='Search...' onChange={this.handleChange} onKeyUp={this.handleKeyUp} ref={(input) => { this.queryInput = input; }} className="station-search" />
             <Helmet>
               <title>The Weekendest beta - Stations</title>
               <meta property="og:url" content="https://www.theweekendest.com/stations" />
