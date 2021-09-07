@@ -168,14 +168,13 @@ class StationList extends React.Component {
       return this.setState({stationsDisplayed: this.stations});
     }
 
-    setTimeout(() => {
-      const re = new RegExp(_.escapeRegExp(data.value), 'i')
-      const isMatch = (result) => re.test(result.name)
+    const query = data.value.replace(/[^0-9a-z]/gi, '').toUpperCase();
 
-      this.setState({
-        stationsDisplayed: _.filter(this.stations, isMatch),
-      })
-    }, 300);
+    this.setState({
+      stationsDisplayed: this.stations.filter((station) =>
+        station.name.replace(/[^0-9a-z]/gi, '').toUpperCase().indexOf(query) > -1 || station.secondary_name?.replace(/[^0-9a-z]/gi, '').toUpperCase().indexOf(query) > -1
+      )
+    });
   }
 
   renderListItem(station, trains) {
