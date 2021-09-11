@@ -74,11 +74,17 @@ class TrainList extends React.Component {
             {
               Object.keys(trains).sort(this.sortFunction).filter((trainId) => trains[trainId].visible || trains[trainId].status !== 'Not Scheduled').map((trainId) => {
                 const train = trains[trainId];
+                const alternateName = train.alternate_name;
+                let displayAlternateName = alternateName && alternateName[0];
+                let match;
+                if (match = alternateName?.match(/^(?<number>[0-9]+)/)) {
+                  displayAlternateName = match.groups.number;
+                }
                 return (
                   <Grid.Column key={train.name + train.alternate_name}>
                     <Link to={`/trains/${train.id}`}>
-                      <TrainBullet name={train.name} alternateName={train.alternate_name && train.alternate_name[0]} color={train.color} size='small'
-                                      textColor={train.text_color} style={{ float: 'left', opacity: train.status === 'Not Scheduled' ? '30%' : '100%' }} />
+                      <TrainBullet name={train.name} alternateName={displayAlternateName} color={train.color} size='small'
+                                      textColor={train.text_color} style={{ float: 'left', opacity: ['Not Scheduled', 'No Service'].includes(train.status) ? '30%' : '100%' }} />
                       {
                         (train.status === 'Not Good' || train.status === 'Slow' ) &&
                         <Icon aria-label={train.status} name="warning sign" color="yellow" size="small" />
