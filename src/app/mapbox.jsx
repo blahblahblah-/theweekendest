@@ -695,34 +695,52 @@ class Mapbox extends React.Component {
         }
 
         trainArrivals.forEach((arr) => {
-          const arrivalTimes = Object.keys(arr.stops).sort((a, b) => arr.stops[a] - arr.stops[b]);
-          const nextStation = arrivalTimes.find((key) => arr.stops[key] > currentTime && stations[key]);
-          const nextStationEstimatedTime = arr.stops[nextStation];
+          let previousStation;
+          let nextStation;
+          let previousStationEstimatedTime;
+          let nextStationEstimatedTime;
+          const sortedStops = Object.keys(arr.stops).sort((a, b) => arr.stops[a] - arr.stops[b]);
 
-          const precedingStations = arrivalTimes.slice(0, arrivalTimes.indexOf(nextStation)).reverse();
-          let previousStation = precedingStations.find((key) => arr.stops[key] <= currentTime && stations[key]);
-          let previousStationEstimatedTime = arr.stops[previousStation];
+          if (arr.is_delayed) {
+            previousStation = arr.last_stop_made;
+            const previousStationIndex = previousStation && sortedStops.indexOf(previousStation);
+            nextStation = previousStation && sortedStops[previousStationIndex + 1];
 
-          if (!nextStation) {
-            return;
+            if (!nextStation || !previousStation) {
+              return;
+            }
+            previousStationEstimatedTime = arr.stops[previousStation];
+            nextStationEstimatedTime = Math.max(arr.stops[nextStation], currentTime + 60);
+
+          } else {
+            nextStation = sortedStops.find((key) => arr.stops[key] > currentTime && stations[key]);
+            nextStationEstimatedTime = arr.stops[nextStation];
+
+            const precedingStations = sortedStops.slice(0, sortedStops.indexOf(nextStation)).reverse();
+            previousStation = precedingStations.find((key) => arr.stops[key] <= currentTime && stations[key]);
+            previousStationEstimatedTime = arr.stops[previousStation];
+
+            if (!previousStation) {
+              const nextId = nextStation;
+              if (fullRoutings.some((r) => r[0] === nextId)) {
+                return;
+              }
+
+              const matchedRouting = fullRoutings.find((r) => r.includes(nextId))
+              if (!matchedRouting) {
+                return;
+              }
+
+              const precedingStops = matchedRouting.slice(0, matchedRouting.indexOf(nextId)).reverse();
+              previousStation = precedingStops.find((stop) => stations[stop]);
+              let timeDiff = (nextStationEstimatedTime - currentTime) * 2;
+              timeDiff = (timeDiff < 420) ? 420 : timeDiff;
+              previousStationEstimatedTime = nextStationEstimatedTime - timeDiff;
+            }
           }
 
-          if (!previousStation) {
-            const nextId = nextStation;
-            if (fullRoutings.some((r) => r[0] === nextId)) {
-              return;
-            }
-
-            const matchedRouting = fullRoutings.find((r) => r.includes(nextId))
-            if (!matchedRouting) {
-              return;
-            }
-
-            const precedingStops = matchedRouting.slice(0, matchedRouting.indexOf(nextId)).reverse();
-            previousStation = precedingStops.find((stop) => stations[stop]);
-            let timeDiff = (nextStationEstimatedTime - currentTime) * 2;
-            timeDiff = (timeDiff < 420) ? 420 : timeDiff;
-            previousStationEstimatedTime = nextStationEstimatedTime - timeDiff;
+          if (!nextStation || !previousStation) {
+            return;
           }
 
           const next = {

@@ -83,6 +83,10 @@ h1.yellow a, h3.yellow a {
   a:hover, a:active {
     color: #d2b91f;
   }
+
+  .delay-info {
+    color: #db2828;
+  }
 }
 
 @media only screen and (max-width: 767px) {

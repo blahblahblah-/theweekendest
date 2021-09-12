@@ -3,31 +3,40 @@ import TrainMapStop from './trainMapStop.jsx';
 import { cloneDeep } from "lodash";
 
 class TripMap extends React.Component {  
-  normalizeTrip(arrivalTimes, currentTime) {
-    const times = Object.keys(arrivalTimes).sort((a, b) => arrivalTimes[a] - arrivalTimes[b]).filter((key) => {
-      const estimatedTime = arrivalTimes[key];
-      return estimatedTime >= (currentTime - 59);
-    }).map((key) => {
+  normalizeTrip(trip, currentTime) {
+    const arrivalTimes = trip.stops;
+    const sortedStops = Object.keys(arrivalTimes).sort((a, b) => arrivalTimes[a] - arrivalTimes[b]);
+    let filteredStops;
+
+    if (trip.is_delayed) {
+      const lastStopIndex = trip.last_stop_made && sortedStops.indexOf(trip.last_stop_made);
+      filteredStops = lastStopIndex > -1 ? sortedStops.slice(lastStopIndex + 1) : sortedStops;
+    } else {
+      filteredStops = sortedStops.filter((key) => {
+        const estimatedTime = arrivalTimes[key];
+        return estimatedTime >= (currentTime - 59);
+      })
+
+      const firstStopInFuture = sortedStops.find((a) => a.estimated_time >= currentTime + 30);
+      if (firstStopInFuture) {
+        const pos = sortedStops.indexOf(firstStopInFuture);
+        filteredStops = sortedStops.slice(Math.max(0, pos - 1), sortedStops.length);
+      }
+    }
+
+    return filteredStops.map((key) => {
       const estimatedTime = arrivalTimes[key];
       return {
         stop_id: key,
         estimated_time: estimatedTime,
       };
     });
-
-    const firstStopInFuture = times.find((a) => a.estimated_time >= currentTime + 30);
-    if (!firstStopInFuture) {
-      return times;
-    }
-
-   const pos = times.indexOf(firstStopInFuture);
-   return times.slice(Math.max(0, pos - 1), times.length);
   }
 
   render() {
     const { trip, train, trains, stops, accessibleStations, elevatorOutages } = this.props;
     const currentTime = Date.now() / 1000;
-    const tripRoute = this.normalizeTrip(trip.stops, currentTime);
+    const tripRoute = this.normalizeTrip(trip, currentTime);
     return(
       <div>
         <ul className='trip-map'>
@@ -52,7 +61,7 @@ class TripMap extends React.Component {
                 <TrainMapStop key={stopId} trains={trains} stop={stop} color={train.color} southStop={true}
                   northStop={false} transfers={transfers} branchStops={[true]} activeBranches={[true]}
                   accessibleStations={accessibleStations} elevatorOutages={elevatorOutages}
-                  arrivalTime={Math.max(tripStop.estimated_time - currentTime, 1)}
+                  arrivalTime={Math.max(tripStop.estimated_time - currentTime, 1)} isDelayed={trip.is_delayed}
                   />
               )
             })

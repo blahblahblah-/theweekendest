@@ -149,14 +149,14 @@ class TrainMapStop extends React.Component {
   }
 
   render() {
-    const { stop, transfers, trains, activeBranches, branchStart, branchEnd, arrivalTime, accessibleStations, elevatorOutages, displayAccessibleOnly, showSecondaryName } = this.props;
+    const { stop, transfers, trains, activeBranches, branchStart, branchEnd, arrivalTime, accessibleStations, elevatorOutages, displayAccessibleOnly, showSecondaryName, isDelayed } = this.props;
     const eta = arrivalTime && Math.round(arrivalTime / 60);
     const opacity = !stop || !displayAccessibleOnly || accessibleStations.north.includes(stop.id) || accessibleStations.south.includes(stop.id) ? 1 : 0.2;
     return (
       <li>
         <div style={{minHeight: "50px", display: "flex"}}>
           {
-            arrivalTime &&
+            arrivalTime && !isDelayed &&
             <Header as='h6'
             style={{minWidth: "20px", maxWidth: "20px", margin: "auto 0 auto 10px", display: "inline", textAlign: "center"}}>
               { eta > 0 &&
@@ -165,6 +165,13 @@ class TrainMapStop extends React.Component {
               { eta <= 0 &&
                 <span>Due</span>
               }
+            </Header>
+          }
+          {
+            arrivalTime && isDelayed &&
+            <Header as='h6'
+            style={{minWidth: "20px", maxWidth: "20px", margin: "auto 0 auto 10px", display: "inline", textAlign: "center"}}>
+              <span>? ? ?</span>
             </Header>
           }
           {

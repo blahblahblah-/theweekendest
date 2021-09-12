@@ -124,7 +124,7 @@ class TripDetails extends React.Component {
                   delayed &&
                   <React.Fragment>
                     <br />
-                    { delayInfo }
+                    <span className='delay-info'>{ delayInfo }</span>
                   </React.Fragment>
                 }
               </Header>
