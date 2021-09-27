@@ -37,15 +37,20 @@ class TrainBullet extends React.Component {
     }
 
     if (size === 'small' && nameLength > 2) {
-      styleHash.letterSpacing = '-.05em';
+      styleHash.letterSpacing = '-.06em';
     }
 
     return styleHash;
   }
 
   innerStyle() {
-    if (!this.props.name.endsWith("X") && this.props.directions && this.props.directions.length === 1 && this.props.textColor !== '#000000') {
-      return { WebkitTextStroke: `0.5px ${this.props.color}` }
+    const { name, directions, color, textColor, size, alternateName } = this.props;
+    let nameLength = name.length + (alternateName?.length || 0);
+    if (!name.endsWith("X") && directions && directions.length === 1 && textColor !== '#000000') {
+      return { WebkitTextStroke: `0.5px ${color}` }
+    }
+    if (size === 'small' && nameLength > 2) {
+      return { fontSize: '.9em' };
     }
   }
 
