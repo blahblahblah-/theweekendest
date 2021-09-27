@@ -110,6 +110,7 @@ class Mapbox extends React.Component {
     this.selectedStations = [];
     this.selectedTripCoords = null;
     this.clickCount = 0;
+    this.triggerGeolocationOnLoad = false;
   }
   
   componentDidMount() {
@@ -143,7 +144,9 @@ class Mapbox extends React.Component {
     this.map.on('load', () => {
       this.mapLoaded = true;
       this.dataTimer = setInterval(this.fetchData.bind(this), 15000);
-      this.geoControl.trigger();
+      if (this.triggerGeolocationOnLoad) {
+        this.geoControl.trigger();
+      }
     });
 
     this.map.on('rotateend', () => {
@@ -2035,6 +2038,9 @@ class Mapbox extends React.Component {
       });
       return;
     }
+    if (!zoom && !bearing) {
+      this.geoControl.trigger();
+    }
     this.resetView(coords, zoom, bearing);
   }
 
@@ -2274,6 +2280,7 @@ class Mapbox extends React.Component {
                       );
                     }
                   } else {
+                    this.triggerGeolocationOnLoad = true;
                     return this.renderListings(0);
                   }
                 }} />
