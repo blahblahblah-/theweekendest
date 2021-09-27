@@ -53,7 +53,7 @@ class TrainDetails extends React.Component {
 
     if (out.length) {
       return (
-        <Segment>
+        <Segment raised>
           <Label attached='top' color='red'>DELAYS</Label>
           { out }
         </Segment>
@@ -85,7 +85,7 @@ class TrainDetails extends React.Component {
 
     if (out.length) {
       return (
-        <Segment>
+        <Segment raised>
           <Label attached='top' color='orange'>SERVICE CHANGES</Label>
           { out }
         </Segment>
@@ -104,7 +104,7 @@ class TrainDetails extends React.Component {
     }
     if (out.length) {
       return (
-        <Segment>
+        <Segment raised>
           <Label attached='top' color='yellow'>SERVICE IRREGULARITIES</Label>
           { out }
         </Segment>
