@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Responsive, Button, Icon, Header, Segment, List, Popup } from "semantic-ui-react";
+import { Responsive, Button, Icon, Header, Segment, List, Popup, Label } from "semantic-ui-react";
 import { withRouter } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Clipboard from 'react-clipboard.js';
@@ -41,10 +41,30 @@ class TrainDetails extends React.Component {
     }
   }
 
+  renderDelays() {
+    const { train } = this.props;
+    let out = [];
+    if (train.delay_summaries?.north) {
+      out.push(<Header as='h5' key="north">{train.delay_summaries.north.replace(/ - /g, "–")}</Header>)
+    }
+    if (train.delay_summaries?.south) {
+      out.push(<Header as='h5' key="south">{train.delay_summaries.south.replace(/ - /g, "–")}</Header>)
+    }
+
+    if (out.length) {
+      return (
+        <Segment>
+          <Label attached='top' color='red'>DELAYS</Label>
+          { out }
+        </Segment>
+      );
+    }
+  }
+
   renderServiceChanges() {
     const { train, trains } = this.props;
 
-    return ['both', 'north', 'south'].flatMap((direction) => train.service_change_summaries && train.service_change_summaries[direction]?.map((change, i) => {
+    const out = ['both', 'north', 'south'].flatMap((direction) => train.service_change_summaries && train.service_change_summaries[direction]?.map((change, i) => {
       let tmp = [change.replace(/ - /g, "–")];
       let matched;
       while (matched = tmp.find((c) => typeof c === 'string' && c.match(/\<[A-Z0-9]*\>/))) {
@@ -62,27 +82,34 @@ class TrainDetails extends React.Component {
 
       return (<Header as='h5' key={`${direction}-${i}`}>{tmp}</Header>);
     }));
+
+    if (out.length) {
+      return (
+        <Segment>
+          <Label attached='top' color='orange'>SERVICE CHANGES</Label>
+          { out }
+        </Segment>
+      );
+    }
   }
 
-  renderSummary() {
+  renderServiceIrregularities() {
     const { train } = this.props;
     let out = [];
-    if (train.service_summaries?.north) {
-      out.push(<Header as='h5' key="north">{train.service_summaries.north.replace(/ - /g, "–")}</Header>)
+    if (train.service_irregularity_summaries?.north) {
+      out.push(<Header as='h5' key="north">{train.service_irregularity_summaries.north.replace(/ - /g, "–")}</Header>)
     }
-    if (train.service_summaries?.south) {
-      out.push(<Header as='h5' key="south">{train.service_summaries.south.replace(/ - /g, "–")}</Header>)
+    if (train.service_irregularity_summaries?.south) {
+      out.push(<Header as='h5' key="south">{train.service_irregularity_summaries.south.replace(/ - /g, "–")}</Header>)
     }
-    const serviceChanges = this.renderServiceChanges();
-    if ((out.length < 1) && (serviceChanges.length < 1)) {
-      return;
+    if (out.length) {
+      return (
+        <Segment>
+          <Label attached='top' color='yellow'>SERVICE IRREGULARITIES</Label>
+          { out }
+        </Segment>
+      );
     }
-    return (
-      <div className="details-body">
-        { serviceChanges }
-        { out }
-      </div>
-    );
   }
 
   handleBack = _ => {
@@ -218,9 +245,11 @@ class TrainDetails extends React.Component {
           { twitterLink(train.id) }
           More info on <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>.
         </Responsive>
-        {
-          this.renderSummary()
-        }
+        <div className="details-body">
+          { this.renderDelays() }
+          { this.renderServiceChanges() }
+          { this.renderServiceIrregularities() }
+        </div>
         <TrainMap routing={train.actual_routings} scheduledRoutings={train.scheduled_routings} stops={stops} train={train} trains={trains} stations={stations} accessibleStations={accessibleStations} elevatorOutages={elevatorOutages} displayAccessibleOnly={displayAccessibleOnly} />
       </Segment>
     );
