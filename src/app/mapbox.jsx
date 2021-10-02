@@ -17,7 +17,6 @@ import StationList from './stationList.jsx';
 import StationDetails from './stationDetails.jsx';
 
 import stationData from '../data/station_details.json';
-import transfers from '../data/transfers.json';
 
 const apiUrl = 'https://www.goodservice.io/api/routes/?detailed=1';
 const stopsUrl = 'https://www.goodservice.io/api/stops/';
@@ -92,11 +91,6 @@ class Mapbox extends React.Component {
       stations[key]["stops"] = new Set();
       stations[key]["transfers"] = new Set();
       stationLocations[`${stationData[key].longitude}-${stationData[key].latitude}`] = key
-    });
-    transfers.forEach((transfer) => {
-      if (stations[transfer['from']]) {
-        stations[transfer['from']]["transfers"].add(transfer['to']);
-      }
     });
     this.showAll = true;
     this.mapLoaded = false;
@@ -198,6 +192,11 @@ class Mapbox extends React.Component {
                 outages[stop.id] = stop.accessibility.advisories;
               }
             }
+            stop.transfers?.forEach((toStop) => {
+              if (stations[stop.id]) {
+                stations[stop.id]["transfers"].add(toStop);
+              }
+            })
             stops[stop.id] = stop;
           });
           this.setState({ stops: stops, accessibleStations: accessibleStations, elevatorOutages: outages }, this.processRoutings);
