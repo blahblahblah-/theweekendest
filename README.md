@@ -12,7 +12,7 @@ See it live at [https://www.theweekendest.com](https://www.theweekendest.com/).
 
 * Download [Stations.csv](http://web.mta.info/developers/data/nyct/subway/Stations.csv) from the MTA's website and drop it in `/src/data/files`
 
-* To have nice looking paths, you'd need to parse out the `shapes.txt` file from the GTFS package. I wrote a script that takes .csv files to generate these paths. Each .csv file is expected to be a contiguous path for a train route. I took the first shape path (with some exceptions) for each route in `shapes.txt` and dumped each into its own .csv file before running it.
+* To have nice looking paths, download the GTFS schedule files from MTA at [http://web.mta.info/developers/developer-data-terms.html](http://web.mta.info/developers/developer-data-terms.html) (agree to the terms, look for "GTFS" then download the data for New York City Transit). You'd need to parse out the `shapes.txt` file from the GTFS package. I wrote a script that takes .csv files to generate these paths. Each .csv file is expected to be a contiguous path for a train route. I took the first shape path (with some exceptions) for each route in `shapes.txt` and dumped each into its own .csv file before running it.
 
 `````
 ruby src/data/generate_json.rb
