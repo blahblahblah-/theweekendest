@@ -513,6 +513,30 @@ h4.ui.top.attached.header.advisories-header {
       margin: 0 .5em;
     }
   }
+
+  .train-map-stop {
+    .transfers {
+      display: inline-block;
+      margin: auto 0;
+
+      .ui.label{
+        padding: .3em .5em;
+
+        .icon {
+          margin-right: .3em;
+        }
+
+        &.blue {
+          background-color: #2596be !important;
+          border-color: #2596be !important;
+        }
+
+        &:first-child {
+          margin-left: .5em;
+        }
+      }
+    }
+  }
 }
 
 .trip-map {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Header } from 'semantic-ui-react';
+import { Header, Label, Icon } from 'semantic-ui-react';
 import TrainBullet from './trainBullet.jsx';
 import { withRouter, Link } from "react-router-dom";
 
@@ -153,7 +153,7 @@ class TrainMapStop extends React.Component {
     const eta = arrivalTime && Math.round(arrivalTime / 60);
     const opacity = !stop || !displayAccessibleOnly || accessibleStations.north.includes(stop.id) || accessibleStations.south.includes(stop.id) ? 1 : 0.2;
     return (
-      <li>
+      <li className="train-map-stop">
         <div style={{minHeight: "50px", display: "flex"}}>
           {
             arrivalTime && !isDelayed &&
@@ -197,7 +197,7 @@ class TrainMapStop extends React.Component {
               </Link>
             }
           </Header>
-          <div style={{display: "inline-block", margin: "auto 0", opacity: opacity}}>
+          <div style={{display: "inline-block", margin: "auto 0", opacity: opacity}} className='transfers'>
             {
               transfers && transfers.map((route) => {
                 const train = trains[route.id];
@@ -207,6 +207,16 @@ class TrainMapStop extends React.Component {
                 )
               })
             }
+            {
+                stop.bus_transfers?.map((b) => {
+                  return (
+                    <Label key={b.route} color={b.sbs ? 'blue' : 'grey'} size='small'>
+                      <Icon name={b.airport_connection ? 'plane' : 'bus'} />
+                      {b.route}
+                    </Label>
+                  );
+                })
+              }
           </div>
         </div>
       </li>
