@@ -199,7 +199,7 @@ class TrainMapStop extends React.Component {
           </Header>
           <div style={{display: "inline-block", margin: "auto 0", opacity: opacity}} className='transfers'>
             {
-              transfers && transfers.map((route) => {
+              transfers?.map((route) => {
                 const train = trains[route.id];
                 return (
                   <TrainBullet link={true} id={route.id} key={train.name} name={train.name} color={train.color}
@@ -208,15 +208,25 @@ class TrainMapStop extends React.Component {
               })
             }
             {
-                stop.bus_transfers?.map((b) => {
-                  return (
-                    <Label key={b.route} color={b.sbs ? 'blue' : 'grey'} size='small'>
-                      <Icon name={b.airport_connection ? 'plane' : 'bus'} />
-                      {b.route}
-                    </Label>
-                  );
-                })
-              }
+              stop.bus_transfers?.map((b) => {
+                return (
+                  <Label key={b.route} color={b.sbs ? 'blue' : 'grey'} size='small'>
+                    <Icon name={b.airport_connection ? 'plane' : 'bus'} />
+                    {b.route}
+                  </Label>
+                );
+              })
+            }
+            {
+              stop.connections?.map((c) => {
+                return (
+                  <Label key={c.name} basic size='small'>
+                    <Icon name={c.mode} />
+                    {c.name}
+                  </Label>
+                );
+              })
+            }
           </div>
         </div>
       </li>

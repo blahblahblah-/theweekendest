@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Responsive, Button, Icon, Header, Segment, List, Popup } from "semantic-ui-react";
+import { Responsive, Button, Icon, Header, Segment, List, Popup, Label } from "semantic-ui-react";
 import { Link, withRouter } from "react-router-dom";
 import Clipboard from 'react-clipboard.js';
 import { Helmet } from "react-helmet";
@@ -695,7 +695,7 @@ class StationDetails extends React.Component {
             </div>
           </Segment>
           {
-            station.transfers.size > 0 &&
+            (station.transfers.size > 0 || station.busTransfers.length > 0 || station.connections.size > 0) &&
             <Segment>
               <Header as="h4">
                 Transfers
@@ -747,6 +747,31 @@ class StationDetails extends React.Component {
                     </List.Item>
                   )
                 })
+              }
+              {
+                ((station.busTransfers.length > 0) || (station.connections.length > 0)) &&
+                <List.Item key="others" className='others'>
+                  {
+                    station.busTransfers?.map((b) => {
+                      return (
+                        <Label key={b.route} color={b.sbs ? 'blue' : 'grey'} size='small'>
+                          <Icon name={b.airport_connection ? 'plane' : 'bus'} />
+                          {b.route}
+                        </Label>
+                      );
+                    })
+                  }
+                  {
+                    station.connections?.map((c) => {
+                      return (
+                        <Label key={c.name} basic size='small'>
+                          <Icon name={c.mode} />
+                          {c.name}
+                        </Label>
+                      );
+                    })
+                  }
+                </List.Item>
               }
             </List>
             </Segment>

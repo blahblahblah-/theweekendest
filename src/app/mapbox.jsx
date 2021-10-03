@@ -90,7 +90,8 @@ class Mapbox extends React.Component {
       stations[key]["passed"] = new Set();
       stations[key]["stops"] = new Set();
       stations[key]["transfers"] = new Set();
-      stations[key]["busTransfers"] = {};
+      stations[key]["busTransfers"] = [];
+      stations[key]["connections"] = [];
       stationLocations[`${stationData[key].longitude}-${stationData[key].latitude}`] = key
     });
     this.showAll = true;
@@ -199,10 +200,13 @@ class Mapbox extends React.Component {
               }
             })
             stops[stop.id] = stop;
+            if (stop.bus_transfers) {
+              stations[stop.id]["busTransfers"] = stop.bus_transfers;
+            }
+            if (stop.connections) {
+              stations[stop.id]["connections"] = stop.connections;
+            }
           });
-          if (stop.bus_transfers) {
-            stations[stop.id]["busTransfers"] = stop.bus_transfers;
-          }
           this.setState({ stops: stops, accessibleStations: accessibleStations, elevatorOutages: outages }, this.processRoutings);
         });
 
