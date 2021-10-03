@@ -695,8 +695,8 @@ class StationDetails extends React.Component {
             </div>
           </Segment>
           {
-            (station.transfers.size > 0 || station.busTransfers.length > 0 || station.connections.size > 0) &&
-            <Segment>
+            (station.transfers.size > 0 || station.busTransfers.length > 0 || station.connections.length > 0) &&
+            <Segment className="transfers">
               <Header as="h4">
                 Transfers
               </Header>

@@ -87,6 +87,10 @@ h1.yellow a, h3.yellow a {
   .delay-info {
     color: #db2828;
   }
+
+  .transfers .others {
+    cursor: default !important;
+  }
 }
 
 @media only screen and (max-width: 767px) {
