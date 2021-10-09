@@ -91,6 +91,16 @@ h1.yellow a, h3.yellow a {
   .transfers .others {
     cursor: default !important;
   }
+
+  .details-body {
+    padding: 0 14px 14px 14px;
+
+    .ui.raised.segment {
+      .ui.yellow.top.attached.label {
+        color: black !important;
+      }
+    }
+  }
 }
 
 @media only screen and (max-width: 767px) {
@@ -313,10 +323,6 @@ h1.yellow a, h3.yellow a {
   text-align: right;
   margin: 0 4em 0.5em 0;
   line-height: 1.5em;
-}
-
-.details-body {
-  padding: 0 14px 14px 14px;
 }
 
 .station-details-route-status {
