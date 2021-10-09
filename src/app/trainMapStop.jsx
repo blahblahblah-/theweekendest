@@ -208,7 +208,7 @@ class TrainMapStop extends React.Component {
               })
             }
             {
-              stop.bus_transfers?.map((b) => {
+              stop?.bus_transfers?.map((b) => {
                 return (
                   <Label key={b.route} color={b.sbs ? 'blue' : 'grey'} size='small'>
                     <Icon name={b.airport_connection ? 'plane' : 'bus'} />
@@ -218,7 +218,7 @@ class TrainMapStop extends React.Component {
               })
             }
             {
-              stop.connections?.map((c) => {
+              stop?.connections?.map((c) => {
                 return (
                   <Label key={c.name} basic size='small'>
                     <Icon name={c.mode} />
