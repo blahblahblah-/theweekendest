@@ -69,6 +69,7 @@ class Mapbox extends React.Component {
       displayLongHeadways: false,
       displayTrainPositions: true,
       loading: true,
+      loadingGeolocation: false,
       processedRoutings: {},
       routingByDirection: {},
       routeStops: {},
@@ -94,7 +95,7 @@ class Mapbox extends React.Component {
       stations[key]["connections"] = [];
       stationLocations[`${stationData[key].longitude}-${stationData[key].latitude}`] = key
     });
-    this.showAll = true;
+    this.showAll = false;
     this.mapLoaded = false;
     this.initialized = false;
     this.calculatedPaths = {};
@@ -1897,11 +1898,28 @@ class Mapbox extends React.Component {
         bearing: (bearing === undefined) ? 29 : bearing,
       });
     } else {
-      this.map.easeTo({
-        center: center,
-        zoom: 14,
-        bearing: 29,
-      });
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(e => {
+          this.map.easeTo({
+            center: [e.coords.longitude, e.coords.latitude],
+            zoom: 14,
+            bearing: 29,
+          })
+        }, () => {
+          this.map.easeTo({
+            center: center,
+            zoom: 14,
+            bearing: 29,
+          });
+        });
+      } else {
+        this.map.easeTo({
+          center: center,
+          zoom: 14,
+          bearing: 29,
+        });
+        this.geoControl.trigger();
+      }
     }
 
     this.selectedTrains = trainIds;
@@ -2045,9 +2063,6 @@ class Mapbox extends React.Component {
       });
       return;
     }
-    if (!zoom && !bearing) {
-      this.geoControl.trigger();
-    }
     this.resetView(coords, zoom, bearing);
   }
 
@@ -2076,11 +2091,26 @@ class Mapbox extends React.Component {
     this.props.history.push(`/trains#${center.lat},${center.lng}/${zoom}/${bearing}`);
   }
 
-  handleNearby = () => {
-    this.geoControl.trigger();
-  }
-
   handleRealignMap = () => {
+    if (navigator.geolocation) {
+      this.setState({ loading: true, loadingGeolocation: true });
+      navigator.geolocation.getCurrentPosition(e => {
+       this.map.easeTo({
+          center: [e.coords.longitude, e.coords.latitude],
+          zoom: 14,
+          bearing: 29,
+        })
+        this.setState({ loading: false, loadingGeolocation: false });
+      }, () => {
+        this.setState({ loading: false, loadingGeolocation: false });
+        this.map.easeTo({
+          center: center,
+          zoom: 14,
+          bearing: 29,
+        });
+      });
+      return;
+    }
     this.map.easeTo({
       center: center,
       zoom: 14,
@@ -2105,7 +2135,7 @@ class Mapbox extends React.Component {
       },
       {
         menuItem: <Menu.Item as={Link} to='/nearby' key='nearby' title='Nearby Stations'><Icon name='location arrow' style={{margin: 0}} /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} accessibleStations={accessibleStations} displayAccessibleOnly={displayAccessibleOnly} elevatorOutages={elevatorOutages}  handleOnMount={this.handleStationList} handleNearby={this.handleNearby} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} accessibleStations={accessibleStations} displayAccessibleOnly={displayAccessibleOnly} elevatorOutages={elevatorOutages}  handleOnMount={this.handleStationList} handleNearby={this.handleRealignMap} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/advisories' key='advisories' title='Advisories'><Icon name='warning sign' style={{margin: 0}} /></Menu.Item>,
@@ -2115,7 +2145,7 @@ class Mapbox extends React.Component {
   }
 
   renderListings(index) {
-    const { trains, stops, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly } = this.state;
+    const { trains, stops, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly, loadingGeolocation } = this.state;
     return (
       <div>
         <Helmet>
@@ -2139,7 +2169,7 @@ class Mapbox extends React.Component {
                 <Icon name='list alternate outline' />
               </Button>
             } />
-            <Button icon title="Center map" onClick={this.handleRealignMap} style={{float: "right"}}>
+            <Button icon title="Center map" onClick={this.handleRealignMap} disabled={loadingGeolocation} style={{float: "right"}}>
               <Icon name='crosshairs' />
             </Button>
           </div>
@@ -2163,7 +2193,7 @@ class Mapbox extends React.Component {
                 } />
               </div>
               <div>
-                <Button icon title="Center map" onClick={this.handleRealignMap}>
+                <Button icon title="Center map" onClick={this.handleRealignMap} disabled={loadingGeolocation}>
                   <Icon name='crosshairs' />
                 </Button>
               </div>
