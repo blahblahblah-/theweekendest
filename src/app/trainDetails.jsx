@@ -81,7 +81,7 @@ class TrainDetails extends React.Component {
       }
 
       return (<Header as='h5' key={`${direction}-${i}`}>{tmp}</Header>);
-    }));
+    })).filter(c => c);
 
     if (out.length) {
       return (
