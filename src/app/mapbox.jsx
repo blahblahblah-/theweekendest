@@ -2284,33 +2284,39 @@ class Mapbox extends React.Component {
                         />
                       );
                     } else {
-                      const hash = location.hash.substr(1).split('/');
-                      let coords = null;
-                      let zoom = null;
+                      if (trains[props.match.params.id]) {
+                        const hash = location.hash.substr(1).split('/');
+                        let coords = null;
+                        let zoom = null;
 
-                      if (hash.length > 1) {
-                        const coordsArray = hash[0].split(',');
-                        if (coordsArray.length > 1) {
-                          coords = [coordsArray[1], coordsArray[0]];
-                          zoom = hash[1];
+                        if (hash.length > 1) {
+                          const coordsArray = hash[0].split(',');
+                          if (coordsArray.length > 1) {
+                            coords = [coordsArray[1], coordsArray[0]];
+                            zoom = hash[1];
+                          }
                         }
-                      }
 
-                      return (
-                        <TrainDetails stops={stops} stations={stations}
-                          accessibleStations={accessibleStations}
-                          elevatorOutages={elevatorOutages}
-                          train={trains[props.match.params.id]} trains={trains}
-                          displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-                          displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
-                          displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
-                          handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
-                          handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} handleDisplayAccessibleOnlyToggle={this.handleDisplayAccessibleOnlyToggle}
-                          handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
-                          handleResetMap={this.handleResetMap}
-                          handleOnMount={this.handleMountTrainDetails} coords={coords} zoom={zoom} infoBox={this.infoBox}
-                        />
-                      );
+                        return (
+                          <TrainDetails stops={stops} stations={stations}
+                            accessibleStations={accessibleStations}
+                            elevatorOutages={elevatorOutages}
+                            train={trains[props.match.params.id]} trains={trains}
+                            displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+                            displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
+                            displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                            handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
+                            handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} handleDisplayAccessibleOnlyToggle={this.handleDisplayAccessibleOnlyToggle}
+                            handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
+                            handleResetMap={this.handleResetMap}
+                            handleOnMount={this.handleMountTrainDetails} coords={coords} zoom={zoom} infoBox={this.infoBox}
+                          />
+                        );
+                      } else {
+                        return (
+                          <Redirect to={`/trains/`} />
+                        );
+                      }
                     }
                   } else {
                     this.triggerGeolocationOnLoad = true;
@@ -2319,20 +2325,26 @@ class Mapbox extends React.Component {
                 }} />
                 <Route path="/stations/:id?" render={(props) => {
                   if (props.match.params.id) {
-                    return (
-                      <StationDetails trains={trains} station={stations[props.match.params.id]} stations={stations}
-                        accessibleStations={accessibleStations}
-                        elevatorOutages={elevatorOutages}
-                        displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
-                        displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
-                        displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
-                        handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
-                        handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} handleDisplayAccessibleOnlyToggle={this.handleDisplayAccessibleOnlyToggle}
-                        handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
-                        handleResetMap={this.handleResetMap}
-                        handleOnMount={this.handleMountStationDetails} infoBox={this.infoBox}
-                      />
-                    )
+                    if (stations[props.match.params.id]) {
+                      return (
+                        <StationDetails trains={trains} station={stations[props.match.params.id]} stations={stations}
+                          accessibleStations={accessibleStations}
+                          elevatorOutages={elevatorOutages}
+                          displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
+                          displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
+                          displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                          handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
+                          handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} handleDisplayAccessibleOnlyToggle={this.handleDisplayAccessibleOnlyToggle}
+                          handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
+                          handleResetMap={this.handleResetMap}
+                          handleOnMount={this.handleMountStationDetails} infoBox={this.infoBox}
+                        />
+                      )
+                    } else {
+                      return (
+                        <Redirect to={`/stations/`} />
+                      );
+                    }
                   } else {
                     return this.renderListings(1);
                   }
