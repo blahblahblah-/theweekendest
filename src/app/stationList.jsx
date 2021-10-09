@@ -20,13 +20,17 @@ class StationList extends React.Component {
     super(props);
     this.stations = [];
 
-    this.state = { stationsDisplayed: [], query: '' };
+    this.state = { stationsDisplayed: [], query: '', nearbyStations: [] };
   }
 
   componentDidMount() {
+    const { nearby } = this.props;
     this.updateMap();
     this.filterAndSortStations();
     this.queryInput?.focus();
+    if (nearby) {
+      this.updateNearbyStations();
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -38,6 +42,9 @@ class StationList extends React.Component {
     }
     if (displayAccessibleOnly !== prevProps.displayAccessibleOnly) {
       this.filterAndSortStations();
+    }
+    if (!prevProps.nearby && nearby) {
+      this.updateNearbyStations();
     }
   }
 
@@ -133,20 +140,19 @@ class StationList extends React.Component {
     });
   }
 
-  stationsNearby() {
-    const { geoLocation } = this.props;
-
-    if (geoLocation) {
-      const currentLocation = turf.helpers.point([geoLocation.longitude, geoLocation.latitude])
-      const options = {units: 'miles'};
-      const stations = this.stations.map((s) => {
-        const stationLocation = turf.helpers.point([s.longitude, s.latitude]);
-        s.distance = turf.distance(currentLocation, stationLocation, options);
-        return s;
+  updateNearbyStations() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(e => {
+        const currentLocation = turf.helpers.point([e.coords.longitude, e.coords.latitude]);
+        const options = {units: 'miles'};
+        const stations = this.stations.map((s) => {
+          const stationLocation = turf.helpers.point([s.longitude, s.latitude]);
+          s.distance = turf.distance(currentLocation, stationLocation, options);
+          return s;
+        });
+        this.setState({nearbyStations: _.filter(stations, (result) => result.distance <= 1.0).sort((a, b) => a.distance - b.distance).slice(0, 5)});
       });
-      return _.filter(stations, (result) => result.distance <= 1.0).sort((a, b) => a.distance - b.distance).slice(0, 5);
     }
-    return [];
   }
 
   filterByStars() {
@@ -238,11 +244,10 @@ class StationList extends React.Component {
 
   render() {
     const { stations, trains, starred, advisories, nearby } = this.props;
-    const { stationsDisplayed, query } = this.state;
+    const { stationsDisplayed, query, nearbyStations } = this.state;
     const stationsWithoutService = advisories && this.stationsWithoutService();
     const stationsWithOneWayService = advisories && this.stationsWithOneWayService();
     const stationsWithElevatorOutages = advisories && this.stationsWithElevatorOutages();
-    const stationsNearby = nearby && this.stationsNearby();
     const icon = query.length > 0 ? { name: 'close', link: true, onClick: this.handleClear} : 'search';
     return (
       <div>
@@ -299,12 +304,12 @@ class StationList extends React.Component {
           <div>
             <List divided relaxed selection style={{marginTop: 0}}>
               {
-                stationsNearby && stationsNearby.map((station) => {
+                nearbyStations && nearbyStations.map((station) => {
                   return this.renderListItem(station, trains);
                 })
               }
               {
-                (!stationsNearby || stationsNearby.length === 0) &&
+                (!nearbyStations || nearbyStations.length === 0) &&
                 <List.Item>
                   <List.Content>
                     No stations nearby. <Icon name='lemon outline' />

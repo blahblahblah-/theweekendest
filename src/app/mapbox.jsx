@@ -172,10 +172,6 @@ class Mapbox extends React.Component {
     this.map.on('dblclick', (e) => {
       return false;
     });
-
-    this.geoControl.on('geolocate', (e) => {
-      this.setState({geoLocation: e.coords});
-    });
   }
 
   fetchData() {
@@ -2119,7 +2115,7 @@ class Mapbox extends React.Component {
   }
 
   panes() {
-    const { trains, geoLocation, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.state;
+    const { trains, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.state;
     return [
       {
         menuItem: <Menu.Item as={Link} to='/trains' key='train' title='Trains'>Trains</Menu.Item>,
@@ -2135,7 +2131,7 @@ class Mapbox extends React.Component {
       },
       {
         menuItem: <Menu.Item as={Link} to='/nearby' key='nearby' title='Nearby Stations'><Icon name='location arrow' style={{margin: 0}} /></Menu.Item>,
-        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} geoLocation={geoLocation} trains={trains} accessibleStations={accessibleStations} displayAccessibleOnly={displayAccessibleOnly} elevatorOutages={elevatorOutages}  handleOnMount={this.handleStationList} handleNearby={this.handleRealignMap} infoBox={this.infoBox} nearby={true} /></Tab.Pane>,
+        render: () => <Tab.Pane attached={false} style={{padding: 0}}><StationList stations={stations} trains={trains} accessibleStations={accessibleStations} displayAccessibleOnly={displayAccessibleOnly} elevatorOutages={elevatorOutages}  handleOnMount={this.handleStationList} handleNearby={this.handleRealignMap} infoBox={this.infoBox} nearby /></Tab.Pane>,
       },
       {
         menuItem: <Menu.Item as={Link} to='/advisories' key='advisories' title='Advisories'><Icon name='warning sign' style={{margin: 0}} /></Menu.Item>,
