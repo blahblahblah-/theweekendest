@@ -272,19 +272,10 @@ class TrainMap extends React.Component {
                 let transfers = Object.keys(transfersObj).map((routeId) => {
                   return {
                     id: routeId,
+                    name: trains[routeId].name,
                     directions: transfersObj[routeId],
                   };
-                }).sort((a, b) => {
-                  const routeA = a.id;
-                  const routeB = b.id;
-                  if (routeA < routeB) {
-                    return -1;
-                  }
-                  if (routeA > routeB) {
-                    return 1;
-                  }
-                  return 0;
-                });
+                }).sort((a, b) => a.name < b.name ? -1 : 1);
                 if (stopId === "") {
                   segments.branches.splice(0, 1);
                   currentBranches = [];
