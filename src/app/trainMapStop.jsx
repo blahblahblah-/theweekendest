@@ -93,7 +93,11 @@ class TrainMapStop extends React.Component {
     let minWidth;
 
     if (index === 0) {
-      minWidth = '40px';
+      if (branching) {
+        minWidth = '80px';
+      } else {
+        minWidth = '40px';
+      }
     } else {
       minWidth = minWidthValue + 'px';
     }
