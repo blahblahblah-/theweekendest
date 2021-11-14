@@ -1288,7 +1288,7 @@ class Mapbox extends React.Component {
           "type": "FeatureCollection",
           "features": Object.keys(stations).map((key) => {
             const destination = routing[routing.length - 1] === key;
-            const transferStation = transferStations.includes(key);
+            const transferStation = transferStations.includes(key) || [...stations[key].transfers].filter(s => stations[s].stops.size > 0).length > 0;
             let offset = offsets[this.selectedTrip.train];
             let bearing = stations[key].bearing;
             let opacity = 0.1;
@@ -1386,7 +1386,7 @@ class Mapbox extends React.Component {
           || (this.selectedTrains.length > 1 && destinations.includes(key))) {
           destination = true;
           priority = 1;
-        } else if (transferStations.includes(key)) {
+        } else if (stations[key].stops.size > 0 && (transferStations.includes(key) || [...stations[key].transfers].filter(s => stations[s].stops.size > 0).length > 0)) {
           transferStation = true;
           priority = 3;
         }
