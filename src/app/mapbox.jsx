@@ -128,6 +128,9 @@ class Mapbox extends React.Component {
       maxPitch: 0,
     });
 
+    this.map.dragRotate.disable();
+    this.map.touchZoomRotate.disableRotation();
+
     this.geoControl = new mapboxgl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true
@@ -135,7 +138,7 @@ class Mapbox extends React.Component {
       trackUserLocation: true
     });
 
-    this.map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+    this.map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "bottom-right");
     this.map.addControl(this.geoControl, 'bottom-right');
 
     this.map.on('load', () => {
