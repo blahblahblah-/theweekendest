@@ -1730,10 +1730,10 @@ class Mapbox extends React.Component {
         if (!bounds.isEmpty()) {
           this.map.fitBounds(bounds, {
             padding: {
-              top: (width >= Responsive.onlyTablet.minWidth) ? 30 : 0,
+              top: (width >= Responsive.onlyTablet.minWidth) ? 30 : -50,
               right: (width >= Responsive.onlyTablet.minWidth) ? 0 : 30,
               left: (width >= Responsive.onlyTablet.minWidth) ? 450 : 30,
-              bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : 0,
+              bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : -150,
             },
             bearing: 29,
           });
@@ -1754,10 +1754,10 @@ class Mapbox extends React.Component {
 
         this.map.fitBounds(bounds, {
           padding: {
-            top: (width >= Responsive.onlyTablet.minWidth) ? 30 : 0,
+            top: (width >= Responsive.onlyTablet.minWidth) ? 30 : -50,
             right: (width >= Responsive.onlyTablet.minWidth) ? 0 : 30,
             left: (width >= Responsive.onlyTablet.minWidth) ? 450 : 30,
-            bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : 0,
+            bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : -150,
           },
           bearing: 29,
         });
@@ -1873,10 +1873,10 @@ class Mapbox extends React.Component {
 
       this.map.fitBounds(bounds, {
         padding: {
-          top: (width >= Responsive.onlyTablet.minWidth) ? 30 : 0,
+          top: (width >= Responsive.onlyTablet.minWidth) ? 30 : -50,
           right: (width >= Responsive.onlyTablet.minWidth) ? 0 : 30,
           left: (width >= Responsive.onlyTablet.minWidth) ? 450 : 30,
-          bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : 0,
+          bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : -150,
         },
         bearing: 29,
       });
