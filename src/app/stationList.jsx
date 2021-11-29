@@ -178,11 +178,33 @@ class StationList extends React.Component {
     }
 
     const query = data.value.replace(/[^0-9a-z]/gi, '').toUpperCase();
+    const filteredStations = this.stations.filter((station) =>
+      station.name.replace(/[^0-9a-z]/gi, '').toUpperCase().indexOf(query) > -1 || station.secondary_name?.replace(/[^0-9a-z]/gi, '').toUpperCase().indexOf(query) > -1
+    );
+    const sortedFilteredStations = filteredStations.sort((a, b) => {
+      const nameA = a.name.replace(/[^0-9a-z]/gi, '').toUpperCase();
+      const nameB = b.name.replace(/[^0-9a-z]/gi, '').toUpperCase();
+
+      if (nameA.includes(query) && !nameB.includes(query)) {
+        return -1
+      }
+      if (!nameA.includes(query) && nameB.includes(query)) {
+        return 1;
+      }
+
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+
+      return 0;
+
+    });
 
     this.setState({
-      stationsDisplayed: this.stations.filter((station) =>
-        station.name.replace(/[^0-9a-z]/gi, '').toUpperCase().indexOf(query) > -1 || station.secondary_name?.replace(/[^0-9a-z]/gi, '').toUpperCase().indexOf(query) > -1
-      ),
+      stationsDisplayed: filteredStations,
       query: data.value,
     });
   }
