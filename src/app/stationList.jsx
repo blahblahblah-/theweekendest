@@ -204,7 +204,7 @@ class StationList extends React.Component {
     });
 
     this.setState({
-      stationsDisplayed: filteredStations,
+      stationsDisplayed: sortedFilteredStations,
       query: data.value,
     });
   }
