@@ -1350,7 +1350,7 @@ class Mapbox extends React.Component {
                 'destination': destination,
                 'transferStation': transferStation,
                 'offset': [offset * 1.5, 0],
-                'offset-double': [offset * 3, 0],
+                'offset-double': [offset * 3.5, 0],
               },
               "geometry": {
                 "type": "Point",
@@ -1459,7 +1459,7 @@ class Mapbox extends React.Component {
             'destination': destination,
             'transferStation': transferStation,
             'offset': [offset * 1.5, 0],
-            'offset-double': [offset * 3, 0],
+            'offset-double': [offset * 3.5, 0],
           },
           "geometry": {
             "type": "Point",
