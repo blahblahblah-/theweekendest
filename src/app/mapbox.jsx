@@ -1107,9 +1107,11 @@ class Mapbox extends React.Component {
         },
       });
       this.map.on('click', "Stops", e => {
-        const path = `/stations/${e.features[0].properties.id}`;
-        this.debounceLayerNavigate(path);
-        e.originalEvent.stopPropagation();
+        if (this.showAll || e.features[0].properties.opacity > 0.1) {
+          const path = `/stations/${e.features[0].properties.id}`;
+          this.debounceLayerNavigate(path);
+          e.originalEvent.stopPropagation();
+        }
       });
       this.map.on('mouseenter', 'Stops', (() => {
         this.map.getCanvas().style.cursor = 'pointer';
@@ -1188,9 +1190,11 @@ class Mapbox extends React.Component {
         },
       }, "TrainOutlines");
       this.map.on('click', "Stops", e => {
-        const path = `/stations/${e.features[0].properties.id}`;
-        this.debounceLayerNavigate(path);
-        e.originalEvent.stopPropagation();
+        if (this.showAll || e.features[0].properties.opacity > 0.1) {
+          const path = `/stations/${e.features[0].properties.id}`;
+          this.debounceLayerNavigate(path);
+          e.originalEvent.stopPropagation();
+        }
       });
       this.map.on('mouseenter', 'Stops', (() => {
         this.map.getCanvas().style.cursor = 'pointer';
@@ -1254,9 +1258,11 @@ class Mapbox extends React.Component {
         }
       }, "TrainOutlines");
       this.map.on('click', 'TrainStops', e => {
-        const path = `/stations/${e.features[0].properties.id}`;
-        this.debounceLayerNavigate(path);
-        e.originalEvent.stopPropagation();
+        if (this.showAll || e.features[0].properties.opacity > 0.1) {
+          const path = `/stations/${e.features[0].properties.id}`;
+          this.debounceLayerNavigate(path);
+          e.originalEvent.stopPropagation();
+        }
       });
       this.map.on('mouseenter', 'TrainStops', (() => {
         this.map.getCanvas().style.cursor = 'pointer';
