@@ -95,7 +95,7 @@ class Mapbox extends React.Component {
       stations[key]["connections"] = [];
       stationLocations[`${stationData[key].longitude}-${stationData[key].latitude}`] = key
     });
-    this.showAll = false;
+    this.showAll = true;
     this.mapLoaded = false;
     this.initialized = false;
     this.calculatedPaths = {};
@@ -1381,12 +1381,16 @@ class Mapbox extends React.Component {
         let destination = false;
         let transferStation = false;
 
-        if ((displayAccessibleOnly && !accessibleStations.north.includes(key) && !accessibleStations.south.includes(key)) ||
-          (!this.selectedTrains.some((train) => stations[key].stops.has(train)) &&
-          !this.selectedStations.includes(key) && (this.selectedTrains.length === 1 || stations[key].stops.size > 0))) {
+        if (
+          (displayAccessibleOnly && !accessibleStations.north.includes(key) && !accessibleStations.south.includes(key) ||
+            (!this.selectedTrains.some((train) => stations[key].stops.has(train)) && !(this.selectedStations.length === 1 && stations[this.selectedStations[0]].transfers.has(key))) &&
+            !(this.showAll && stations[key].stops.size === 0) &&
+            (this.selectedStations.length === 0 || (!this.selectedStations.includes(key)) && !this.selectedTrains.some((train) => stations[key].stops.has(train))))
+          ) {
           opacity = 0.1;
           priority = 10;
-        } else if (this.selectedStations.length > 0 && !this.selectedStations.includes(key)) {
+        } else if (this.selectedStations.length > 0 && !this.selectedStations.includes(key) ||
+          (this.selectedStations.length === 1 && stations[this.selectedStations[0]].transfers.has(key))) {
           opacity = 0.5;
           priority = 7;
         } else if (
@@ -1713,6 +1717,7 @@ class Mapbox extends React.Component {
 
   goToTrain(train, coords, zoom) {
     const { width } = this.state;
+    this.showAll = false;
     this.selectTrain(train);
 
     if (coords && zoom) {
@@ -1746,12 +1751,12 @@ class Mapbox extends React.Component {
         }
       }
     }
-    this.showAll = false;
   }
 
   goToTrip(trip, direction, train) {
     const { width } = this.state;
 
+    this.showAll = false;
     this.selectTrip(trip, direction, train, (coords) => {
       if (coords[0]) {
         const bounds = coords.reduce((bounds, coord) => {
@@ -1769,7 +1774,6 @@ class Mapbox extends React.Component {
         });
       }
     });
-    this.showAll = false;
   }
 
   selectTrip(trip, direction, train, callback) {
@@ -1834,6 +1838,7 @@ class Mapbox extends React.Component {
     this.selectedTrains = selectedTrains;
     this.selectedStations = selectedStations;
     this.selectedTrip = null;
+    this.showAll = false;
     this.renderStops();
     this.renderTrainPositions();
     trainIds.forEach((t) => {
@@ -1887,15 +1892,9 @@ class Mapbox extends React.Component {
         bearing: 29,
       });
     }
-
-    this.showAll = false;
   }
 
   resetView(coords, zoom, bearing) {
-    if (this.showAll) {
-      return;
-    }
-
     if (coords && zoom) {
       this.map.easeTo({
         center: coords,
@@ -2151,6 +2150,9 @@ class Mapbox extends React.Component {
 
   renderListings(index) {
     const { trains, stops, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly, loadingGeolocation } = this.state;
+    if ([0, 1, 3].includes(index)) {
+      this.showAll = true;
+    }
     return (
       <div>
         <Helmet>
