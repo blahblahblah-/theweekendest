@@ -1457,11 +1457,24 @@ class Mapbox extends React.Component {
           bearing = 0;
         }
 
+        let stationName = stations[key].name;
+
+        if (this.selectedStations.length === 1 &&
+          (stations[this.selectedStations[0]].transfers.has(key) ||
+            stations[this.selectedStations[0]].transfers.size > 0 && this.selectedStations[0] === key)) {
+          stationName = `${stations[key].name}\n${Array.from(stations[key].stops).map(routeId => {
+            if (['FS', 'GS', 'H'].includes(routeId)) {
+              return 'S';
+            }
+            return routeId;
+          }).join(", ")}`;
+        }
+
         return {
           "type": "Feature",
           "properties": {
             "id": stations[key].id,
-            "name": stations[key].name.replace(/ - /g, "\n").replace(/ \(/g, "\n(").replace(/Av\//g,"Av\n"),
+            "name": stationName.replace(/ - /g, "\n").replace(/ \(/g, "\n(").replace(/Av\//g,"Av\n"),
             "stopType": stopTypeIcon,
             "opacity": opacity,
             "priority": priority,
