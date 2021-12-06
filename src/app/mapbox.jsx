@@ -1857,12 +1857,13 @@ class Mapbox extends React.Component {
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
-        if (selectedStations.length === 1 && Array.from(stations[selectedStations[0]].transfers).some(stationId => stations[stationId].stops.has(t))) {
-          this.map.setPaintProperty(layerId, 'line-opacity', 0.5);
-        } else if (!includeTrains || !stationsData.some((station) => station.stops.has(t))) {
-          this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
-        } else {
+        if (includeTrains && stationsData.some((station) => station.stops.has(t))) {
           this.map.setPaintProperty(layerId, 'line-opacity', 1);
+        } else if (selectedStations.length === 1 && Array.from(stations[selectedStations[0]].transfers).some(stationId => stations[stationId].stops.has(t))) {
+          console.log(t);
+          this.map.setPaintProperty(layerId, 'line-opacity', 0.5);
+        } else {
+          this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
         }
       }
 
