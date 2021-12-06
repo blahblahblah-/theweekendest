@@ -1857,7 +1857,9 @@ class Mapbox extends React.Component {
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
-        if (!includeTrains || !stationsData.some((station) => station.stops.has(t))) {
+        if (selectedStations.length === 1 && Array.from(stations[selectedStations[0]].transfers).some(stationId => stations[stationId].stops.has(t))) {
+          this.map.setPaintProperty(layerId, 'line-opacity', 0.5);
+        } else if (!includeTrains || !stationsData.some((station) => station.stops.has(t))) {
           this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
         } else {
           this.map.setPaintProperty(layerId, 'line-opacity', 1);
