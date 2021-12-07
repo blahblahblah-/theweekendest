@@ -1156,13 +1156,26 @@ class Mapbox extends React.Component {
             "stops":  [[9, 0.25], [12, 0.75], [14, 2]],
           },
           "icon-image": ['get', 'stopType'],
-          "icon-size": {
-            "stops": [[9, 0.1], [14, 0.75]]
-          },
+          "icon-size": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            8, 3/13,
+            13, 8/13,
+            14, 17/13,
+          ],
           "icon-rotate": ['get', 'bearing'],
           "icon-rotation-alignment": "map",
           "icon-allow-overlap": true,
-          "icon-offset": ["get", "offset-double"],
+          "icon-offset": ["get", "offset-eight"],
+          "icon-offset": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            8, ["get", "offset-eight"],
+            13, ["get", "offset-thirteen"],
+            14, ["get", "offset-fourteen"],
+          ],
           "symbol-sort-key": ['get', 'priority'],
         },
         "paint": {
@@ -1343,7 +1356,6 @@ class Mapbox extends React.Component {
             } else {
               bearing = 0;
             }
-
             return {
               "type": "Feature",
               "properties": {
@@ -1356,7 +1368,9 @@ class Mapbox extends React.Component {
                 'destination': destination,
                 'transferStation': transferStation,
                 'offset': [offset * 1.5, 0],
-                'offset-double': [offset * 3.5, 0],
+                'offset-eight': [offset * 13 / 3, 0],
+                'offset-thirteen': [offset * 1.5 * 13 / 8, 0],
+                'offset-fourteen': [offset * 3 * 13 / 17, 0],
               },
               "geometry": {
                 "type": "Point",
@@ -1482,7 +1496,9 @@ class Mapbox extends React.Component {
             'destination': destination,
             'transferStation': transferStation,
             'offset': [offset * 1.5, 0],
-            'offset-double': [offset * 3.5, 0],
+            'offset-eight': [offset * 13 / 3, 0],
+            'offset-thirteen': [offset * 1.5 * 13 / 8, 0],
+            'offset-fourteen': [offset * 3 * 13 / 17, 0],
           },
           "geometry": {
             "type": "Point",
