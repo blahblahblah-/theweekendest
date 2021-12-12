@@ -56,6 +56,8 @@ const STATIONS_THAT_OVERLAP_EACH_OTHER = {
   "R09": "718",
 }
 
+const MANHATTAN_TILT = 29;
+
 mapboxgl.accessToken = process.env.MAPBOX_TOKEN;
 
 class Mapbox extends React.Component {
@@ -117,7 +119,7 @@ class Mapbox extends React.Component {
       container: this.mapContainer,
       style: 'mapbox://styles/theweekendest/ck1fhati848311cp6ezdzj5cm?optimize=true',
       center: center,
-      bearing: 29,
+      bearing: MANHATTAN_TILT,
       minZoom: 9,
       zoom: 14,
       hash: false,
@@ -1477,10 +1479,43 @@ class Mapbox extends React.Component {
           (stations[this.selectedStations[0]].transfers.has(key) ||
             stations[this.selectedStations[0]].transfers.size > 0 && this.selectedStations[0] === key)) {
           stationName = `${stations[key].name}\n${Array.from(stations[key].stops).map(routeId => {
-            if (['FS', 'GS', 'H'].includes(routeId)) {
-              return 'S';
+            let id = routeId;
+            let adjustedBearing = stations[key].bearing - MANHATTAN_TILT;
+            if (adjustedBearing < 0) {
+              adjustedBearing += 360;
             }
-            return routeId;
+
+            if (['FS', 'GS', 'H'].includes(routeId)) {
+              id = "S";
+            }
+            // Downtown only
+            if (!stations[key].northStops.has(routeId)) {
+              if (adjustedBearing > 60 && adjustedBearing < 120) {
+                return `←${id}`;
+              }
+              if (adjustedBearing >= 120 && adjustedBearing <= 240) {
+                return `↑${id}`;
+              }
+              if (adjustedBearing > 240 && adjustedBearing < 300) {
+                return `→${id}`;
+              }
+              return `↓${id}`;
+            }
+
+            // Uptown only
+            if (!stations[key].southStops.has(routeId)) {
+              if (adjustedBearing > 60 && adjustedBearing < 120) {
+                return `→${id}`;
+              }
+              if (adjustedBearing >= 120 && adjustedBearing <= 240) {
+                return `↓${id}`;
+              }
+              if (adjustedBearing > 240 && adjustedBearing < 300) {
+                return `←${id}`;
+              }
+              return `↑${id}`;
+            }
+            return id;
           }).join(", ")}`;
         }
 
@@ -1753,7 +1788,7 @@ class Mapbox extends React.Component {
       this.map.easeTo({
         center: coords,
         zoom: zoom,
-        bearing: 29,
+        bearing: MANHATTAN_TILT,
       });
     } else {
       const source = this.map.getSource(`${train}-train`);
@@ -1775,7 +1810,7 @@ class Mapbox extends React.Component {
               left: (width >= Responsive.onlyTablet.minWidth) ? 450 : 30,
               bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : -150,
             },
-            bearing: 29,
+            bearing: MANHATTAN_TILT,
           });
         }
       }
@@ -1799,7 +1834,7 @@ class Mapbox extends React.Component {
             left: (width >= Responsive.onlyTablet.minWidth) ? 450 : 30,
             bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : -150,
           },
-          bearing: 29,
+          bearing: MANHATTAN_TILT,
         });
       }
     });
@@ -1906,7 +1941,7 @@ class Mapbox extends React.Component {
       this.map.easeTo({
         center: coords,
         zoom: 15,
-        bearing: 29,
+        bearing: MANHATTAN_TILT,
       });
     } else {
       const coordinatesArray = selectedStations.map((s) => [stations[s].longitude, stations[s].latitude]);
@@ -1921,7 +1956,7 @@ class Mapbox extends React.Component {
           left: (width >= Responsive.onlyTablet.minWidth) ? 450 : 30,
           bottom: (width >= Responsive.onlyTablet.minWidth) ? 20 : -150,
         },
-        bearing: 29,
+        bearing: MANHATTAN_TILT,
       });
     }
   }
@@ -1931,7 +1966,7 @@ class Mapbox extends React.Component {
       this.map.easeTo({
         center: coords,
         zoom: zoom,
-        bearing: (bearing === undefined) ? 29 : bearing,
+        bearing: (bearing === undefined) ? MANHATTAN_TILT : bearing,
       });
     } else {
       if (navigator.geolocation) {
@@ -1939,20 +1974,20 @@ class Mapbox extends React.Component {
           this.map.easeTo({
             center: [e.coords.longitude, e.coords.latitude],
             zoom: 14,
-            bearing: 29,
+            bearing: MANHATTAN_TILT,
           })
         }, () => {
           this.map.easeTo({
             center: center,
             zoom: 14,
-            bearing: 29,
+            bearing: MANHATTAN_TILT,
           });
         });
       } else {
         this.map.easeTo({
           center: center,
           zoom: 14,
-          bearing: 29,
+          bearing: MANHATTAN_TILT,
         });
         this.geoControl.trigger();
       }
@@ -2134,7 +2169,7 @@ class Mapbox extends React.Component {
        this.map.easeTo({
           center: [e.coords.longitude, e.coords.latitude],
           zoom: 14,
-          bearing: 29,
+          bearing: MANHATTAN_TILT,
         })
         this.setState({ loading: false, loadingGeolocation: false });
       }, () => {
@@ -2142,7 +2177,7 @@ class Mapbox extends React.Component {
         this.map.easeTo({
           center: center,
           zoom: 14,
-          bearing: 29,
+          bearing: MANHATTAN_TILT,
         });
       });
       return;
@@ -2150,7 +2185,7 @@ class Mapbox extends React.Component {
     this.map.easeTo({
       center: center,
       zoom: 14,
-      bearing: 29,
+      bearing: MANHATTAN_TILT,
     });
   }
 
