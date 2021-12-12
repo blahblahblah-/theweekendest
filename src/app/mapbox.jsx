@@ -1476,8 +1476,7 @@ class Mapbox extends React.Component {
         let stationName = stations[key].name;
 
         if (this.selectedStations.length === 1 &&
-          (stations[this.selectedStations[0]].transfers.has(key) ||
-            stations[this.selectedStations[0]].transfers.size > 0 && this.selectedStations[0] === key)) {
+          (stations[this.selectedStations[0]].transfers.has(key) || this.selectedStations[0] === key)) {
           stationName = `${stations[key].name}\n${Array.from(stations[key].stops).map(routeId => {
             let id = routeId;
             let adjustedBearing = stations[key].bearing - MANHATTAN_TILT;
