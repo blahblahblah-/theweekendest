@@ -1486,6 +1486,8 @@ class Mapbox extends React.Component {
 
             if (['FS', 'GS', 'H'].includes(routeId)) {
               id = "S";
+            } else if (routeId === 'SI') {
+              id = "SIR";
             }
             // Downtown only
             if (!stations[key].northStops.has(routeId)) {
