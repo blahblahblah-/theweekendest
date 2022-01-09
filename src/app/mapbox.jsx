@@ -388,6 +388,7 @@ class Mapbox extends React.Component {
 
   renderLines() {
     const { trains, processedRoutings, offsets } = this.state;
+    let lastRouteLayerId;
 
     Object.keys(trains).forEach((key) => {
       if (!processedRoutings[key]) {
@@ -414,7 +415,9 @@ class Mapbox extends React.Component {
         "properties": {
           "color": route.color,
           "offset": offsets[key],
+          "text-offset": [offsets[key], 0],
           "opacity": this.selectedTrains.includes(key) ? 1 : 0.1,
+          "outline-opacity": this.selectedTrains.includes(key) ? .01 : 0,
         },
         "geometry": {
           "type": "MultiLineString",
@@ -428,6 +431,38 @@ class Mapbox extends React.Component {
         this.map.addSource(layerId, {
           "type": "geojson",
           "data": geojson
+        });
+      }
+
+      if (!this.map.getLayer(`TrainOutlines-${key}`)) {
+        this.map.addLayer({
+          'id': `TrainOutlines-${key}`,
+          'type': 'symbol',
+          'source': layerId,
+          'layout': {
+            'text-allow-overlap': true,
+            'text-field': '-',
+            'text-padding': 0,
+            'text-line-height': {
+              "stops": [[10, 1], [12.5, 8]]
+            },
+            'text-size': 1,
+            'symbol-placement': 'line',
+            'symbol-spacing': 10,
+            'symbol-sort-key': 1,
+          },
+          'paint': {
+            'text-color': '#aaaaaa',
+            'text-opacity': ['get','outline-opacity'],
+            'text-translate':  [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              8, ["literal", [offsets[key], 0]],
+              13, ["literal", [offsets[key] * 3, 0]],
+              14, ["literal", [offsets[key] * 5, 0]],
+            ],
+          },
         });
       }
 
@@ -463,6 +498,7 @@ class Mapbox extends React.Component {
         };
 
         this.map.addLayer(layer);
+        lastRouteLayerId = layerId;
         this.map.on('click', layerId, (e) => {
           if (this.showAll) {
             setTimeout(() => {
@@ -479,6 +515,14 @@ class Mapbox extends React.Component {
         }).bind(this));
       }
     });
+
+    if (lastRouteLayerId) {
+      Object.keys(trains).forEach((key) => {
+        const layerId = `TrainOutlines-${key}`;
+        this.map.moveLayer(layerId, lastRouteLayerId);
+      });
+    }
+
     this.renderOverlays();
     this.renderStops();
     this.renderTrainPositions();
@@ -667,9 +711,10 @@ class Mapbox extends React.Component {
         this.map.moveLayer("TrainStops")
       }
 
-      if (this.map.getLayer("TrainOutlines")) {
-        this.map.moveLayer("TrainOutlines")
-      }
+      Object.keys(trains).forEach((key) => {
+        const layerId = `TrainOutlines-${key}`;
+        this.map.moveLayer(layerId);
+      });
 
       if (this.map.getLayer("TrainPositions")) {
         this.map.moveLayer("TrainPositions")
@@ -965,9 +1010,10 @@ class Mapbox extends React.Component {
       this.map.moveLayer("TrainStops");
     }
 
-    if (this.map.getLayer("TrainOutlines")) {
-      this.map.moveLayer("TrainOutlines")
-    }
+    Object.keys(trains).forEach((key) => {
+      const layerId = `TrainOutlines-${key}`;
+      this.map.moveLayer(layerId);
+    });
 
     if (this.map.getLayer("TrainPositions")) {
       this.map.moveLayer("TrainPositions");
@@ -1078,50 +1124,7 @@ class Mapbox extends React.Component {
   }
 
   renderStops() {
-    if (this.map.getSource("TrainOutlines")) {
-      this.map.getSource("TrainOutlines").setData(this.lineOutlineGeoJson());
-    } else {
-      this.map.addSource("TrainOutlines", {
-        "type": "geojson",
-        "data": this.lineOutlineGeoJson()
-      });
-    }
-    if (!this.map.getLayer("TrainOutlines")) {
-      this.map.addLayer({
-        'id': 'TrainOutlines',
-        'type': 'symbol',
-        'source': 'TrainOutlines',
-        'layout': {
-          'text-field': '-',
-          'text-padding': 0,
-          'text-line-height': {
-            "stops": [[10, 1], [12.5, 8]]
-          },
-          'text-size': 1,
-          'symbol-placement': 'line',
-          'symbol-spacing': 10,
-          'symbol-sort-key': 1,
-          'text-offset': ['get', 'offset'],
-        },
-        'paint': {
-          'text-color': '#aaaaaa',
-          'text-opacity': 0.01,
-        },
-      });
-      this.map.on('click', "Stops", e => {
-        if (this.showAll || e.features[0].properties.opacity > 0.1) {
-          const path = `/stations/${e.features[0].properties.id}`;
-          this.debounceLayerNavigate(path);
-          e.originalEvent.stopPropagation();
-        }
-      });
-      this.map.on('mouseenter', 'Stops', (() => {
-        this.map.getCanvas().style.cursor = 'pointer';
-      }).bind(this));
-      this.map.on('mouseleave', 'Stops', (() => {
-        this.map.getCanvas().style.cursor = '';
-      }).bind(this));
-    }
+    const { trains } = this.state;
 
     if (this.map.getSource("Stops")) {
       this.map.getSource("Stops").setData(this.stopsGeoJson());
@@ -1203,7 +1206,7 @@ class Mapbox extends React.Component {
           ],
           "text-opacity": ['get', 'opacity'],
         },
-      }, "TrainOutlines");
+      });
       this.map.on('click', "Stops", e => {
         if (this.showAll || e.features[0].properties.opacity > 0.1) {
           const path = `/stations/${e.features[0].properties.id}`;
@@ -1219,7 +1222,10 @@ class Mapbox extends React.Component {
       }).bind(this));
     }
     this.renderLineStops();
-    this.map.moveLayer('TrainOutlines');
+    Object.keys(trains).forEach((key) => {
+      const layerId = `TrainOutlines-${key}`;
+      this.map.moveLayer(layerId);
+    });
   }
 
   renderLineStops() {
@@ -1271,7 +1277,7 @@ class Mapbox extends React.Component {
             14, ["get", "opacity"],
           ]
         }
-      }, "TrainOutlines");
+      });
       this.map.on('click', 'TrainStops', e => {
         if (this.showAll || e.features[0].properties.opacity > 0.1) {
           const path = `/stations/${e.features[0].properties.id}`;
@@ -1853,8 +1859,12 @@ class Mapbox extends React.Component {
     this.renderTrainPositions(callback);
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
+      const trainOutlineLayerId = `TrainOutlines-${t}`;
       if (this.map.getLayer(layerId)) {
         this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
+      }
+      if (this.map.getLayer(trainOutlineLayerId)) {
+        this.map.setLayoutProperty(trainOutlineLayerId, 'visibility', 'none');
       }
 
       Object.keys(statusColors).forEach((status) => {
@@ -1874,11 +1884,19 @@ class Mapbox extends React.Component {
     this.renderTrainPositions();
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
+      const trainOutlineLayerId = `TrainOutlines-${t}`;
       if (this.map.getLayer(layerId)) {
         if (t !== train) {
           this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
         } else {
           this.map.setPaintProperty(layerId, 'line-opacity', 1);
+        }
+      }
+      if (this.map.getLayer(trainOutlineLayerId)) {
+        if (t !== train) {
+          this.map.setLayoutProperty(trainOutlineLayerId, 'visibility', 'none');
+        } else {
+          this.map.setLayoutProperty(trainOutlineLayerId, 'visibility', 'visible');
         }
       }
 
@@ -1908,14 +1926,22 @@ class Mapbox extends React.Component {
     this.renderTrainPositions();
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
+      const trainOutlineLayerId = `TrainOutlines-${t}`;
       if (this.map.getLayer(layerId)) {
         if (includeTrains && stationsData.some((station) => station.stops.has(t))) {
           this.map.setPaintProperty(layerId, 'line-opacity', 1);
         } else if (selectedStations.length === 1 && Array.from(stations[selectedStations[0]].transfers).some(stationId => stations[stationId].stops.has(t))) {
-          console.log(t);
           this.map.setPaintProperty(layerId, 'line-opacity', 0.5);
         } else {
           this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
+        }
+      }
+
+      if (this.map.getLayer(trainOutlineLayerId)) {
+        if ((includeTrains && stationsData.some((station) => station.stops.has(t))) || (selectedStations.length === 1 && Array.from(stations[selectedStations[0]].transfers).some(stationId => stations[stationId].stops.has(t)))) {
+          this.map.setLayoutProperty(trainOutlineLayerId, 'visibility', 'visible');
+        } else {
+          this.map.setLayoutProperty(trainOutlineLayerId, 'visibility', 'none');
         }
       }
 
@@ -2000,8 +2026,13 @@ class Mapbox extends React.Component {
 
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
+      const trainOutlineLayerId = `TrainOutlines-${t}`;
       if (this.map.getLayer(layerId)) {
         this.map.setPaintProperty(layerId, 'line-opacity', 1);
+      }
+
+      if (this.map.getLayer(trainOutlineLayerId)) {
+        this.map.setLayoutProperty(trainOutlineLayerId, 'visibility', 'visible');
       }
 
       Object.keys(statusColors).forEach((status) => {
