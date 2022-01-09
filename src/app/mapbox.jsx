@@ -2255,12 +2255,12 @@ class Mapbox extends React.Component {
     return (
       <div>
         <Helmet>
-          <title>The Weekendest beta - Real-Time New York City Subway Map</title>
+          <title>The Weekendest - Real-Time New York City Subway Map</title>
           <meta property="og:url" content="https://www.theweekendest.com" />
           <meta name="twitter:url" content="https://www.theweekendest.com" />
           <link rel="canonical" href="https://www.theweekendest.com" />
-          <meta property="og:title" content="The Weekendest beta - Real-Time New York City Subway Map" />
-          <meta name="twitter:title" content="The Weekendest beta - Real-Time New York City Subway Map" />
+          <meta property="og:title" content="The Weekendest - Real-Time New York City Subway Map" />
+          <meta name="twitter:title" content="The Weekendest - Real-Time New York City Subway Map" />
           <meta name="Description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
           <meta property="og:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
           <meta name="twitter:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
@@ -2342,7 +2342,7 @@ class Mapbox extends React.Component {
             <div className='yellow-bar'></div>
             <Header inverted as='h3' className='site-name' style={{float: "left", marginBottom: '2px'}}>
               <Link to='/'>
-                The Weekendest<span id="alpha">beta</span>
+                The Weekendest
               </Link>
               <Header.Subheader>
                 Real-Time NYC Subway Map
@@ -2356,7 +2356,7 @@ class Mapbox extends React.Component {
             <div className='yellow-bar'></div>
             <Header inverted as='h1' className='site-name' style={{float: 'left'}}>
               <Link to='/'>
-                The Weekendest<span id="alpha">beta</span>
+                The Weekendest
               </Link>
               <Header.Subheader>
                 Real-Time New York City Subway Map
