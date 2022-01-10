@@ -2309,7 +2309,7 @@ class Mapbox extends React.Component {
           }
           <Responsive {...Responsive.onlyMobile} as='div'>
             <div className='yellow-bar'></div>
-            <Header inverted as='h3' className='site-name' style={{float: "left", marginBottom: '2px'}}>
+            <Header inverted as='h3' className='site-name'>
               <Link to='/'>
                 The Weekendest
               </Link>

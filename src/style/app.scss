@@ -32,7 +32,9 @@ h1.yellow a, h3.yellow a {
 
 .ui.header.site-name {
   margin-top: 0;
+  margin-bottom: 0.3em;
   padding: 0;
+  float: left;
 
   a {
     color: white;
@@ -272,7 +274,7 @@ h1.yellow a, h3.yellow a {
 
 .mobile-pane-control {
   position: absolute;
-  top: 58px;
+  top: 60px;
   left: 240px;
   z-index: 1;
 }
