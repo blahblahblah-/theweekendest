@@ -150,6 +150,7 @@ class StationDetails extends React.Component {
         time: trip.is_delayed ? Math.max((trip.stops[station.id] - currentTime), 60) : (trip.stops[station.id]  - currentTime),
         destination: destination,
         delayed: trip.is_delayed,
+        assigned: trip.is_assigned,
         scheduleDiscrepancy: trip.schedule_discrepancy,
       }
     }).sort((a, b) => a.time - b.time).filter((tripData) => tripData.time >= -59).slice(0, 2);
@@ -161,7 +162,14 @@ class StationDetails extends React.Component {
     return times.map((estimate) => {
       const runDestination = stations[estimate.destination].name.replace(/ - /g, "–");
       const roundedTime = Math.round(estimate.time / 60);
-      let timeText = estimate.time <= 60 ? "Due" : `${roundedTime} min`;
+      let timeText;
+
+      if (estimate.assigned) {
+        timeText = estimate.time <= 60 ? "Due" : `${roundedTime} min`;
+      } else {
+        timeText = estimate.time <= 60 ? "~0" : `~${roundedTime} min`;
+      }
+
       if (estimate.delayed) {
         timeText = 'Delayed';
       } else if (estimate.scheduleDiscrepancy < -120 && timeText !== "Due") {
@@ -172,14 +180,14 @@ class StationDetails extends React.Component {
         const runDestinationShort = this.shortenStationName(runDestination);
         return (
           <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}
-            className='station-details-train-arrival-estimation'>
+            className={'station-details-train-arrival-estimation ' + (estimate.assigned ? '' : 'unassigned')}>
             {timeText} ({runDestinationShort})
           </Link>
         );
       }
       return (
         <Link to={`/trains/${trainId}/${estimate.id.replace('..', '-')}`} key={estimate.id} title={`${trainId} Train ID: ${estimate.id} to ${runDestination}`}
-          className='station-details-train-arrival-estimation'>
+          className={'station-details-train-arrival-estimation ' + (estimate.assigned ? '' : 'unassigned')}>
           {timeText}
         </Link>);
     }).reduce((prev, curr) => [prev, ', ', curr]);

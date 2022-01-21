@@ -342,6 +342,10 @@ h1.yellow a, h3.yellow a {
 
 .station-details-train-arrival-estimation {
   white-space: nowrap;
+
+  &.unassigned {
+    font-style: italic;
+  }
 }
 
 .header-secondary-name {
