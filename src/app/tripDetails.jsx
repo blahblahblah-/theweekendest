@@ -185,6 +185,7 @@ class TripDetails extends React.Component {
                   { stations[destination].name.replace(/ - /g, "–") }
                 </Link>
               }<br />
+              { trip.is_assigned ? "Train assigned to trip" : "Train not yet assigned to trip"}<br />
               { scheduleDiscrepancyText }
               {
                 delayed &&
