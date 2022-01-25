@@ -95,7 +95,7 @@ h1.yellow a, h3.yellow a {
   }
 
   .details-body {
-    padding: 0 14px 14px 14px;
+    padding: 0 1em 1em 1em;
 
     .ui.raised.segment {
       .ui.yellow.top.attached.label {
@@ -323,7 +323,7 @@ h1.yellow a, h3.yellow a {
 
 .mobile-goodservice {
   text-align: right;
-  margin: 0 0.5em 0.5em 0;
+  margin: 0 14px 7px 0;
   line-height: 1.5em;
 }
 
@@ -553,6 +553,7 @@ h4.ui.top.attached.header.advisories-header {
         }
       }
     }
+    margin-right: 1em;
   }
 }
 
@@ -574,4 +575,13 @@ h4.ui.top.attached.header.advisories-header {
       margin: 0 .5em;
     }
   }
+
+  .train-map-stop {
+    margin-right: 1em;
+  }
+}
+
+.ui.button.icon.right {
+  float: right;
+  margin-right: 0;
 }

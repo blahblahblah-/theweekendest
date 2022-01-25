@@ -94,7 +94,7 @@ class TripDetails extends React.Component {
               <Icon name='external share' />
             </Button>
           }
-          <Clipboard component={Button} style={{float: "right"}} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${train.id}/${trip.id.replace('..', '-')}`}>
+          <Clipboard component={Button} className="icon right" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${train.id}/${trip.id.replace('..', '-')}`}>
             <Icon name='linkify' />
           </Clipboard>
           <div className="train-details-header">
@@ -119,7 +119,9 @@ class TripDetails extends React.Component {
                     { stations[destination].name.replace(/ - /g, "–") }
                   </Link>
                 }<br />
-                { trip.is_assigned ? "Train assigned to trip" : "Train not yet assigned to trip"}<br />
+                { !trip.is_assigned &&
+                  <>Train not yet assigned to trip<br /></>
+                }
                 { scheduleDiscrepancyText }
                 {
                   delayed &&

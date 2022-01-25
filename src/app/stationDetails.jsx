@@ -501,7 +501,7 @@ class StationDetails extends React.Component {
               <Icon name='external share' />
             </Button>
           }
-          <Clipboard component={Button} style={{float: "right"}} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/stations/${this.props.station.id}`}>
+          <Clipboard component={Button} className="icon right" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/stations/${this.props.station.id}`}>
             <Icon name='linkify' />
           </Clipboard>
           <Header as="h3" className='header-station-name'>
