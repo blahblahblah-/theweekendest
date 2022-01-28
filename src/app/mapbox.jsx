@@ -544,7 +544,9 @@ class Mapbox extends React.Component {
           "text-rotate": ['get', 'text-rotate']
         },
         "paint": {
-          "text-color": ['get', 'text-color']
+          "text-color": ['get', 'text-color'],
+          "text-halo-color": "#666666",
+          "text-halo-width": ['get', 'halo-width'],
         },
         "filter": ['get', 'visibility']
       });
@@ -833,10 +835,11 @@ class Mapbox extends React.Component {
           "color": trains[pos.route].color,
           "icon": pos.routeName.endsWith('X') ? `train-pos-x-${trains[pos.route].color.slice(1).toLowerCase()}` : `train-pos-${trains[pos.route].color.slice(1).toLowerCase()}`,
           "text-color": textColor,
+          "halo-width": (pos.delayed) ? 1 : 0,
           "bearing": bearing,
           "text-rotate": textRotate,
           "offset": [Math.sin(bearingInRads) * -0.3, Math.cos(bearingInRads) * 0.3],
-          "visibility": visibility
+          "visibility": visibility,
         }
 
         return feature;
