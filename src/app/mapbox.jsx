@@ -771,6 +771,7 @@ class Mapbox extends React.Component {
             routeName: trains[routeId].name,
             id: arr.id,
             direction: direction,
+            delayed: arr.is_delayed,
             prev: prev,
             next: next
           });
@@ -807,6 +808,10 @@ class Mapbox extends React.Component {
           turf.helpers.point(feature.geometry.coordinates), turf.helpers.point(pointAhead.geometry.coordinates)
         );
         const bearingInRads = (bearing - this.map.getBearing()) * (Math.PI / 180);
+        let textColor = trains[pos.route].color.toLowerCase() === '#fbbd08' ? '#000000' : '#ffffff';
+        if (pos.delayed) {
+          textColor = '#ff0000';
+        }
         let visibility = false;
 
         if ((this.selectedTrip && this.selectedTrip.id === pos.id) || this.selectedTrains.includes(pos.route)) {
@@ -827,7 +832,7 @@ class Mapbox extends React.Component {
           "direction": pos.direction,
           "color": trains[pos.route].color,
           "icon": pos.routeName.endsWith('X') ? `train-pos-x-${trains[pos.route].color.slice(1).toLowerCase()}` : `train-pos-${trains[pos.route].color.slice(1).toLowerCase()}`,
-          "text-color": trains[pos.route].color.toLowerCase() === '#fbbd08' ? '#000000' : '#ffffff',
+          "text-color": textColor,
           "bearing": bearing,
           "text-rotate": textRotate,
           "offset": [Math.sin(bearingInRads) * -0.3, Math.cos(bearingInRads) * 0.3],
