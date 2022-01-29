@@ -520,6 +520,7 @@ class Mapbox extends React.Component {
     }
 
     if (!this.map.getLayer("TrainPositions")) {
+      let blink = false;
       this.map.addLayer({
         "id": "TrainPositions",
         "type": "symbol",
@@ -545,11 +546,19 @@ class Mapbox extends React.Component {
         },
         "paint": {
           "text-color": ['get', 'text-color'],
+          "text-color-transition": {
+            "duration": 500,
+          },
           "text-halo-color": "#666666",
           "text-halo-width": ['get', 'halo-width'],
         },
         "filter": ['get', 'visibility']
       });
+
+      setInterval(() => {
+        this.map.setPaintProperty('TrainPositions', "text-color", blink ? ['get', 'alternate-text-color'] : ['get', 'text-color']);
+        blink = !blink;
+      }, 1000);
 
       this.map.on('click', "TrainPositions", e => {
         const path = `/trains/${e.features[0].properties.routeId}/${e.features[0].properties.tripId.replace("..", "-")}`;
@@ -810,10 +819,7 @@ class Mapbox extends React.Component {
           turf.helpers.point(feature.geometry.coordinates), turf.helpers.point(pointAhead.geometry.coordinates)
         );
         const bearingInRads = (bearing - this.map.getBearing()) * (Math.PI / 180);
-        let textColor = trains[pos.route].color.toLowerCase() === '#fbbd08' ? '#000000' : '#ffffff';
-        if (pos.delayed) {
-          textColor = '#ff0000';
-        }
+        const textColor = trains[pos.route].color.toLowerCase() === '#fbbd08' ? '#000000' : '#ffffff';
         let visibility = false;
 
         if ((this.selectedTrip && this.selectedTrip.id === pos.id) || this.selectedTrains.includes(pos.route)) {
@@ -835,6 +841,7 @@ class Mapbox extends React.Component {
           "color": trains[pos.route].color,
           "icon": pos.routeName.endsWith('X') ? `train-pos-x-${trains[pos.route].color.slice(1).toLowerCase()}` : `train-pos-${trains[pos.route].color.slice(1).toLowerCase()}`,
           "text-color": textColor,
+          "alternate-text-color": (pos.delayed) ? '#ff0000' : textColor,
           "halo-width": (pos.delayed) ? 1 : 0,
           "bearing": bearing,
           "text-rotate": textRotate,
