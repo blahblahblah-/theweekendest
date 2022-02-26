@@ -381,7 +381,7 @@ class Mapbox extends React.Component {
   shouldReverseDirection(fromRouteId, toRouteId, stationId) {
     return Object.keys(STATIONS_TO_FLIP_DIRECTIONS).some((targetStation) => {
       const triggerStation = STATIONS_TO_FLIP_DIRECTIONS[targetStation];
-      return stationId === targetStation && stations[triggerStation].stops.has(fromRouteId) !== stations[triggerStation].stops.has(toRouteId);
+      return (stationId === targetStation && stations[triggerStation].stops.has(fromRouteId) !== stations[triggerStation].stops.has(toRouteId)) || fromRouteId === 'M' && M_TRAIN_SHUFFLE.includes(stationId);
     })
     return false;
   }
@@ -1341,7 +1341,7 @@ class Mapbox extends React.Component {
               priority = (routing[routing.length - 1] === key ? 1 : 5);
               stopType = this.selectedTrip.direction === 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
 
-              if (this.selectedTrip.train === 'M' && M_TRAIN_SHUFFLE.includes(key) || this.shouldReverseDirection(this.selectedTrip.train, null, key)) {
+              if (this.shouldReverseDirection(this.selectedTrip.train, null, key)) {
                 stopType = this.selectedTrip.direction !== 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
               }
 
@@ -1605,8 +1605,7 @@ class Mapbox extends React.Component {
 
     return trainStations.filter((stopId) => stations[stopId]).map((stopId) => {
       const bearing = stations[stopId].bearing || this.map.getBearing();
-      const flip = (STATIONS_TO_FLIP_DIRECTIONS[stopId] && stations[STATIONS_TO_FLIP_DIRECTIONS[stopId]].stops.has(trainId)) ||
-        trainId === 'M' && M_TRAIN_SHUFFLE.includes(stopId);
+      const flip = this.shouldReverseDirection(trainId, null, stopId);
       let stopTypeIcon = 'express-stop';
       let opacity = 1;
       let stopOffset = offset * 5;
