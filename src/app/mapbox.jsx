@@ -7,6 +7,7 @@ import { Helmet } from "react-helmet";
 import { debounce, filter, map } from 'lodash';
 import * as Cookies from 'es-cookie';
 import * as turf from './vendor/turf.js';
+import KofiButton from "kofi-button"
 
 import LegendModal from './legendModal.jsx';
 import OverlayControls from './overlayControls.jsx';
@@ -1926,7 +1927,6 @@ class Mapbox extends React.Component {
         if (includeTrains && stationsData.some((station) => station.stops.has(t))) {
           this.map.setPaintProperty(layerId, 'line-opacity', 1);
         } else if (selectedStations.length === 1 && Array.from(stations[selectedStations[0]].transfers).some(stationId => stations[stationId].stops.has(t))) {
-          console.log(t);
           this.map.setPaintProperty(layerId, 'line-opacity', 0.5);
         } else {
           this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
@@ -2465,6 +2465,7 @@ class Mapbox extends React.Component {
               Powered by <a href='https://www.goodservice.io' target='_blank'>goodservice.io</a>.<br />
               Created by <a href='https://sunny.ng' target='_blank'>Sunny Ng</a>.<br />
               <a href='https://github.com/blahblahblah-/theweekendest' target='_blank'>Source code</a>.
+              <KofiButton color="#29abe0" title="Support Me on Ko-fi" kofiID="sunnyng" />
             </Header>
             </div>
         </Segment>
