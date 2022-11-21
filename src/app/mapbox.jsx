@@ -725,43 +725,15 @@ class Mapbox extends React.Component {
           let nextStationEstimatedTime;
           const sortedStops = Object.keys(arr.stops).sort((a, b) => arr.stops[a] - arr.stops[b]);
 
-          if (arr.is_delayed) {
-            previousStation = arr.last_stop_made;
-            const previousStationIndex = previousStation && sortedStops.indexOf(previousStation);
-            nextStation = previousStation && sortedStops[previousStationIndex + 1];
+          previousStation = arr.last_stop_made;
+          const previousStationIndex = previousStation && sortedStops.indexOf(previousStation);
+          nextStation = previousStation && sortedStops[previousStationIndex + 1];
 
-            if (!nextStation || !previousStation) {
-              return;
-            }
-            previousStationEstimatedTime = arr.stops[previousStation];
-            nextStationEstimatedTime = Math.max(arr.stops[nextStation], currentTime + 60);
-
-          } else {
-            nextStation = sortedStops.find((key) => arr.stops[key] > currentTime && stations[key]);
-            nextStationEstimatedTime = arr.stops[nextStation];
-
-            const precedingStations = sortedStops.slice(0, sortedStops.indexOf(nextStation)).reverse();
-            previousStation = precedingStations.find((key) => arr.stops[key] <= currentTime && stations[key]);
-            previousStationEstimatedTime = arr.stops[previousStation];
-
-            if (!previousStation) {
-              const nextId = nextStation;
-              if (fullRoutings.some((r) => r[0] === nextId)) {
-                return;
-              }
-
-              const matchedRouting = fullRoutings.find((r) => r.includes(nextId))
-              if (!matchedRouting) {
-                return;
-              }
-
-              const precedingStops = matchedRouting.slice(0, matchedRouting.indexOf(nextId)).reverse();
-              previousStation = precedingStops.find((stop) => stations[stop]);
-              let timeDiff = (nextStationEstimatedTime - currentTime) * 2;
-              timeDiff = (timeDiff < 420) ? 420 : timeDiff;
-              previousStationEstimatedTime = nextStationEstimatedTime - timeDiff;
-            }
+          if (!nextStation || !previousStation) {
+            return;
           }
+          previousStationEstimatedTime = arr.stops[previousStation];
+          nextStationEstimatedTime = Math.max(arr.stops[nextStation], currentTime + 60);
 
           if (!nextStation || !previousStation) {
             return;
