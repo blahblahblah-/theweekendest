@@ -88,7 +88,7 @@ class StationDetails extends React.Component {
     const { station } = this.props;
     const name = `${ station.name.replace(/ - /g, "–") }${ station.secondary_name ? ` (${station.secondary_name})` : ""}`;
     navigator.share({
-      title: `The Weekendest beta - ${name} Station`,
+      title: `The Weekendest - ${name} Station`,
       url: `https://www.theweekendest.com/stations/${station.id}`
     });
   }
@@ -466,7 +466,7 @@ class StationDetails extends React.Component {
     const { stations, station, trains, accessibleStations, elevatorOutages } = this.props;
     const { fav } = this.state;
     const name = `${ station.name.replace(/ - /g, "–") }${ station.secondary_name ? ` (${station.secondary_name})` : ""}`;
-    const title = `The Weekendest beta - ${name} Station`;
+    const title = `The Weekendest - ${name} Station`;
     return (
       <Segment className='details-pane'>
         <Helmet>

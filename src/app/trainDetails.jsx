@@ -125,7 +125,7 @@ class TrainDetails extends React.Component {
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
 
     navigator.share({
-      title: `The Weekendest beta - ${name} Train`,
+      title: `The Weekendest - ${name} Train`,
       url: `https://www.theweekendest.com/trains/${train.id}`
     });
   }
@@ -156,7 +156,7 @@ class TrainDetails extends React.Component {
   render() {
     const { routing, stops, train, trains, stations, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
-    const title = `The Weekendest beta - ${name} Train`;
+    const title = `The Weekendest - ${name} Train`;
     return (
       <Segment className="details-pane">
         <Helmet>

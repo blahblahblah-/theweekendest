@@ -42,7 +42,7 @@ class TripDetails extends React.Component {
     const { trip, train } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     navigator.share({
-      title: `The Weekendest beta - ${name} Train - Trip ${trip.id}`,
+      title: `The Weekendest - ${name} Train - Trip ${trip.id}`,
       url: `https://www.theweekendest.com/trains/${train.id}/${trip.id}`
     });
   }
@@ -55,7 +55,7 @@ class TripDetails extends React.Component {
   render() {
     const { trip, stops, train, trains, stations, direction, accessibleStations, elevatorOutages } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
-    const title = `The Weekendest beta - ${name} Train - Trip ${trip.id}`;
+    const title = `The Weekendest - ${name} Train - Trip ${trip.id}`;
     const destination = Object.keys(trip.stops).sort((a, b) => trip.stops[b] - trip.stops[a])[0];
     const scheduleDiscrepancy = Math.round(trip.schedule_discrepancy / 60);
     const scheduleDiscrepancyText = scheduleDiscrepancy > 0 ? `${scheduleDiscrepancy} min behind schedule` : `${Math.abs(scheduleDiscrepancy)} min ahead of schedule`;
