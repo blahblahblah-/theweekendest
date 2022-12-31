@@ -14,7 +14,10 @@ import TrainBullet from './trainBullet.jsx';
 import Cross from "./icons/cross-15.svg";
 
 // M train directions are reversed between Essex St and Myrtle Av to match with J/Z trains
-const M_TRAIN_SHUFFLE = ["M21", "M20", "M19", "M18", "M16", "M14", "M13", "M12", "M11"];
+const M_TRAIN_SHUFFLE = ["M21", "M20", "M19", "M18", "M16", "M14", "M13", "M12", "M11"]
+
+// G trains at Hoyt–Schermerhorn Sts have directions reversed to match platform assignments with A/C trains
+const HOYT_SCHERMERHORN_STOP = "A42"
 
 const STATIONS_EXEMPT_FROM_UPTOWN_DOWNTOWN_DIRECTIONS = new Set(
   ['901', '902', '723', '724', '725', '726', 'L06', 'L05', 'L03', 'L02', 'L01']
@@ -124,7 +127,7 @@ class StationDetails extends React.Component {
     const currentTime = Date.now() / 1000;
     let actualDirection = direction;
 
-    if (trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id)) {
+    if (trainId === 'M' && M_TRAIN_SHUFFLE.includes(station.id) || trainId === 'G' && HOYT_SCHERMERHORN_STOP === station.id) {
       actualDirection = direction === "north" ? "south" : "north";
     }
 
@@ -172,9 +175,6 @@ class StationDetails extends React.Component {
 
       if (estimate.delayed) {
         timeText = 'Delayed';
-      } else if (estimate.scheduleDiscrepancy < -120 && timeText !== "Due") {
-        const upperbound = Math.round((estimate.time - estimate.scheduleDiscrepancy) / 60);
-        timeText = `${roundedTime} - ${upperbound} min`;
       }
       if (destinationsArray.length > 1 || estimate.destination !== destinationsArray[0]) {
         const runDestinationShort = this.shortenStationName(runDestination);
@@ -198,7 +198,7 @@ class StationDetails extends React.Component {
     let destinations = [];
     Object.keys(trains).forEach((key) => {
       const train = trains[key];
-      if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
+      if (!['M', 'G'].includes(key) || !M_TRAIN_SHUFFLE.concat(HOYT_SCHERMERHORN_STOP).includes(station.id)) {
         train.actual_routings?.south?.forEach((routing) => {
           if (routing.includes(station.id)) {
             destinations.push(routing[routing.length - 1]);
@@ -209,6 +209,15 @@ class StationDetails extends React.Component {
 
     if (M_TRAIN_SHUFFLE.includes(station.id)) {
       const train = trains["M"];
+      train.actual_routings?.north?.forEach((routing) => {
+        if (routing.includes(station.id)) {
+          destinations.push(routing[routing.length - 1]);
+        }
+      })
+    }
+
+    if (HOYT_SCHERMERHORN_STOP === station.id) {
+      const train = trains["G"];
       train.actual_routings?.north?.forEach((routing) => {
         if (routing.includes(station.id)) {
           destinations.push(routing[routing.length - 1]);
@@ -231,7 +240,7 @@ class StationDetails extends React.Component {
     let adjacentBoroughs = new Set();
     Object.keys(trains).forEach((key) => {
       const train = trains[key];
-      if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
+      if (!['M', 'G'].includes(key) || !M_TRAIN_SHUFFLE.concat(HOYT_SCHERMERHORN_STOP).includes(station.id)) {
         train.actual_routings?.south?.forEach((routing) => {
           if (routing.includes(station.id)) {
             routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
@@ -253,6 +262,20 @@ class StationDetails extends React.Component {
 
     if (M_TRAIN_SHUFFLE.includes(station.id)) {
       const train = trains["M"];
+      train.actual_routings?.north?.forEach((routing) => {
+        if (routing.includes(station.id)) {
+          routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
+            const s = stations[stationId];
+            if (s.borough !== currentBorough) {
+              adjacentBoroughs.add(s.borough);
+            }
+          });
+        }
+      })
+    }
+
+    if (HOYT_SCHERMERHORN_STOP === station.id) {
+      const train = trains["G"];
       train.actual_routings?.north?.forEach((routing) => {
         if (routing.includes(station.id)) {
           routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
@@ -300,7 +323,7 @@ class StationDetails extends React.Component {
     let destinations = [];
     Object.keys(trains).forEach((key) => {
       const train = trains[key];
-      if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
+      if (!['M', 'G'].includes(key) || !M_TRAIN_SHUFFLE.concat(HOYT_SCHERMERHORN_STOP).includes(station.id)) {
         train.actual_routings?.north?.forEach((routing) => {
           if (routing.includes(station.id)) {
             destinations.push(routing[routing.length - 1]);
@@ -318,6 +341,15 @@ class StationDetails extends React.Component {
       })
     }
 
+    if (HOYT_SCHERMERHORN_STOP === station.id) {
+      const train = trains["G"];
+      train.actual_routings?.south?.forEach((routing) => {
+        if (routing.includes(station.id)) {
+          destinations.push(routing[routing.length - 1]);
+        }
+      })
+    }
+
     return this.sortDestinations(destinations, link);
   }
 
@@ -328,7 +360,7 @@ class StationDetails extends React.Component {
     let adjacentBoroughs = new Set();
     Object.keys(trains).forEach((key) => {
       const train = trains[key];
-      if (key !== 'M' || !M_TRAIN_SHUFFLE.includes(station.id)) {
+      if (!['M', 'G'].includes(key) || !M_TRAIN_SHUFFLE.concat(HOYT_SCHERMERHORN_STOP).includes(station.id)) {
         train.actual_routings?.north?.forEach((routing) => {
           if (routing.includes(station.id)) {
             routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
@@ -350,6 +382,20 @@ class StationDetails extends React.Component {
 
     if (M_TRAIN_SHUFFLE.includes(station.id)) {
       const train = trains["M"];
+      train.actual_routings?.south?.forEach((routing) => {
+        if (routing.includes(station.id)) {
+          routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
+            const s = stations[stationId];
+            if (s.borough !== currentBorough) {
+              adjacentBoroughs.add(s.borough);
+            }
+          });
+        }
+      })
+    }
+
+    if (HOYT_SCHERMERHORN_STOP === station.id) {
+      const train = trains["G"];
       train.actual_routings?.south?.forEach((routing) => {
         if (routing.includes(station.id)) {
           routing.slice(routing.indexOf(station.id) + 1).forEach((stationId) => {
