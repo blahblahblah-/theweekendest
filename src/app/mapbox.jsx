@@ -1262,7 +1262,7 @@ class Mapbox extends React.Component {
             ["exponential", 2],
             ["zoom"],
             13, 0,
-            14, ["get", "opacity"],
+            13.5, ["get", "opacity"],
           ]
         }
       }, "TrainOutlines");
