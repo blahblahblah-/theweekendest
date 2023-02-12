@@ -415,7 +415,7 @@ class Mapbox extends React.Component {
         "properties": {
           "color": route.color,
           "offset": offsets[key],
-          "opacity": this.selectedTrains.includes(key) ? 1 : 0.1,
+          "opacity": this.selectedTrains.includes(key) ? 1 : 0.05,
         },
         "geometry": {
           "type": "MultiLineString",
@@ -798,6 +798,12 @@ class Mapbox extends React.Component {
         if ((this.selectedTrip && this.selectedTrip.id === pos.id) || this.selectedTrains.includes(pos.route)) {
           visibility = true;
         }
+        if (this.selectedTrains.length === 1) {
+          const additionalTrips = trains[this.selectedTrains[0]].additional_trips_on_shared_tracks || [];
+          if (additionalTrips.includes(pos.id)) {
+            visibility = true;
+          }
+        }
         let textRotate = 0;
 
         if (pos.routeName.endsWith('X')) {
@@ -884,7 +890,7 @@ class Mapbox extends React.Component {
             "type": "Feature",
             "properties": {
               "offset": offsets[key],
-              "opacity": this.selectedTrains.includes(key) ? 1 : 0.1
+              "opacity": this.selectedTrains.includes(key) ? 1 : 0.05
             },
             "geometry": {
               "type": "MultiLineString",
@@ -1097,7 +1103,7 @@ class Mapbox extends React.Component {
         },
       });
       this.map.on('click', "Stops", e => {
-        if (this.showAll || e.features[0].properties.opacity > 0.1) {
+        if (this.showAll || e.features[0].properties.opacity > 0.05) {
           const path = `/stations/${e.features[0].properties.id}`;
           this.debounceLayerNavigate(path);
           e.originalEvent.stopPropagation();
@@ -1193,7 +1199,7 @@ class Mapbox extends React.Component {
         },
       }, "TrainOutlines");
       this.map.on('click', "Stops", e => {
-        if (this.showAll || e.features[0].properties.opacity > 0.1) {
+        if (this.showAll || e.features[0].properties.opacity > 0.05) {
           const path = `/stations/${e.features[0].properties.id}`;
           this.debounceLayerNavigate(path);
           e.originalEvent.stopPropagation();
@@ -1261,7 +1267,7 @@ class Mapbox extends React.Component {
         }
       }, "TrainOutlines");
       this.map.on('click', 'TrainStops', e => {
-        if (this.showAll || e.features[0].properties.opacity > 0.1) {
+        if (this.showAll || e.features[0].properties.opacity > 0.05) {
           const path = `/stations/${e.features[0].properties.id}`;
           this.debounceLayerNavigate(path);
           e.originalEvent.stopPropagation();
@@ -1303,7 +1309,7 @@ class Mapbox extends React.Component {
             const transferStation = transferStations.includes(key) || [...stations[key].transfers].filter(s => stations[s].stops.size > 0).length > 0;
             let offset = offsets[this.selectedTrip.train];
             let bearing = stations[key].bearing;
-            let opacity = 0.1;
+            let opacity = 0.05;
             let priority = 10;
             let stopType = this.stopTypeIcon(key);
 
@@ -1391,7 +1397,7 @@ class Mapbox extends React.Component {
             !(this.showAll && stations[key].stops.size === 0) &&
             (this.selectedStations.length === 0 || (!this.selectedStations.includes(key)) && !this.selectedTrains.some((train) => stations[key].stops.has(train))))
           ) {
-          opacity = 0.1;
+          opacity = 0.05;
           priority = 10;
         } else if (this.selectedStations.length > 0 && !this.selectedStations.includes(key) ||
           (this.selectedStations.length === 1 && stations[this.selectedStations[0]].transfers.has(key))) {
@@ -1629,8 +1635,15 @@ class Mapbox extends React.Component {
         stopOffset *= -1;
       }
 
-      if ((!this.selectedTrains.includes(trainId) && !this.selectedTrip) || (this.selectedTrip && !tripRouting?.includes(stopId))) {
-        opacity = 0.1;
+      if (this.selectedTrains.length === 1 &&
+          this.selectedTrains.some((train) =>
+            trains[train].routes_with_shared_tracks && Object.keys(trains[train].routes_with_shared_tracks).some((direction) =>
+              trains[train].routes_with_shared_tracks[direction][stopId] && Object.keys(trains[train].routes_with_shared_tracks[direction][stopId]).includes(trainId)))) {
+        opacity = 1;
+      } else if (this.selectedTrains.length === 1 && this.selectedTrains.some((train) => trains[train].routes_with_shared_tracks_summary?.includes(trainId))) {
+        opacity = 0.25;
+      } else if ((!this.selectedTrains.includes(trainId) && !this.selectedTrip) || (this.selectedTrip && !tripRouting?.includes(stopId))) {
+        opacity = 0.05;
       }
 
       return {
@@ -1841,19 +1854,20 @@ class Mapbox extends React.Component {
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
-        this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
+        this.map.setPaintProperty(layerId, 'line-opacity', 0.05);
       }
 
       Object.keys(statusColors).forEach((status) => {
         const l = `${layerId}-${status}`;
         if (this.map.getLayer(l)) {
-          this.map.setPaintProperty(l, 'line-opacity', 0.1);
+          this.map.setPaintProperty(l, 'line-opacity', 0.05);
         }
       });
     });
   }
 
   selectTrain(train) {
+    const { trains } = this.state;
     this.selectedTrains = [train];
     this.selectedStations = [];
     this.selectedTrip = null;
@@ -1862,8 +1876,10 @@ class Mapbox extends React.Component {
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
-        if (t !== train) {
-          this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
+        if (trains[train].routes_with_shared_tracks_summary?.includes(t)) {
+          this.map.setPaintProperty(layerId, 'line-opacity', 0.3);
+        } else if (t !== train) {
+          this.map.setPaintProperty(layerId, 'line-opacity', 0.05);
         } else {
           this.map.setPaintProperty(layerId, 'line-opacity', 1);
         }
@@ -1872,8 +1888,10 @@ class Mapbox extends React.Component {
       Object.keys(statusColors).forEach((status) => {
         const l = `${layerId}-${status}`;
         if (this.map.getLayer(l)) {
-          if (t !== train) {
-            this.map.setPaintProperty(l, 'line-opacity', 0.1);
+          if (trains[train].routes_with_shared_tracks_summary?.includes(t)) {
+            this.map.setPaintProperty(layerId, 'line-opacity', 0.3);
+          } else if (t !== train) {
+            this.map.setPaintProperty(l, 'line-opacity', 0.05);
           } else {
             this.map.setPaintProperty(l, 'line-opacity', 1);
           }
@@ -1901,7 +1919,7 @@ class Mapbox extends React.Component {
         } else if (selectedStations.length === 1 && Array.from(stations[selectedStations[0]].transfers).some(stationId => stations[stationId].stops.has(t))) {
           this.map.setPaintProperty(layerId, 'line-opacity', 0.5);
         } else {
-          this.map.setPaintProperty(layerId, 'line-opacity', 0.1);
+          this.map.setPaintProperty(layerId, 'line-opacity', 0.05);
         }
       }
 
@@ -1909,7 +1927,7 @@ class Mapbox extends React.Component {
         const l = `${layerId}-${status}`;
         if (this.map.getLayer(l)) {
           if (!includeTrains || !stationsData.some((station) => station.stops.has(t))) {
-            this.map.setPaintProperty(l, 'line-opacity', 0.1);
+            this.map.setPaintProperty(l, 'line-opacity', 0.05);
           } else {
             this.map.setPaintProperty(l, 'line-opacity', 1);
           }
