@@ -136,18 +136,21 @@ class TrainDetails extends React.Component {
   }
 
   renderOverlayControls() {
-    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly,
+    const { displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly, displayAdditionalTrips,
       handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle, handleDisplayAccessibleOnlyToggle,
+      handleDisplayAdditionalTripsToggle,
       handleDisplayTrainPositionsToggle} = this.props;
     return (
       <Popup trigger={<Button icon='sliders horizontal' title="Configure overlays" />}
             on='click' hideOnScroll position='bottom center' style={{maxWidth: "195px"}}>
         <OverlayControls displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
             displayLongHeadways={displayLongHeadways} displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
+            displayAdditionalTrips={displayAdditionalTrips}
             handleDisplayProblemsToggle={handleDisplayProblemsToggle} handleDisplayAccessibleOnlyToggle={handleDisplayAccessibleOnlyToggle}
             handleDisplayDelaysToggle={handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={handleDisplaySlowSpeedsToggle}
             handleDisplayLongHeadwaysToggle={handleDisplayLongHeadwaysToggle}
             handleDisplayTrainPositionsToggle={handleDisplayTrainPositionsToggle}
+            handleDisplayAdditionalTripsToggle={handleDisplayAdditionalTripsToggle}
             alwaysExpand={true} />
       </Popup>
     )

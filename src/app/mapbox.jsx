@@ -71,6 +71,7 @@ class Mapbox extends React.Component {
       displaySlowSpeeds: false,
       displayLongHeadways: false,
       displayTrainPositions: true,
+      displayAdditionalTrips: true,
       loading: true,
       loadingGeolocation: false,
       processedRoutings: {},
@@ -767,7 +768,7 @@ class Mapbox extends React.Component {
   }
 
   trainPositionGeoJson(currentTime, trainPositions, callback) {
-    const { trains } = this.state;
+    const { trains, displayAdditionalTrips } = this.state;
     const trainPositionsObj = {};
 
     if (!trains) {
@@ -798,7 +799,7 @@ class Mapbox extends React.Component {
         if ((this.selectedTrip && this.selectedTrip.id === pos.id) || this.selectedTrains.includes(pos.route)) {
           visibility = true;
         }
-        if (this.selectedTrains.length === 1) {
+        if (displayAdditionalTrips && this.selectedTrains.length === 1) {
           const additionalTrips = trains[this.selectedTrains[0]].additional_trips_on_shared_tracks || [];
           if (additionalTrips.includes(pos.id)) {
             visibility = true;
@@ -1575,7 +1576,7 @@ class Mapbox extends React.Component {
   }
 
   lineStopsGeoJson(trainId) {
-    const { processedRoutings, trains, offsets, displayAccessibleOnly, accessibleStations, elevatorOutages } = this.state;
+    const { processedRoutings, trains, offsets, displayAccessibleOnly, accessibleStations, elevatorOutages, displayAdditionalTrips } = this.state;
     const trainStations = Array.from(new Set(processedRoutings[trainId].flat()));
     const offset = offsets[trainId];
     const isTripThisTrain = this.selectedTrip?.train === trainId;
@@ -1635,7 +1636,7 @@ class Mapbox extends React.Component {
         stopOffset *= -1;
       }
 
-      if (this.selectedTrains.length === 1 &&
+      if (displayAdditionalTrips && this.selectedTrains.length === 1 &&
           this.selectedTrains.some((train) =>
             trains[train].routes_with_shared_tracks && Object.keys(trains[train].routes_with_shared_tracks).some((direction) =>
               trains[train].routes_with_shared_tracks[direction][stopId] && Object.keys(trains[train].routes_with_shared_tracks[direction][stopId]).includes(trainId)))) {
@@ -1867,16 +1868,21 @@ class Mapbox extends React.Component {
   }
 
   selectTrain(train) {
-    const { trains } = this.state;
+    const { displayAdditionalTrips } = this.state;
     this.selectedTrains = [train];
     this.selectedStations = [];
     this.selectedTrip = null;
     this.renderStops();
-    this.renderTrainPositions();
+    this.renderSelectedTrain();
+  }
+
+  renderSelectedTrain() {
+    const { trains, displayAdditionalTrips } = this.state;
+    const train = this.selectedTrains[0];
     trainIds.forEach((t) => {
       const layerId = `${t}-train`;
       if (this.map.getLayer(layerId)) {
-        if (trains[train].routes_with_shared_tracks_summary?.includes(t)) {
+        if (displayAdditionalTrips && trains[train].routes_with_shared_tracks_summary?.includes(t)) {
           this.map.setPaintProperty(layerId, 'line-opacity', 0.3);
         } else if (t !== train) {
           this.map.setPaintProperty(layerId, 'line-opacity', 0.05);
@@ -1888,7 +1894,7 @@ class Mapbox extends React.Component {
       Object.keys(statusColors).forEach((status) => {
         const l = `${layerId}-${status}`;
         if (this.map.getLayer(l)) {
-          if (trains[train].routes_with_shared_tracks_summary?.includes(t)) {
+          if (displayAdditionalTrips && trains[train].routes_with_shared_tracks_summary?.includes(t)) {
             this.map.setPaintProperty(layerId, 'line-opacity', 0.3);
           } else if (t !== train) {
             this.map.setPaintProperty(l, 'line-opacity', 0.05);
@@ -1898,6 +1904,7 @@ class Mapbox extends React.Component {
         }
       });
     });
+    this.renderTrainPositions();
   }
 
   goToStations(selectedStations, includeTrains) {
@@ -2075,6 +2082,14 @@ class Mapbox extends React.Component {
     this.setState({displayTrainPositions: checked}, this.renderTrainPositions);
     gtag('event', 'toggle', {
       'event_category': 'displayTrainPositions',
+      'event_label': checked.toString()
+    });
+  }
+
+  handleDisplayAdditionalTripsToggle = (e, {checked}) => {
+    this.setState({displayAdditionalTrips: checked}, this.renderSelectedTrain);
+    gtag('event', 'toggle', {
+      'event_category': 'DisplayAdditionalTrips',
       'event_label': checked.toString()
     });
   }
@@ -2298,7 +2313,7 @@ class Mapbox extends React.Component {
 
   render() {
     const { loading, trains, stops, timestamp, blogPost, accessibleStations, elevatorOutages,
-      displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly } = this.state;
+      displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly, displayAdditionalTrips } = this.state;
     return (
       <Responsive as='div' fireOnMount onUpdate={this.handleOnUpdate}>
         <div ref={el => this.mapContainer = el} className='mapbox'>
@@ -2387,10 +2402,12 @@ class Mapbox extends React.Component {
                             train={trains[props.match.params.id]} trains={trains}
                             displayProblems={displayProblems} displayDelays={displayDelays} displaySlowSpeeds={displaySlowSpeeds}
                             displayTrainPositions={displayTrainPositions} displayAccessibleOnly={displayAccessibleOnly}
-                            displayLongHeadways={displayLongHeadways} handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
+                            displayLongHeadways={displayLongHeadways} displayAdditionalTrips={displayAdditionalTrips}
+                            handleDisplayProblemsToggle={this.handleDisplayProblemsToggle}
                             handleDisplayDelaysToggle={this.handleDisplayDelaysToggle} handleDisplaySlowSpeedsToggle={this.handleDisplaySlowSpeedsToggle}
                             handleDisplayLongHeadwaysToggle={this.handleDisplayLongHeadwaysToggle} handleDisplayAccessibleOnlyToggle={this.handleDisplayAccessibleOnlyToggle}
                             handleDisplayTrainPositionsToggle={this.handleDisplayTrainPositionsToggle}
+                            handleDisplayAdditionalTripsToggle={this.handleDisplayAdditionalTripsToggle}
                             handleResetMap={this.handleResetMap}
                             handleOnMount={this.handleMountTrainDetails} coords={coords} zoom={zoom} infoBox={this.infoBox}
                           />

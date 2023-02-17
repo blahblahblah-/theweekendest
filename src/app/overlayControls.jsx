@@ -5,9 +5,9 @@ import { List, Checkbox, Header, Icon } from "semantic-ui-react";
 class OverlayControls extends React.Component {
 
   render() {
-    const { alwaysExpand, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly,
+    const { alwaysExpand, displayProblems, displayDelays, displaySlowSpeeds, displayLongHeadways, displayTrainPositions, displayAccessibleOnly, displayAdditionalTrips,
       handleDisplayProblemsToggle, handleDisplayDelaysToggle, handleDisplaySlowSpeedsToggle, handleDisplayLongHeadwaysToggle, handleDisplayAccessibleOnlyToggle,
-      handleDisplayTrainPositionsToggle} = this.props;
+      handleDisplayAdditionalTripsToggle, handleDisplayTrainPositionsToggle} = this.props;
 
     return (
       <List className='overlay-controls'>
@@ -19,6 +19,11 @@ class OverlayControls extends React.Component {
             </label>
           } />
         </List.Item>
+        { handleDisplayAdditionalTripsToggle &&
+          <List.Item>
+            <Checkbox toggle onChange={handleDisplayAdditionalTripsToggle} checked={displayAdditionalTrips} label={<label title="Display other trains that share tracks.">Other Trains</label>} />
+          </List.Item>
+        }
         <List.Item>
           <Checkbox toggle onChange={handleDisplayTrainPositionsToggle} checked={displayTrainPositions} label={<label title="Train location estimations are calculated from estimated arrival times and may not be accurate.">Train Locations</label>} />
         </List.Item>
