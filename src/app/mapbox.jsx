@@ -1981,28 +1981,7 @@ class Mapbox extends React.Component {
         bearing: (bearing === undefined) ? MANHATTAN_TILT : bearing,
       });
     } else {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(e => {
-          this.map.easeTo({
-            center: [e.coords.longitude, e.coords.latitude],
-            zoom: 14,
-            bearing: MANHATTAN_TILT,
-          })
-        }, () => {
-          this.map.easeTo({
-            center: center,
-            zoom: 14,
-            bearing: MANHATTAN_TILT,
-          });
-        });
-      } else {
-        this.map.easeTo({
-          center: center,
-          zoom: 14,
-          bearing: MANHATTAN_TILT,
-        });
-        this.geoControl.trigger();
-      }
+      this.handleRealignMap();
     }
 
     this.selectedTrains = trainIds;
@@ -2186,12 +2165,21 @@ class Mapbox extends React.Component {
     if (navigator.geolocation) {
       this.setState({ loading: true, loadingGeolocation: true });
       navigator.geolocation.getCurrentPosition(e => {
-       this.map.easeTo({
-          center: [e.coords.longitude, e.coords.latitude],
-          zoom: 14,
-          bearing: MANHATTAN_TILT,
-        })
-        this.setState({ loading: false, loadingGeolocation: false });
+        if (e.coords.longitude >= defaultBounds[0][0] && e.coords.longitude <= defaultBounds[1][0] &&
+          e.coords.latitude >= defaultBounds[0][1] && e.coords.latitude <= defaultBounds[1][1]) {
+            this.map.easeTo({
+              center: [e.coords.longitude, e.coords.latitude],
+              zoom: 14,
+              bearing: MANHATTAN_TILT,
+            })
+        } else {
+          this.map.easeTo({
+            center: center,
+            zoom: 14,
+            bearing: MANHATTAN_TILT,
+          });
+         }
+         this.setState({ loading: false, loadingGeolocation: false });
       }, () => {
         this.setState({ loading: false, loadingGeolocation: false });
         this.map.easeTo({
