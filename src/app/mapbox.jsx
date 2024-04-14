@@ -25,8 +25,8 @@ const stations = {};
 const stationLocations = {};
 const center = [-73.98119, 40.75855]
 const defaultBounds = [
-  [-74.251961, 40.512764],
-  [-73.755405, 40.903125]
+  [-74.8113, 40.1797],
+  [-73.3584, 41.1247]
 ]
 const trainIds = [
   '2', '3', '1', '4', '5', '6', '6X', '7', '7X', 'A', 'AL', 'C', 'E', 'F', 'FX',
@@ -125,10 +125,7 @@ class Mapbox extends React.Component {
       minZoom: 9,
       zoom: 14,
       hash: false,
-      maxBounds: [
-        [-74.8113, 40.1797],
-        [-73.3584, 41.1247]
-      ],
+      maxBounds: defaultBounds,
       maxPitch: 0,
     });
 
@@ -604,7 +601,9 @@ class Mapbox extends React.Component {
       return;
     }
 
-    const tripRoute = Object.keys(tripData.stops).sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key);
+    const lastStop = tripData.last_stop_made;
+    const lastStopTime = lastStop ? tripData.stops[lastStop] : Date.now() / 1000;
+    const tripRoute = Object.keys(tripData.stops).filter((key) => tripData.stops[key] >= lastStopTime).sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key);
     const northboundRouting = (this.selectedTrip.direction === 'north') ? tripRoute : tripRoute.slice().reverse();
     const northboundCoordinatesArray = this.routingGeoJson(northboundRouting);
     const coords = (this.selectedTrip.direction === 'north') ? northboundCoordinatesArray : northboundCoordinatesArray.reverse();
@@ -1290,7 +1289,9 @@ class Mapbox extends React.Component {
       const tripData = trains[this.selectedTrip.train].trips[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
 
       if (tripData) {
-        const routing = Object.keys(tripData.stops).sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key);
+        const lastStop = tripData.last_stop_made;
+        const lastStopTime = lastStop ? tripData.stops[lastStop] : Date.now() / 1000;
+        const routing = Object.keys(tripData.stops).filter((key) => tripData.stops[key] >= lastStopTime).sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key);
         const northboundRouting = (this.selectedTrip.direction === 'north') ? routing : routing.slice().reverse();
         const northboundCoordinatesArray = this.routingGeoJson(northboundRouting);
         const coords = (this.selectedTrip.direction === 'north') ? northboundCoordinatesArray : northboundCoordinatesArray.reverse();
@@ -1378,7 +1379,6 @@ class Mapbox extends React.Component {
         }
       }
     }
-
     return {
       "type": "FeatureCollection",
       "features": Object.keys(stations).map((key) => {
@@ -1581,7 +1581,10 @@ class Mapbox extends React.Component {
     const offset = offsets[trainId];
     const isTripThisTrain = this.selectedTrip?.train === trainId;
     const tripData = isTripThisTrain && trains[this.selectedTrip.train].trips[this.selectedTrip.direction].find((t) => t.id === this.selectedTrip.id);
-    const tripRouting = isTripThisTrain ? Object.keys(tripData.stops).sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key) : null;
+    const lastStop = tripData?.last_stop_made;
+    const lastStopTime = lastStop ? tripData.stops[lastStop] : Date.now() / 1000;
+    const tripRouting = isTripThisTrain ? Object.keys(tripData.stops).filter((key) => tripData.stops[key] >= lastStopTime)
+      .sort((a, b) => tripData.stops[a] - tripData.stops[b]).map((key) => key) : null;
 
     return trainStations.filter((stopId) => stations[stopId]).map((stopId) => {
       const bearing = stations[stopId].bearing || this.map.getBearing();
