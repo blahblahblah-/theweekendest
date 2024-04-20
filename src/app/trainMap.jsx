@@ -45,6 +45,10 @@ class TrainMap extends React.Component {
       return b.length - a.length ;
     });
 
+    if (allRoutings.length < 1) {
+      return;
+    }
+
     const longestLine = [...allRoutings[0]];
 
     if (!longestLine) {
