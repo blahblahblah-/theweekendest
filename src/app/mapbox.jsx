@@ -1207,16 +1207,15 @@ class Mapbox extends React.Component {
             '#eeeeee',
           ],
           "icon-opacity": [
-            "interpolate",
-            ["exponential", 2],
+            "step",
             ["zoom"],
-            8, ["get", "opacity"],
-            13, ["get", "opacity"],
-            14, ['case',
+            ["get", "opacity"],
+            12,
+            ['case',
               ['==', ['get', 'stopType'], 'cross-15'],
               ["get", "opacity"],
               0
-            ]
+            ],
           ],
           "text-opacity": ['get', 'opacity'],
         },
@@ -1270,23 +1269,23 @@ class Mapbox extends React.Component {
         "id": 'TrainStops',
         "type": "symbol",
         "source": 'TrainStops',
-        "minzoom": 13,
+        "minzoom": 12,
         "layout": {
           "icon-image": ['get', 'stopType'],
-          "icon-size": 0.60,
+          "icon-size": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            12, 0.24,
+            13, 0.6,
+          ],
           "icon-rotate": ['get', 'bearing'],
           "icon-rotation-alignment": "map",
           "icon-allow-overlap": true,
           "icon-offset": ["get", "offset"],
         },
         "paint": {
-          "icon-opacity": [
-            "interpolate",
-            ["exponential", 2],
-            ["zoom"],
-            13, 0,
-            13.5, ["get", "opacity"],
-          ]
+          "icon-opacity": 1,
         }
       }, "TrainOutlines");
       this.map.on('click', 'TrainStops', e => {
