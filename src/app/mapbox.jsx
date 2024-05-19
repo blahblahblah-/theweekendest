@@ -242,7 +242,7 @@ class Mapbox extends React.Component {
     const results = {};
     Object.keys(routesData).forEach((routeId) => {
       const data = routesData[routeId]
-      data["color"] = colorsMap[data["color"]] || data["color"];
+      data["color"] = colorsMap[data["color"].toLowerCase()] || data["color"];
       results[routeId] = data
     })
     return results
