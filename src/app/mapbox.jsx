@@ -29,14 +29,27 @@ const defaultBounds = [
   [-73.3584, 41.1247]
 ]
 const trainIds = [
-  '2', '3', '1', '4', '5', '6', '6X', '7', '7X', 'A', 'AL', 'C', 'E', 'F', 'FX',
-  'D', 'B', 'M', 'J', 'Z', 'R', 'N', 'Q', 'W', 'G', 'H', 'FS', 'GS', "L", "SI"
+  "2", "3", "1", "4", "5", "6", "6X", "7", "7X", "A", "D", "C", "E",
+  "B", "F", "FX", "G", "M", "J", "Z", "R", "N", "Q", "W", "H", "FS", "GS", "L", "SI"
 ];
 
 const statusColors = {
   'long-headway': '#dddddd',
   'slow': '#fbfb08',
   'delayed': '#ff8093'
+}
+
+const colorsMap = {
+  "#db2828": "#ee352e",
+  "#21ba45": "#00933c",
+  "#a333c8": "#b933ad",
+  "#2185d0": "#2850ad",
+  "#f2711c": "#ff6319",
+  "#b5cc18": "#6cbe45",
+  "#a5673f": "#996633",
+  "#a0a0a0": "#a7a9ac",
+  "#fbbd08": "#fccc0a",
+  "#767676": "#6d6e71",
 }
 
 const M_TRAIN_SHUFFLE = ["M21", "M20", "M19", "M18", "M16", "M14", "M13", "M12", "M11"];
@@ -119,7 +132,7 @@ class Mapbox extends React.Component {
 
     this.map = new mapboxgl.Map({
       container: this.mapContainer,
-      style: 'mapbox://styles/theweekendest/ck1fhati848311cp6ezdzj5cm?optimize=true',
+      style: 'mapbox://styles/theweekendest/clro3gt8l005501p2datf8fd8?optimize=true',
       center: center,
       bearing: MANHATTAN_TILT,
       minZoom: 9,
@@ -215,7 +228,7 @@ class Mapbox extends React.Component {
         .then(response => response.json())
         .then(data => {
           this.setState({
-            trains: data.routes,
+            trains: this.convertColors(data.routes),
             blogPost: data.blog_post,
             timestamp: data.timestamp,
             loading: false
@@ -223,6 +236,16 @@ class Mapbox extends React.Component {
         }
       );
     });
+  }
+
+  convertColors(routesData) {
+    const results = {};
+    Object.keys(routesData).forEach((routeId) => {
+      const data = routesData[routeId]
+      data["color"] = colorsMap[data["color"]] || data["color"];
+      results[routeId] = data
+    })
+    return results
   }
 
   processRoutings() {
@@ -346,10 +369,16 @@ class Mapbox extends React.Component {
       }
 
       stops.forEach((stop) => {
+        if (stop === "D43") {
+          return;
+        }
         stations[stop]["stops"].forEach((route) => {
+          if (train === route) {
+            return;
+          }
           if (offsets[route] != undefined) {
             let offsetToUse = offsets[route];
-            if (this.shouldReverseDirection(train, route, stop)) {
+            if (this.shouldReverseDirection(train, route, stop) || this.shouldReverseDirection(route, train, stop)) {
               if (offsetToUse > 0) {
                 if (offsetToUse % 2 === 1) {
                   offsetToUse++;
@@ -528,16 +557,12 @@ class Mapbox extends React.Component {
           "icon-image": ['get', 'icon'],
           "icon-allow-overlap": true,
           "icon-ignore-placement": true,
-          "icon-size": {
-            "stops": [[10, 0.5], [11, 1], [12, 1.5], [13, 2]]
-          },
+          "icon-size": 0.5,
           "icon-rotate": ['get', 'bearing'],
           "icon-rotation-alignment": "map",
           "text-field": ['get', 'route'],
-          "text-font": ['Lato Bold', "Open Sans Bold","Arial Unicode MS Bold"],
-          "text-size": {
-            "stops": [[10, 6], [11, 8], [12, 10], [13, 12]]
-          },
+          "text-font": ["Arial Unicode MS Bold", "Open Sans Bold"],
+          "text-size": 12,
           "text-ignore-placement": true,
           "text-allow-overlap": true,
           "text-offset": ['get', 'offset'],
@@ -548,8 +573,6 @@ class Mapbox extends React.Component {
           "text-color-transition": {
             "duration": 500,
           },
-          "text-halo-color": "#666666",
-          "text-halo-width": ['get', 'halo-width'],
         },
         "filter": ['get', 'visibility']
       });
@@ -792,7 +815,7 @@ class Mapbox extends React.Component {
           turf.helpers.point(feature.geometry.coordinates), turf.helpers.point(pointAhead.geometry.coordinates)
         );
         const bearingInRads = (bearing - this.map.getBearing()) * (Math.PI / 180);
-        const textColor = trains[pos.route].color.toLowerCase() === '#fbbd08' ? '#000000' : '#ffffff';
+        const textColor = trains[pos.route].text_color || "#ffffff";
         let visibility = false;
 
         if ((this.selectedTrip && this.selectedTrip.id === pos.id) || this.selectedTrains.includes(pos.route)) {
@@ -821,7 +844,6 @@ class Mapbox extends React.Component {
           "icon": pos.routeName.endsWith('X') ? `train-pos-x-${trains[pos.route].color.slice(1).toLowerCase()}` : `train-pos-${trains[pos.route].color.slice(1).toLowerCase()}`,
           "text-color": textColor,
           "alternate-text-color": (pos.delayed) ? '#ff0000' : textColor,
-          "halo-width": (pos.delayed) ? 1 : 0,
           "bearing": bearing,
           "text-rotate": textRotate,
           "offset": [Math.sin(bearingInRads) * -0.3, Math.cos(bearingInRads) * 0.3],
@@ -1140,8 +1162,8 @@ class Mapbox extends React.Component {
               ['get', 'destination'],
               ['get', 'transferStation'],
             ],
-            ['literal', ['Lato Bold', "Open Sans Bold","Arial Unicode MS Bold"]],
-            ['literal', ['Lato Regular', "Open Sans Regular","Arial Unicode MS Regular"]],
+            ['literal', ["Arial Unicode MS Bold", "Open Sans Bold",]],
+            ['literal', ["Arial Unicode MS Regular", "Open Sans Regular",]],
           ],
           "text-optional": true,
           "text-justify": "auto",
@@ -2462,6 +2484,7 @@ class Mapbox extends React.Component {
               }
               Powered by <a href='https://www.goodservice.io' target='_blank'>goodservice.io</a>.<br />
               Created by <a href='https://sunny.ng' target='_blank'>Sunny Ng</a>.<br />
+              Subway Route Symbols ®: Metropolitan Transportation Authority. Used with permission.<br />
               <a href='https://github.com/blahblahblah-/theweekendest' target='_blank'>Source code</a>.
               <KofiButton color="#29abe0" title="Support Me on Ko-fi" kofiID="sunnyng" />
             </Header>
