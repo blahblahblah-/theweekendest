@@ -26,16 +26,36 @@ const config = {
     filename: 'bundle.js',  // Name of generated bundle after build
     publicPath: '/' // public URL of the output directory when referenced in a browser
   },
-  node: {
-    fs: 'empty',
-    process: 'mock',
-    Buffer: true,
+  resolve: {
+    fallback: {
+      fs: false,
+    }
   },
   module: {  // where we defined file patterns and their loaders
       rules: [
           {
             test: /\.jpe?g$|\.ico$|\.gif$|\.png$|\.woff$|\.ttf$|\.wav$|\.mp3$|\.webmanifest$|\.xml$/,
-            loader: 'file-loader?name=[name].[ext]'  // <-- retain original file name
+            use: [
+                {
+                    loader: 'file-loader',
+                    options: {
+                        limit: 1000,
+                        name : '[name].[ext]'
+                    }
+                }
+            ],
+          },
+          {
+            test: /apple-app-site-association$/,
+            use: [
+                {
+                    loader: 'file-loader',
+                    options: {
+                        limit: 1000,
+                        name : '[name]'
+                    }
+                }
+            ],
           },
           {
             test: /\.js[x]?$/,
