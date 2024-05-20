@@ -134,10 +134,10 @@ h1.yellow a, h3.yellow a {
 }
 
 .route {
-  width: 2em;
-  height: 2em;
-  font-size: 2em;
-  line-height: 2em;
+  width: 1.5em;
+  height: 1.5em;
+  font-size: 3em;
+  line-height: 1.5em;
   text-align: center;
   font-weight: bold;
   color: #fff;
@@ -233,7 +233,7 @@ h1.yellow a, h3.yellow a {
 
   .route {
     display: inline-block;
-    margin-left: 3px;
+    margin-left: -1px;
 
     &.diamond {
       margin-top: .5em;
@@ -420,7 +420,7 @@ h4.ui.top.attached.header.advisories-header {
 
 .trip-bullet {
   .route {
-    margin: 10px 0 0 8px;
+    margin: 10px 0 0 5px;
 
     &.diamond {
       margin-bottom: 10px;
