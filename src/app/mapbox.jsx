@@ -474,8 +474,9 @@ class Mapbox extends React.Component {
               ["linear"],
               ["zoom"],
               8, 1,
-              13, 2,
-              14, 5,
+              11, 1,
+              12, 2,
+              13, 5,
             ],
             "line-color": ["get", "color"],
             "line-offset": [
@@ -483,8 +484,9 @@ class Mapbox extends React.Component {
               ["linear"],
               ["zoom"],
               8, ["get", "offset"],
-              13, ["*", ["get", "offset"], 1.5],
-              14, ["*", ["get", "offset"], 3],
+              11, ["get", "offset"],
+              12, ["*", ["get", "offset"], 1.5],
+              13, ["*", ["get", "offset"], 3],
             ],
             "line-opacity": ["get", "opacity"],
           }
