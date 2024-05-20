@@ -1286,7 +1286,7 @@ class Mapbox extends React.Component {
           "icon-offset": ["get", "offset"],
         },
         "paint": {
-          "icon-opacity": 1,
+          "icon-opacity": ["get", "opacity"],
         }
       }, "TrainOutlines");
       this.map.on('click', 'TrainStops', e => {
@@ -1662,12 +1662,12 @@ class Mapbox extends React.Component {
         stopOffset *= -1;
       }
 
-      if (displayAdditionalTrips && this.selectedTrains.length === 1 &&
+      if (displayAdditionalTrips && this.selectedTrains.length === 1 && this.selectedStations.length === 0 &&
           this.selectedTrains.some((train) =>
             trains[train].routes_with_shared_tracks && Object.keys(trains[train].routes_with_shared_tracks).some((direction) =>
               trains[train].routes_with_shared_tracks[direction][stopId] && Object.keys(trains[train].routes_with_shared_tracks[direction][stopId]).includes(trainId)))) {
         opacity = 1;
-      } else if (this.selectedTrains.length === 1 && this.selectedTrains.some((train) => trains[train].routes_with_shared_tracks_summary?.includes(trainId))) {
+      } else if (this.selectedTrains.length === 1 && this.selectedStations.length === 0 && this.selectedTrains.some((train) => trains[train].routes_with_shared_tracks_summary?.includes(trainId))) {
         opacity = 0.25;
       } else if ((!this.selectedTrains.includes(trainId) && !this.selectedTrip) || (this.selectedTrip && !tripRouting?.includes(stopId))) {
         opacity = 0.05;
