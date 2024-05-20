@@ -157,6 +157,10 @@ h1.yellow a, h3.yellow a {
     font-size: 1em;
     line-height: 1.5em;
   }
+
+  &.condensed {
+    font-stretch: condensed;
+  }
 }
 
 .bullet {

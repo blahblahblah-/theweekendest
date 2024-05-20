@@ -10,12 +10,13 @@ class TrainBullet extends React.Component {
   classNames() {
     const { size, name, directions } = this.props;
     const directionClass = (directions && directions.length === 1) ? (directions[0] === 'north' ? 'uptown-only' : 'downtown-only') : ''
+    const fontStretchClass = name.length > 2 ? ' condensed' : '';
     if (size === 'small') {
-      return name.endsWith("X") ? 'small route diamond' : 'small route bullet ' + directionClass;
+      return name.endsWith("X") ? 'small route diamond' : 'small route bullet ' + directionClass + fontStretchClass;
     } else if (size === 'medium') {
-      return name.endsWith("X") ? 'medium route diamond' : 'medium route bullet ' + directionClass;
+      return name.endsWith("X") ? 'medium route diamond' : 'medium route bullet ' + directionClass + fontStretchClass;
     }
-    return name.endsWith("X") ? 'route diamond' : 'route bullet' + directionClass;
+    return name.endsWith("X") ? 'route diamond' : 'route bullet' + directionClass + fontStretchClass;
   }
 
   innerClassNames() {
@@ -34,10 +35,6 @@ class TrainBullet extends React.Component {
       styleHash.color = `${textColor}`;
     } else {
       styleHash.color = "#ffffff";
-    }
-
-    if (size === 'small' && nameLength > 2) {
-      styleHash.letterSpacing = '-.06em';
     }
 
     return styleHash;
