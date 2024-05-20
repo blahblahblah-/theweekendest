@@ -557,6 +557,15 @@ class Mapbox extends React.Component {
         "source": "TrainPositions",
         "layout": {
           "icon-image": ['get', 'icon'],
+          "icon-offset": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            8, ['get', 'offset-small'],
+            11, ['get', 'offset-small'],
+            12, ['get', 'offset-medium'],
+            13, ['get', 'offset-large'],
+          ],
           "icon-allow-overlap": true,
           "icon-ignore-placement": true,
           "icon-size": 0.5,
@@ -567,7 +576,15 @@ class Mapbox extends React.Component {
           "text-size": 12,
           "text-ignore-placement": true,
           "text-allow-overlap": true,
-          "text-offset": ['get', 'offset'],
+          "text-offset": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            8, ['get', 'text-offset-small'],
+            11, ['get', 'text-offset-small'],
+            12, ['get', 'text-offset-medium'],
+            13, ['get', 'text-offset-large'],
+          ],
           "text-rotate": ['get', 'text-rotate']
         },
         "paint": {
@@ -793,7 +810,7 @@ class Mapbox extends React.Component {
   }
 
   trainPositionGeoJson(currentTime, trainPositions, callback) {
-    const { trains, displayAdditionalTrips } = this.state;
+    const { trains, displayAdditionalTrips, offsets } = this.state;
     const trainPositionsObj = {};
 
     if (!trains) {
@@ -819,6 +836,27 @@ class Mapbox extends React.Component {
         );
         const bearingInRads = (bearing - this.map.getBearing()) * (Math.PI / 180);
         const textColor = trains[pos.route].text_color || "#ffffff";
+        const textRotate = (bearing + 225 - this.map.getBearing()) % 90 - 45;
+        let posOffset;
+        let directionModifier = 1;
+
+        if (this.selectedTrip) {
+          posOffset = offsets[this.selectedTrip.train];
+        } else if (this.selectedTrains.length === 1) {
+          posOffset = offsets[this.selectedTrains[0]];
+        } else {
+          let prevStopOffset = this.calculateStopOffset(prev);
+          let nextStopOffset = this.calculateStopOffset(next);
+          posOffset = (prevStopOffset + nextStopOffset) / 2;
+        }
+        if (pos.direction === 'south') {
+          directionModifier *= -1;
+        }
+        if (this.shouldReverseDirection(pos.route, null, next)) {
+          directionModifier *= -1;
+        }
+        posOffset *= directionModifier;
+
         let visibility = false;
 
         if ((this.selectedTrip && this.selectedTrip.id === pos.id) || this.selectedTrains.includes(pos.route)) {
@@ -829,11 +867,6 @@ class Mapbox extends React.Component {
           if (additionalTrips.includes(pos.id)) {
             visibility = true;
           }
-        }
-        let textRotate = 0;
-
-        if (pos.routeName.endsWith('X')) {
-          textRotate = (bearing + 225) % 90 - 45 - this.map.getBearing();
         }
 
         trainPositionsObj[pos.id] = feature.geometry.coordinates;
@@ -849,7 +882,21 @@ class Mapbox extends React.Component {
           "alternate-text-color": (pos.delayed) ? '#ff0000' : textColor,
           "bearing": bearing,
           "text-rotate": textRotate,
-          "offset": [Math.sin(bearingInRads) * -0.3, Math.cos(bearingInRads) * 0.3],
+          "text-offset-small": [
+            Math.sin(bearingInRads) * -0.3 + Math.cos(bearingInRads) * posOffset * 0.083,
+            Math.cos(bearingInRads) * 0.3 + Math.sin(bearingInRads) * posOffset * 0.083,
+          ],
+          "text-offset-medium": [
+            Math.sin(bearingInRads) * -0.3 + Math.cos(bearingInRads) * posOffset * 0.125,
+            Math.cos(bearingInRads) * 0.3 + Math.sin(bearingInRads) * posOffset * 0.125,
+          ],
+          "text-offset-large": [
+            Math.sin(bearingInRads) * -0.3 + Math.cos(bearingInRads) * posOffset * 0.25,
+            Math.cos(bearingInRads) * 0.3 + Math.sin(bearingInRads) * posOffset * 0.25,
+          ],
+          "offset-small": [posOffset * 2, 0],
+          "offset-medium": [posOffset * 3, 0],
+          "offset-large": [posOffset * 6, 0],
           "visibility": visibility,
         }
 
@@ -1447,16 +1494,7 @@ class Mapbox extends React.Component {
             offset = offset * -1;
           }
         } else {
-          const trainsPassed = Array.from(stations[key]["passed"]);
-          const trainOffsets = trainsPassed.map((t) => {
-            if (this.shouldReverseDirection(t, null, key)) {
-              return offsets[t] * -1;
-            }
-            return offsets[t];
-          });
-          if (trainsPassed.length > 0) {
-            offset = (Math.max(...trainOffsets) + Math.min(...trainOffsets)) / 2;
-          }
+          offset = this.calculateStopOffset(key);
         }
 
         if (bearing === undefined && !["circle-15", "express-stop", "cross-15"].includes(stopTypeIcon)) {
@@ -1563,6 +1601,22 @@ class Mapbox extends React.Component {
         }
       })
     };
+  }
+
+  calculateStopOffset(stopId) {
+    const { offsets } = this.state;
+
+    const trainsPassed = Array.from(stations[stopId]["passed"]);
+    const trainOffsets = trainsPassed.map((t) => {
+      if (this.shouldReverseDirection(t, null, stopId)) {
+        return offsets[t] * -1;
+      }
+      return offsets[t];
+    });
+    if (trainsPassed.length > 0) {
+      return (Math.max(...trainOffsets) + Math.min(...trainOffsets)) / 2;
+    }
+    return 0;
   }
 
   lineOutlineGeoJson() {
