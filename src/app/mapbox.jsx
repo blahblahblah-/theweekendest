@@ -595,6 +595,7 @@ class Mapbox extends React.Component {
       }).bind(this));
     }
 
+    this.map.setLayerZoomRange("TrainPositions", this.selectedTrains.length === 1 || this.selectedTrip ? 0 : 12,);
     this.map.setLayoutProperty("TrainPositions", "visibility", "visible");
     this.map.moveLayer("TrainPositions");
 
