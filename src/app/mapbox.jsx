@@ -1204,9 +1204,13 @@ class Mapbox extends React.Component {
         "source": "Stops",
         "layout": {
           "text-field": ['get', 'name'],
-          "text-size": {
-            "stops": [[10, 8], [13, 12]]
-          },
+          "text-size": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            6, 8,
+            12, 12,
+          ],
           "text-font": ['case',
             ['any',
               ['get', 'destination'],
@@ -1219,10 +1223,24 @@ class Mapbox extends React.Component {
           "text-justify": "auto",
           'text-allow-overlap': false,
           "text-padding": 1,
-          "text-variable-anchor": ["bottom-right", "top-right", "bottom-left", "top-left", "right", "left", "bottom"],
-          "text-radial-offset": {
-            "stops":  [[9, 0.25], [12, 0.75], [14, 2]],
-          },
+          "text-variable-anchor": ["bottom-left", "top-left", "left", "bottom-right", "top-right", "right", "bottom", "top"],
+          "text-radial-offset": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            6, 0.1,
+            12, [
+              "match",
+              ["get", "offset-range"],
+              0, 0.5,
+              2, 1,
+              4, 1.5,
+              6, 2,
+              8, 2.5,
+              10, 3,
+              3.5,
+            ],
+          ],
           "icon-image": ['get', 'stopType'],
           "icon-size": [
             "interpolate",
@@ -1392,11 +1410,7 @@ class Mapbox extends React.Component {
 
               opacity = 1;
               priority = (routing[routing.length - 1] === key ? 1 : 5);
-              stopType = this.selectedTrip.direction === 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
-
-              if (this.shouldReverseDirection(this.selectedTrip.train, null, key)) {
-                stopType = this.selectedTrip.direction !== 'north' ? 'all-uptown-trains' : 'all-downtown-trains';
-              }
+              stopType = 'express-stop';
 
               if (this.shouldReverseDirection(this.selectedTrip.train, null, key)) {
                 offset = offset * -1;
@@ -1441,6 +1455,7 @@ class Mapbox extends React.Component {
                 'offset-small': [offset / 0.33, 0],
                 'offset-medium': [offset / 0.66, 0],
                 'offset-large': [offset * 1.5 / 0.66, 0],
+                'offset-range': 0,
               },
               "geometry": {
                 "type": "Point",
@@ -1458,6 +1473,7 @@ class Mapbox extends React.Component {
         const stationCoords = [stations[key].longitude, stations[key].latitude];
         const stationPt = turf.helpers.point(stationCoords);
         let offset = 0;
+        let offsetRange = 0;
         let bearing = stations[key].bearing;
         let opacity = 1;
         let priority = 5;
@@ -1495,6 +1511,7 @@ class Mapbox extends React.Component {
           }
         } else {
           offset = this.calculateStopOffset(key);
+          offsetRange = this.calculateOffsetRange(key);
         }
 
         if (bearing === undefined && !["circle-15", "express-stop", "cross-15"].includes(stopTypeIcon)) {
@@ -1593,6 +1610,7 @@ class Mapbox extends React.Component {
             'offset-small': [offset / 0.33, 0],
             'offset-medium': [offset / 0.66, 0],
             'offset-large': [offset * 1.5 / 0.66, 0],
+            'offset-range': offsetRange,
           },
           "geometry": {
             "type": "Point",
@@ -1615,6 +1633,22 @@ class Mapbox extends React.Component {
     });
     if (trainsPassed.length > 0) {
       return (Math.max(...trainOffsets) + Math.min(...trainOffsets)) / 2;
+    }
+    return 0;
+  }
+
+  calculateOffsetRange(stopId) {
+    const { offsets } = this.state;
+
+    const trainsPassed = Array.from(stations[stopId]["passed"]);
+    const trainOffsets = trainsPassed.map((t) => {
+      if (this.shouldReverseDirection(t, null, stopId)) {
+        return offsets[t] * -1;
+      }
+      return offsets[t];
+    });
+    if (trainsPassed.length > 0) {
+      return Math.max(...trainOffsets) - Math.min(...trainOffsets);
     }
     return 0;
   }
