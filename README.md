@@ -27,3 +27,5 @@ Inspirations:
 * [https://www.i-want-to-ride-an-electric-citi.bike](https://www.i-want-to-ride-an-electric-citi.bike)
 * [https://saadiqm.com/2018/03/28/react-mapbox-gl-js-updating-data-source.html](https://saadiqm.com/2018/03/28/react-mapbox-gl-js-updating-data-source.html)
 * [https://blog.mapbox.com/mapping-the-dc-metro-d4da611555e8](https://blog.mapbox.com/mapping-the-dc-metro-d4da611555e8)
+
+Subway Route Symbols ®: Metropolitan Transportation Authority. Used with permission.
