@@ -39,19 +39,6 @@ const statusColors = {
   'delayed': '#ff8093'
 }
 
-const colorsMap = {
-  "#db2828": "#ee352e",
-  "#21ba45": "#00933c",
-  "#a333c8": "#b933ad",
-  "#2185d0": "#2850ad",
-  "#f2711c": "#ff6319",
-  "#b5cc18": "#6cbe45",
-  "#a5673f": "#996633",
-  "#a0a0a0": "#a7a9ac",
-  "#fbbd08": "#fccc0a",
-  "#767676": "#6d6e71",
-}
-
 const M_TRAIN_SHUFFLE = ["M21", "M20", "M19", "M18", "M16", "M14", "M13", "M12", "M11"];
 
 // Trains passing through these stations can be physically in the opposite direction of trains that are running in the same direction
@@ -228,7 +215,7 @@ class Mapbox extends React.Component {
         .then(response => response.json())
         .then(data => {
           this.setState({
-            trains: this.convertColors(data.routes),
+            trains: data.routes,
             blogPost: data.blog_post,
             timestamp: data.timestamp,
             loading: false
@@ -236,16 +223,6 @@ class Mapbox extends React.Component {
         }
       );
     });
-  }
-
-  convertColors(routesData) {
-    const results = {};
-    Object.keys(routesData).forEach((routeId) => {
-      const data = routesData[routeId]
-      data["color"] = colorsMap[data["color"].toLowerCase()] || data["color"];
-      results[routeId] = data
-    })
-    return results
   }
 
   processRoutings() {
