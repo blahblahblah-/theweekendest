@@ -1217,6 +1217,17 @@ class Mapbox extends React.Component {
               10, 3,
               3.5,
             ],
+            13, [
+              "match",
+              ["get", "offset-range"],
+              0, 1,
+              2, 1.5,
+              4, 2,
+              6, 2.5,
+              8, 3,
+              10, 3.5,
+              4,
+            ],
           ],
           "icon-image": ['get', 'stopType'],
           "icon-size": [
