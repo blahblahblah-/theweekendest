@@ -10,6 +10,9 @@ import * as turf from './vendor/turf.js';
 import KofiButton from "kofi-button"
 
 import LegendModal from './legendModal.jsx';
+import ContactModal from './contactModal.jsx'
+import PrivacyIosModal from './privacyIosModal.jsx'
+import TermsOfUseIosModal from './termsOfUseIosModal.jsx'
 import OverlayControls from './overlayControls.jsx';
 import TrainList from './trainList.jsx';
 import TrainDetails from './trainDetails.jsx';
@@ -2550,6 +2553,15 @@ class Mapbox extends React.Component {
                 <Route path="/advisories" render={() => {
                   return this.renderListings(4);
                 }} />
+                <Route path="/contact" render={() => {
+                  return (<ContactModal open={true} />)
+                }} />
+                <Route path="/privacy-ios" render={() => {
+                  return (<PrivacyIosModal open={true} />)
+                }} />
+                <Route path="/terms-of-use-ios" render={() => {
+                  return (<TermsOfUseIosModal open={true} />)
+                }} />
                 <Route render={() => <Redirect to="/trains" /> } />
               </Switch>
             }
@@ -2563,6 +2575,7 @@ class Mapbox extends React.Component {
               }
               Powered by <a href='https://www.goodservice.io' target='_blank'>goodservice.io</a>.<br />
               Created by <a href='https://sunny.ng' target='_blank'>Sunny Ng</a>.<br />
+              <a href='/contact'>Contact Us</a>.<br />
               Subway Route Symbols ®: Metropolitan Transportation Authority. Used with permission.<br />
               <a href='https://github.com/blahblahblah-/theweekendest' target='_blank'>Source code</a>.
               <KofiButton color="#29abe0" title="Support Me on Ko-fi" kofiID="sunnyng" />
