@@ -30,8 +30,8 @@ h1.yellow a, h3.yellow a {
   margin-bottom: .2em;
 }
 
-.ui.header.site-name {
-  margin-top: 0;
+.site-name {
+  margin-top: 0.5em;
   margin-bottom: 0.3em;
   padding: 0;
   float: left;
@@ -39,15 +39,35 @@ h1.yellow a, h3.yellow a {
   a {
     color: white;
   }
-}
-
-.yellow-bar {
-  width: 342px;
-  height: 5px;
-  background-color: #fcea40;
 
   @media only screen and (max-width: 767px) {
-    width: 269px;
+    height: 40px;
+  }
+}
+
+.green-bar {
+  width: 340px;
+  height: 5px;
+  background-color: #2fb953;
+
+  @media only screen and (max-width: 767px) {
+    width: 267px;
+  }
+
+  .stop {
+    height: 5px;
+    width: 5px;
+    background-color: #ffffff;
+    border: 1px solid #000000;
+    -webkit-border-radius: 999px;
+    -moz-border-radius: 999px;
+    border-radius: 999px;
+    position: absolute;
+    right: 17px;
+
+    @media only screen and (max-width: 767px) {
+      right: 20px;
+    }
   }
 }
 
@@ -279,7 +299,7 @@ h1.yellow a, h3.yellow a {
 
 .mobile-pane-control {
   position: absolute;
-  top: 60px;
+  top: 67px;
   left: 240px;
   z-index: 1;
 }

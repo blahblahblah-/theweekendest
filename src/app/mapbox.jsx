@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import mapboxgl from 'mapbox-gl';
-import { Responsive, Checkbox, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu, List, Grid } from "semantic-ui-react";
+import { Responsive, Checkbox, Header, Segment, Statistic, Tab, Button, Loader, Icon, Menu, List, Grid, Image } from "semantic-ui-react";
 import { BrowserRouter as Router, Route, Link, Switch, Redirect, withRouter } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { debounce, filter, map } from 'lodash';
@@ -19,6 +19,7 @@ import TrainDetails from './trainDetails.jsx';
 import TripDetails from './tripDetails.jsx';
 import StationList from './stationList.jsx';
 import StationDetails from './stationDetails.jsx';
+import header from "./images/header.png";
 
 import stationData from '../data/station_details.json';
 
@@ -2422,29 +2423,19 @@ class Mapbox extends React.Component {
             </Responsive>
           }
           <Responsive {...Responsive.onlyMobile} as='div'>
-            <div className='yellow-bar'></div>
-            <Header inverted as='h3' className='site-name'>
-              <Link to='/'>
-                The Weekendest
-              </Link>
-              <Header.Subheader>
-                Real-Time NYC Subway Map
-              </Header.Subheader>
-            </Header>
+            <div className='green-bar'>
+              <div className="stop"></div>
+            </div>
+            <Image src={header} className="site-name" />
             <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "5px 11px 0 0"}}>
               <Icon loading={loading} name='refresh' />
             </Button>
           </Responsive>
           <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div'>
-            <div className='yellow-bar'></div>
-            <Header inverted as='h1' className='site-name' style={{float: 'left'}}>
-              <Link to='/'>
-                The Weekendest
-              </Link>
-              <Header.Subheader>
-                Real-Time New York City Subway Map
-              </Header.Subheader>
-            </Header>
+            <div className='green-bar'>
+              <div className="stop"></div>
+            </div>
+            <Image src={header} className="site-name" />
             <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "18px 9px 0 0"}}>
               <Icon loading={loading} name='refresh' />
             </Button>
@@ -2575,6 +2566,10 @@ class Mapbox extends React.Component {
               }
               Powered by <a href='https://www.goodservice.io' target='_blank'>goodservice.io</a>.<br />
               Created by <a href='https://sunny.ng' target='_blank'>Sunny Ng</a>.<br />
+              <a href="https://apps.apple.com/us/app/the-weekendest-nyc-subway-map/id6476543418?itsct=apps_box_badge&amp;itscg=30200" style={{display: "inline-block", overflow: "hidden", borderRadius: "7.5px", width: "125px", height: "41.5px"}}>
+                <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1716681600" alt="Download on the App Store" style={{borderRadius: "7.5px", width: "125px", height: "41.5px"}} />
+              </a>
+              <br />
               <a href='/contact'>Contact Us</a>.<br />
               Subway Route Symbols ®: Metropolitan Transportation Authority. Used with permission.<br />
               <a href='https://github.com/blahblahblah-/theweekendest' target='_blank'>Source code</a>.

@@ -1,0 +1,31 @@
+{
+    "applinks": {
+        "apps": [],
+        "details": [
+            {
+                "appIDs": ["LT5JAC55XG.io.goodservice.The-Weekendest"],
+                "components": [
+                    {
+                      "/": "/*",
+                      "comment": "Matches any URL"
+                    },
+                    {
+                      "/": "/privacy-ios",
+                      "exclude": true,
+                      "comment": "Exclude privacy policy"
+                    },
+                    {
+                      "/": "/terms-of-use-ios",
+                      "exclude": true,
+                      "comment": "Exclude terms of use"
+                    },
+                    {
+                      "/": "/contact",
+                      "exclude": true,
+                      "comment": "Exclude contact"
+                    }
+                ]
+            }
+        ]
+    }
+}

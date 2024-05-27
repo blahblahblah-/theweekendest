@@ -5,10 +5,22 @@
   "display": "fullscreen",
   "background_color": "#000000",
   "description": "Real-Time New York City Subway Map",
-  "icons": [{
-    "src": "apple-touch-icon.png",
-    "sizes": "180x180",
-    "type": "image/png"
-  }],
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
   "scope": "https://www.theweekendest.com/"
 }
