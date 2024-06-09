@@ -74,7 +74,7 @@ h1.yellow a, h3.yellow a {
 .infobox {
   display: block;
   position: absolute !important;
-  top: 10px;
+  top: 80px;
   left: 10px;
   bottom: auto;
   width: 300px;
@@ -84,11 +84,40 @@ h1.yellow a, h3.yellow a {
 }
 
 .mapbox {
-  top: 0px;
+  top: 70px;
   bottom: 0;
   left: 0;
   right: 0;
   position: absolute;
+
+  @media only screen and (max-width: 767px) {
+    top: 60px;
+  }
+}
+
+.ui.message.toast {
+  padding: 9px 20px;
+  text-align: center;
+  height: 70px;
+
+  a {
+    font-weight: bold;
+  }
+
+  @media only screen and (max-width: 767px) {
+    padding: 1px 9px;
+    text-align: left;
+
+    .header {
+      display: inline;
+    }
+    .header::after {
+      content: " - ";
+    }
+    p {
+      display: inline;
+    }
+  }
 }
 
 @media only screen and (min-width: 768px) {
