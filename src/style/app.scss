@@ -81,6 +81,10 @@ h1.yellow a, h3.yellow a {
   padding: 10px !important;
   max-height: 90%;
   border-radius: 1rem !important;
+
+  @media only screen and (max-width: 767px) {
+    top: 85px;
+  }
 }
 
 .mapbox {
@@ -89,6 +93,10 @@ h1.yellow a, h3.yellow a {
   left: 0;
   right: 0;
   position: absolute;
+
+  @media only screen and (max-width: 767px) {
+    top: 80px;
+  }
 }
 
 .ui.message.toast {
@@ -103,6 +111,7 @@ h1.yellow a, h3.yellow a {
   @media only screen and (max-width: 767px) {
     padding: 1px 9px;
     text-align: left;
+    height: 90px;
 
     .header {
       display: inline;
