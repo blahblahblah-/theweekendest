@@ -30,6 +30,7 @@ class ContactModal extends React.Component {
             <ul>
               <li>Follow on Twitter <a href="https://twitter.com/theweekendest" target="_blank">https://twitter.com/theweekendest</a></li>
               <li>Follow on Bluesky <a href="https://bsky.app/profile/theweekendest.com" target="_blank">https://bsky.app/profile/theweekendest.com</a></li>
+              <li>Follow on Instagram <a href="https://instagram.com/theweekendest.nyc" target="_blank">https://instagram.com/theweekendest.nyc</a></li>
               <li>Email <a href="mailto:hello@theweekendest.com">hello@theweekendest.com</a></li>
             </ul>
           </Modal.Description>
