@@ -108,7 +108,11 @@ class Mapbox extends React.Component {
     this.initialized = false;
     this.calculatedPaths = {};
     this.props.history.listen((location) => {
-      gtag('config', 'UA-127585516-1', {'page_path': location.pathname});
+      gtag('event', 'page_view', {
+        'page_location': window.location.href,
+        'page_title': document.title,
+        'standalone' : window.navigator.standalone === true,
+      });
     });
     this.selectedTrains = trainIds;
     this.selectedTrip = null;
