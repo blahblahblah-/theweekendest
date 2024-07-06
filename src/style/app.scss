@@ -89,6 +89,10 @@ h1.yellow a, h3.yellow a {
   left: 0;
   right: 0;
   position: absolute;
+
+  @media only screen and (max-width: 767px) {
+    top: 60px;
+  }
 }
 
 .ui.message.toast {
