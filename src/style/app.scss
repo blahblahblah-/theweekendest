@@ -41,7 +41,18 @@ h1.yellow a, h3.yellow a {
   }
 
   @media only screen and (max-width: 767px) {
-    height: 40px;
+    height: 33px;
+  }
+}
+
+.ui.button.app-button {
+  display: none;
+  float: left;
+  margin-top: 10px;
+  margin-left: 10px;
+
+  @supports (-webkit-touch-callout: none) {
+    display: block;
   }
 }
 
@@ -299,7 +310,7 @@ h1.yellow a, h3.yellow a {
 
 .mobile-pane-control {
   position: absolute;
-  top: 67px;
+  top: 60px;
   left: 240px;
   z-index: 1;
 }

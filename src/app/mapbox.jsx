@@ -2430,7 +2430,12 @@ class Mapbox extends React.Component {
             <div className='green-bar'>
               <div className="stop"></div>
             </div>
-            <Image src={header} className="site-name" />
+            <Link to='/'>
+              <Image src={header} className="site-name" />
+            </Link>
+            <a href="https://apps.apple.com/us/app/the-weekendest-nyc-subway-map/id6476543418" target="_blank">
+              <Button inverted size='mini' compact circular className="app-button">Get App</Button>
+            </a>
             <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "5px 11px 0 0"}}>
               <Icon loading={loading} name='refresh' />
             </Button>
@@ -2439,7 +2444,9 @@ class Mapbox extends React.Component {
             <div className='green-bar'>
               <div className="stop"></div>
             </div>
-            <Image src={header} className="site-name" />
+            <Link to='/'>
+              <Image src={header} className="site-name" />
+            </Link>
             <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "18px 9px 0 0"}}>
               <Icon loading={loading} name='refresh' />
             </Button>
