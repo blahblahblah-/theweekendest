@@ -156,7 +156,6 @@ class Mapbox extends React.Component {
       if (this.triggerGeolocationOnLoad) {
         this.geoControl.trigger();
       }
-      window.dispatchEvent(new Event("resize"));
     });
 
     this.map.on('rotateend', () => {
