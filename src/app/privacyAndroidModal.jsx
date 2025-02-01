@@ -3,7 +3,7 @@ import { Modal } from 'semantic-ui-react';
 import { withRouter } from 'react-router-dom';
 import { Helmet } from "react-helmet";
 
-class PrivacyIosModal extends React.Component {
+class PrivacyAndroidModal extends React.Component {
   handleOnClose = () => {
     const { history } = this.props;
     return history.push('/');
@@ -18,9 +18,9 @@ class PrivacyIosModal extends React.Component {
           <title>The Weekendest - App Privacy Policy</title>
           <meta property="og:title" content="The Weekendest - App Privacy Policy" />
           <meta name="twitter:title" content="The Weekendest - App Privacy Policy" />
-          <meta property="og:url" content={`https://www.theweekendest.com/privacy-ios`} />
-          <meta name="twitter:url" content={`https://www.theweekendest.com/privacy-ios`} />
-          <link rel="canonical" href={`https://www.theweekendest.com/privacy-ios`} />
+          <meta property="og:url" content={`https://www.theweekendest.com/privacy-android`} />
+          <meta name="twitter:url" content={`https://www.theweekendest.com/privacy-android`} />
+          <link rel="canonical" href={`https://www.theweekendest.com/privacy-android`} />
         </Helmet>
         <Modal.Header>
           App Privacy Policy
@@ -57,4 +57,4 @@ class PrivacyIosModal extends React.Component {
     )
   }
 }
-export default withRouter(PrivacyIosModal);
+export default withRouter(PrivacyAndroidModal);

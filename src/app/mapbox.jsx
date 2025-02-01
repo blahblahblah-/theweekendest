@@ -12,6 +12,7 @@ import KofiButton from "kofi-button"
 import LegendModal from './legendModal.jsx';
 import ContactModal from './contactModal.jsx'
 import PrivacyIosModal from './privacyIosModal.jsx'
+import PrivacyAndroidModal from './privacyAndroidModal.jsx'
 import TermsOfUseIosModal from './termsOfUseIosModal.jsx'
 import OverlayControls from './overlayControls.jsx';
 import TrainList from './trainList.jsx';
@@ -2561,6 +2562,9 @@ class Mapbox extends React.Component {
                 }} />
                 <Route path="/privacy-ios" render={() => {
                   return (<PrivacyIosModal open={true} />)
+                }} />
+                <Route path="/privacy-android" render={() => {
+                  return (<PrivacyAndroidModal open={true} />)
                 }} />
                 <Route path="/terms-of-use-ios" render={() => {
                   return (<TermsOfUseIosModal open={true} />)
