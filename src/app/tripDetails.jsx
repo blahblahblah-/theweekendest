@@ -113,7 +113,8 @@ class TripDetails extends React.Component {
               <Header as='h4' style={{textAlign: 'right'}}>
                 { train.alternate_name }
                 { train.alternate_name && <br /> }
-                Train ID: { trip.id }<br />
+                Trip ID: { trip.id }<br />
+                Train ID: { trip.interval }<br />
                 To: {
                   <Link to={`/stations/${stations[destination].id}`}>
                     { stations[destination].name.replace(/ - /g, "–") }
