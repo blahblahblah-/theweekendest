@@ -278,12 +278,12 @@ class StationList extends React.Component {
           <div>
             <Input icon={icon} placeholder='Search...' onChange={this.handleChange} onKeyUp={this.handleKeyUp} ref={(input) => { this.queryInput = input; }} className="station-search" />
             <Helmet>
-              <title>The Weekendest - Stations</title>
-              <meta property="og:url" content="https://www.theweekendest.com/stations" />
-              <meta name="twitter:url" content="https://www.theweekendest.com/stations" />
-              <link rel="canonical" href="https://www.theweekendest.com/stations" />
-              <meta property="og:title" content="The Weekendest - Stations" />
-              <meta name="twitter:title" content="The Weekendest - Stations" />
+              <title>Subway Now (formerly The Weekendest) - Stations</title>
+              <meta property="og:url" content="https://www.subwaynow.app/stations" />
+              <meta name="twitter:url" content="https://www.subwaynow.app/stations" />
+              <link rel="canonical" href="https://www.subwaynow.app/stations" />
+              <meta property="og:title" content="Subway Now (formerly The Weekendest) - Stations" />
+              <meta name="twitter:title" content="Subway Now (formerly The Weekendest) - Stations" />
               <meta name="Description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
               <meta property="og:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
               <meta name="twitter:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
@@ -309,12 +309,12 @@ class StationList extends React.Component {
               }
             </List>
             <Helmet>
-              <title>The Weekendest - Starred Stations</title>
-              <meta property="og:url" content="https://www.theweekendest.com/starred" />
-              <meta name="twitter:url" content="https://www.theweekendest.com/starred" />
-              <link rel="canonical" href="https://www.theweekendest.com/starred" />
-              <meta property="og:title" content="The Weekendest - Starred Stations" />
-              <meta name="twitter:title" content="The Weekendest - Starred Stations" />
+              <title>Subway Now (formerly The Weekendest) - Starred Stations</title>
+              <meta property="og:url" content="https://www.subwaynow.app/starred" />
+              <meta name="twitter:url" content="https://www.subwaynow.app/starred" />
+              <link rel="canonical" href="https://www.subwaynow.app/starred" />
+              <meta property="og:title" content="Subway Now (formerly The Weekendest) - Starred Stations" />
+              <meta name="twitter:title" content="Subway Now (formerly The Weekendest) - Starred Stations" />
               <meta name="Description" content="Star your favorite New York City subway stations and view their trains' status, live arrival times and real-time routing." />
               <meta property="og:description" content="Star your favorite New York City subway stations and view their trains' status, live arrival times and real-time routing." />
               <meta name="twitter:description" content="Star your favorite New York City subway stations and view their trains' status, live arrival times and real-time routing." />
@@ -340,12 +340,12 @@ class StationList extends React.Component {
               }
             </List>
             <Helmet>
-              <title>The Weekendest - Nearby Stations</title>
-              <meta property="og:url" content="https://www.theweekendest.com/nearby" />
-              <meta name="twitter:url" content="https://www.theweekendest.com/nearby" />
-              <link rel="canonical" href="https://www.theweekendest.com/nearby" />
-              <meta property="og:title" content="The Weekendest - Nearby Stations" />
-              <meta name="twitter:title" content="The Weekendest - Nearby Stations" />
+              <title>Subway Now (formerly The Weekendest) - Nearby Stations</title>
+              <meta property="og:url" content="https://www.subwaynow.app/nearby" />
+              <meta name="twitter:url" content="https://www.subwaynow.app/nearby" />
+              <link rel="canonical" href="https://www.subwaynow.app/nearby" />
+              <meta property="og:title" content="Subway Now (formerly The Weekendest) - Nearby Stations" />
+              <meta name="twitter:title" content="Subway Now (formerly The Weekendest) - Nearby Stations" />
               <meta name="Description" content="Find the New York City subway stations nearest you, and view their trains' status, live arrival times and real-time routing." />
               <meta property="og:description" content="Find the New York City subway stations nearest you, and view their trains' status, live arrival times and real-time routing." />
               <meta name="twitter:description" content="Find the New York City subway stations nearest you, and view their trains' status, live arrival times and real-time routing." />
@@ -409,12 +409,12 @@ class StationList extends React.Component {
               </Header>
             }
             <Helmet>
-              <title>The Weekendest - Advisories</title>
-              <meta property="og:url" content="https://www.theweekendest.com/advisories" />
-              <meta name="twitter:url" content="https://www.theweekendest.com/advisories" />
-              <link rel="canonical" href="https://www.theweekendest.com/advisories" />
-              <meta property="og:title" content="The Weekendest - Advisories" />
-              <meta name="twitter:title" content="The Weekendest - Advisories" />
+              <title>Subway Now (formerly The Weekendest) - Advisories</title>
+              <meta property="og:url" content="https://www.subwaynow.app/advisories" />
+              <meta name="twitter:url" content="https://www.subwaynow.app/advisories" />
+              <link rel="canonical" href="https://www.subwaynow.app/advisories" />
+              <meta property="og:title" content="Subway Now (formerly The Weekendest) - Advisories" />
+              <meta name="twitter:title" content="Subway Now (formerly The Weekendest) - Advisories" />
               <meta name="Description" content="View in real-time which New York City subway stations are currently closed or have only one-way train service." />
               <meta property="og:description" content="View in real-time which New York City subway stations are currently closed or have only one-way train service." />
               <meta name="twitter:description" content="View in real-time which New York City subway stations are currently closed or have only one-way train service." />

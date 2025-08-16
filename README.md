@@ -4,7 +4,7 @@ This is a React app that relies heavily on [goodservice.io](https://github.com/b
 
 A Mapbox theme was created for this project and has been made public.
 
-See it live at [https://www.theweekendest.com](https://www.theweekendest.com/).
+See it live at [https://www.subwaynow.app](https://www.subwaynow.app/).
 
 ## Running locally
 

@@ -21,11 +21,12 @@ import TripDetails from './tripDetails.jsx';
 import StationList from './stationList.jsx';
 import StationDetails from './stationDetails.jsx';
 import header from "./images/header.png";
+import googleplay from "./images/googleplay.png";
 
 import stationData from '../data/station_details.json';
 
-const apiUrl = 'https://www.goodservice.io/api/routes/?detailed=1';
-const stopsUrl = 'https://www.goodservice.io/api/stops/';
+const apiUrl = 'https://api.subwaynow.app/routes/?detailed=1';
+const stopsUrl = 'https://api.subwaynow.app/stops/';
 const stations = {};
 const stationLocations = {};
 const center = [-73.98119, 40.75855]
@@ -2345,12 +2346,12 @@ class Mapbox extends React.Component {
     return (
       <div>
         <Helmet>
-          <title>The Weekendest - Real-Time New York City Subway Map</title>
-          <meta property="og:url" content="https://www.theweekendest.com" />
-          <meta name="twitter:url" content="https://www.theweekendest.com" />
-          <link rel="canonical" href="https://www.theweekendest.com" />
-          <meta property="og:title" content="The Weekendest - Real-Time New York City Subway Map" />
-          <meta name="twitter:title" content="The Weekendest - Real-Time New York City Subway Map" />
+          <title>Subway Now (formerly The Weekendest) - Real-Time New York City Subway Map</title>
+          <meta property="og:url" content="https://www.subwaynow.app" />
+          <meta name="twitter:url" content="https://www.subwaynow.app" />
+          <link rel="canonical" href="https://www.subwaynow.app" />
+          <meta property="og:title" content="Subway Now (formerly The Weekendest) - Real-Time New York City Subway Map" />
+          <meta name="twitter:title" content="Subway Now (formerly The Weekendest) - Real-Time New York City Subway Map" />
           <meta name="Description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
           <meta property="og:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
           <meta name="twitter:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." />
@@ -2437,6 +2438,9 @@ class Mapbox extends React.Component {
             </Link>
             <a href="https://apps.apple.com/us/app/the-weekendest-nyc-subway-map/id6476543418" target="_blank">
               <Button inverted size='mini' compact circular className="app-button">Get App</Button>
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=io.goodservice.theweekendest" target="_blank">
+              <Button inverted size='mini' compact circular className="android-app-button">Get App</Button>
             </a>
             <Button icon inverted disabled={loading} onClick={this.handleRefresh} title="Refresh" style={{float: 'right', margin: "5px 11px 0 0"}}>
               <Icon loading={loading} name='refresh' />
@@ -2575,8 +2579,11 @@ class Mapbox extends React.Component {
             <Loader active={!(trains && Object.keys(trains.length > 0))} />
             <Header inverted as='h5' floated='left' style={{margin: "10px 5px"}}>
               Last updated {timestamp && (new Date(timestamp * 1000)).toLocaleTimeString('en-US')}.<br />
-              <a href="https://apps.apple.com/us/app/the-weekendest-nyc-subway-map/id6476543418?itsct=apps_box_badge&amp;itscg=30200" style={{display: "inline-block", overflow: "hidden", borderRadius: "7.5px", width: "125px", height: "41.5px"}}>
+              <a href="https://apps.apple.com/us/app/the-weekendest-nyc-subway-map/id6476543418?itsct=apps_box_badge&amp;itscg=30200" style={{display: "inline-block", overflow: "hidden", borderRadius: "7.5px", width: "125px", height: "41.5px", marginTop:"12px", marginBottom: "12px"}}>
                 <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1716681600" alt="Download on the App Store" style={{borderRadius: "7.5px", width: "125px", height: "41.5px"}} />
+              </a>
+              <a href="https://play.google.com/store/apps/details?id=io.goodservice.theweekendest" style={{display: "inline-block", overflow: "hidden", height: "41.5px", marginLeft:"12px", marginTop:"12px", marginBottom: "12px"}}>
+                <Image src={googleplay} alt="Download on Google Play" style={{height: "41.5px"}}  />
               </a>
               <br />
               { blogPost &&
@@ -2584,7 +2591,7 @@ class Mapbox extends React.Component {
                   Latest blog post: <a href={blogPost.link} target="_blank">{blogPost.title}</a>.<br />
                 </span>
               }
-              Powered by <a href='https://www.goodservice.io' target='_blank'>goodservice.io</a>.<br />
+              Try our <a href='https://lite.subwaynow.app' target='_blank'>lite version</a>.<br />
               Created by <a href='https://sunny.ng' target='_blank'>Sunny Ng</a>.<br />
               <a href='/contact'>Contact Us</a>.<br />
               Subway Route Symbols ®: Metropolitan Transportation Authority. Used with permission.<br />

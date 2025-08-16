@@ -15,58 +15,45 @@
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css"></link>
   <link href='https://api.mapbox.com/mapbox-gl-js/v2.0.0/mapbox-gl.css' rel='stylesheet' />
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>The Weekendest - Real-Time New York City Subway Map</title>
+  <title>Subway Now (formerly The Weekendest) - Real-Time New York City Subway Map</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="Description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." data-react-helmet="true" />
 
   <!-- Start SmartBanner configuration -->
-  <meta name="smartbanner:title" content="The Weekendest">
-  <meta name="smartbanner:author" content="Real-time Subway Map for NYC">
-  <meta name="smartbanner:icon-apple" content="https://www.theweekendest.com/apple-touch-icon.png">
+  <meta name="smartbanner:title" content="Subway Now">
+  <meta name="smartbanner:author" content="NYC Train Tracker">
+  <meta name="smartbanner:icon-apple" content="https://www.subwaynow.app/apple-touch-icon.png">
+  <meta name="smartbanner:icon-google" content="https://www.subwaynow.app/apple-touch-icon.png">
   <meta name="smartbanner:button" content="VIEW">
   <meta name="smartbanner:button-url-apple" content="https://apps.apple.com/us/app/the-weekendest-nyc-subway-map/id6476543418">
-  <meta name="smartbanner:enabled-platforms" content="ios">
+  <meta name="smartbanner:button-url-google" content="https://play.google.com/store/apps/details?id=io.goodservice.theweekendest">
+  <meta name="smartbanner:enabled-platforms" content="android,ios">
   <meta name="smartbanner:exclude-user-agent-regex" content="^.*(Version).*Safari">
   <meta name="smartbanner:close-label" content="Close">
   <!-- End SmartBanner configuration -->
 
   <!-- facebook open graph tags -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.theweekendest.com" data-react-helmet="true" />
-  <meta property="og:title" content="The Weekendest - Real-Time New York City Subway Map" data-react-helmet="true" />
+  <meta property="og:url" content="https://www.subwaynow.app" data-react-helmet="true" />
+  <meta property="og:title" content="Subway Now (formerly The Weekendest) - Real-Time New York City Subway Map" data-react-helmet="true" />
   <meta property="og:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." data-react-helmet="true" />
-  <meta property="og:image" content="https://www.theweekendest.com<%= require('../images/screenshot.png') %>" />
+  <meta property="og:image" content="https://www.subwaynow.app<%= require('../images/screenshot.png') %>" />
   <meta name="apple-itunes-app" content="app-id=6476543418">
 
   <!-- twitter card tags additive with the og: tags -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:domain" content="theweekendest.com" />
-  <meta name="twitter:title" content="The Weekendest - Real-Time New York City Subway Map" data-react-helmet="true" />
+  <meta name="twitter:domain" content="subwaynow.app" />
+  <meta name="twitter:title" content="Subway Now (formerly The Weekendest) - Real-Time New York City Subway Map" data-react-helmet="true" />
   <meta name="twitter:description" content="Real-time map for the New York City subway. Check for planned service changes, up-to-date train routing, and real-time arrival times." data-react-helmet="true" />
   <meta name="twitter:site" content="@goodservice_io" />
   <meta name="twitter:creator" content="@_blahblahblah" />
-  <meta name="twitter:image" content="https://www.theweekendest.com<%= require('../images/screenshot.png') %>" />
-  <meta name="twitter:url" content="https://www.theweekendest.com" data-react-helmet="true" />
-  <link rel="canonical" href="https://www.theweekendest.com" data-react-helmet="true" />
+  <meta name="twitter:image" content="https://www.subwaynow.app<%= require('../images/screenshot.png') %>" />
+  <meta name="twitter:url" content="https://www.subwaynow.app" data-react-helmet="true" />
+  <link rel="canonical" href="https://www.subwaynow.app" data-react-helmet="true" />
   <link rel="icon" href="<%= require('../images/favicon.png') %>">
   <link rel="apple-touch-icon" href="<%= require('../images/apple-touch-icon.png') %>" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="manifest" href="<%= require('../images/manifest.webmanifest') %>" />
   <link rel="sitemap" href="<%= require('../images/sitemap.xml') %>" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="The Weekendest">
-  <link href="<%= require('../images/iphone5_splash.png') %>" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
-  <link href="<%= require('../images/iphone6_splash.png') %>" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
-  <link href="<%= require('../images/iphoneplus_splash.png') %>" media="(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
-  <link href="<%= require('../images/iphonex_splash.png') %>" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
-  <link href="<%= require('../images/iphonexr_splash.png') %>" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
-  <link href="<%= require('../images/iphonexsmax_splash.png') %>" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
-  <link href="<%= require('../images/ipad_splash.png') %>" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
-  <link href="<%= require('../images/ipadpro1_splash.png') %>" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
-  <link href="<%= require('../images/ipadpro3_splash.png') %>" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
-  <link href="<%= require('../images/ipadpro2_splash.png') %>" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
 </head>
 <body>
   <section id="index"></section>

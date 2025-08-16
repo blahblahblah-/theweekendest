@@ -35,6 +35,7 @@ h1.yellow a, h3.yellow a {
   margin-bottom: 0.3em;
   padding: 0;
   float: left;
+  height: 55px;
 
   a {
     color: white;
@@ -53,6 +54,17 @@ h1.yellow a, h3.yellow a {
 
   @supports (-webkit-touch-callout: none) {
     display: block;
+  }
+}
+
+.ui.button.android-app-button {
+  display: block;
+  float: left;
+  margin-top: 10px;
+  margin-left: 10px;
+
+  @supports (-webkit-touch-callout: none) {
+    display: none;
   }
 }
 

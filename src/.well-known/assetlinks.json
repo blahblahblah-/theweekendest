@@ -1,0 +1,11 @@
+[
+    {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+        "namespace": "android_app",
+        "package_name": "io.goodservice.theweekendest",
+        "sha256_cert_fingerprints":
+            ["90:8E:AB:7B:BD:65:D0:34:2B:06:A9:52:08:FC:86:07:7F:6E:BE:00:DE:FE:51:E9:44:37:4E:D3:16:70:DB:72"]
+        }
+    }
+]

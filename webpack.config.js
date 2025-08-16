@@ -58,6 +58,18 @@ const config = {
             ],
           },
           {
+            test: /assetlinks.json$/,
+            use: [
+                {
+                    loader: 'file-loader',
+                    options: {
+                        limit: 1000,
+                        name : '[name]'
+                    }
+                }
+            ],
+          },
+          {
             test: /\.js[x]?$/,
             use: 'babel-loader',
             exclude: [

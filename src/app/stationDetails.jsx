@@ -91,8 +91,8 @@ class StationDetails extends React.Component {
     const { station } = this.props;
     const name = `${ station.name.replace(/ - /g, "–") }${ station.secondary_name ? ` (${station.secondary_name})` : ""}`;
     navigator.share({
-      title: `The Weekendest - ${name} Station`,
-      url: `https://www.theweekendest.com/stations/${station.id}`
+      title: `Subway Now (formerly The Weekendest) - ${name} Station`,
+      url: `https://www.subwaynow.app/stations/${station.id}`
     });
   }
 
@@ -512,18 +512,18 @@ class StationDetails extends React.Component {
     const { stations, station, trains, accessibleStations, elevatorOutages } = this.props;
     const { fav } = this.state;
     const name = `${ station.name.replace(/ - /g, "–") }${ station.secondary_name ? ` (${station.secondary_name})` : ""}`;
-    const title = `The Weekendest - ${name} Station`;
+    const title = `Subway Now (formerly The Weekendest) - ${name} Station`;
     return (
       <Segment className='details-pane'>
         <Helmet>
           <title>{title}</title>
           <meta property="og:title" content={`${name} Station`} />
           <meta name="twitter:title" content={title} />
-          <meta property="og:url" content={`https://www.theweekendest.com/stations/${station.id}`} />
-          <meta name="twitter:url" content={`https://www.theweekendest.com/stations/${station.id}`} />
+          <meta property="og:url" content={`https://www.subwaynow.app/stations/${station.id}`} />
+          <meta name="twitter:url" content={`https://www.subwaynow.app/stations/${station.id}`} />
           <meta property="og:description" content={`Check service status, and real-time train arrival times for ${name} Station on the New York City subway.`} />
           <meta name="twitter:description" content={`Check service status, and real-time train arrival times for ${name} Station on the New York City subway.`} />
-          <link rel="canonical" href={`https://www.theweekendest.com/stations/${station.id}`} />
+          <link rel="canonical" href={`https://www.subwaynow.app/stations/${station.id}`} />
           <meta name="Description" content={`Check service status, and real-time train arrival times for ${name} Station on the New York City subway.`} />
         </Helmet>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
@@ -547,7 +547,7 @@ class StationDetails extends React.Component {
               <Icon name='external share' />
             </Button>
           }
-          <Clipboard component={Button} className="icon right" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/stations/${this.props.station.id}`}>
+          <Clipboard component={Button} className="icon right" title="Copy Link" data-clipboard-text={`https://www.subwaynow.app/stations/${this.props.station.id}`}>
             <Icon name='linkify' />
           </Clipboard>
           <Header as="h3" className='header-station-name'>
@@ -602,7 +602,7 @@ class StationDetails extends React.Component {
             <Button icon onClick={this.handleStar} title={ fav ? 'Remove station from favorites' : 'Add station to favorites'}>
               <Icon name={ fav ? 'star' : 'star outline'} />
             </Button>
-            <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/stations/${this.props.station.id}`}>
+            <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.subwaynow.app/stations/${this.props.station.id}`}>
               <Icon name='linkify' />
             </Clipboard>
             { navigator.share &&

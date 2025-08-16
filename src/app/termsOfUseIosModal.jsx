@@ -15,12 +15,12 @@ class TermsOfUseIosModal extends React.Component {
         open={this.props.open} onClose={this.handleOnClose}
         closeIcon dimmer="blurring" closeOnDocumentClick closeOnDimmerClick>
         <Helmet>
-          <title>The Weekendest - App Terms of Use</title>
-          <meta property="og:title" content="The Weekendest - Terms of Use" />
-          <meta name="twitter:title" content="The Weekendest - Terms of Use" />
-          <meta property="og:url" content={`https://www.theweekendest.com/terms-of-use-ios`} />
-          <meta name="twitter:url" content={`https://www.theweekendest.com/terms-of-use-ios`} />
-          <link rel="canonical" href={`https://www.theweekendest.com/terms-of-use-ios`} />
+          <title>Subway Now (formerly The Weekendest) - App Terms of Use</title>
+          <meta property="og:title" content="Subway Now (formerly The Weekendest) - Terms of Use" />
+          <meta name="twitter:title" content="Subway Now (formerly The Weekendest) - Terms of Use" />
+          <meta property="og:url" content={`https://www.subwaynow.app/terms-of-use-ios`} />
+          <meta name="twitter:url" content={`https://www.subwaynow.app/terms-of-use-ios`} />
+          <link rel="canonical" href={`https://www.subwaynow.app/terms-of-use-ios`} />
         </Helmet>
         <Modal.Header>
           App Terms of Use
@@ -30,19 +30,19 @@ class TermsOfUseIosModal extends React.Component {
             <p>Last updated: 05/24/2024</p>
             <h4>Introduction</h4>
             <p>
-              Welcome to The Weekendest (“Company”, “we”, “our”, “us”)! As you have just clicked our Terms of Service, please pause, grab a cup of coffee and carefully read the following paragraphs. It will take you approximately 20 minutes.
+              Welcome to Subway Now (“Company”, “we”, “our”, “us”)! As you have just clicked our Terms of Service, please pause, grab a cup of coffee and carefully read the following paragraphs. It will take you approximately 20 minutes.
             </p>
             <p>
-              These Terms of Service (“Terms”, “Terms of Service”) govern your use of our mobile application The Weekendest operated by Sunny Ng.
+              These Terms of Service (“Terms”, “Terms of Service”) govern your use of our mobile application Subway Now operated by Sunny Ng.
             </p>
             <p>
-              Our Privacy Policy also governs your use of our Service and explains how we collect, safeguard and disclose information that results from your use of our web pages. Please read it here <Link to='/privacy-ios'>https://www.theweekendest.com/privacy-ios</Link>.
+              Our Privacy Policy also governs your use of our Service and explains how we collect, safeguard and disclose information that results from your use of our web pages. Please read it here <Link to='/privacy-ios'>https://www.subwaynow.app/privacy-ios</Link>.
             </p>
             <p>
               Your agreement with us includes these Terms and our Privacy Policy (“Agreements”). You acknowledge that you have read and understood Agreements, and agree to be bound of them.
             </p>
             <p>
-              If you do not agree with (or cannot comply with) Agreements, then you may not use the Service, but please let us know by emailing at ios@theweekendest.com so we can try to find a solution. These Terms apply to all visitors, users and others who wish to access or use Service.
+              If you do not agree with (or cannot comply with) Agreements, then you may not use the Service, but please let us know by emailing at ios@subwaynow.app so we can try to find a solution. These Terms apply to all visitors, users and others who wish to access or use Service.
             </p>
             <p>
               Thank you for being responsible.
@@ -52,14 +52,14 @@ class TermsOfUseIosModal extends React.Component {
               Some parts of Service are billed on a subscription basis (“Subscription(s)”). You will be billed in advance on a recurring and periodic basis (“Billing Cycle”). Billing cycles are set either on a monthly or annual basis, depending on the type of subscription plan you select when purchasing a Subscription.
             </p>
             <p>
-              At the end of each Billing Cycle, your Subscription will automatically renew under the exact same conditions unless you cancel it or The Weekendest cancels it. You may cancel your Subscription renewal through the App Store.
+              At the end of each Billing Cycle, your Subscription will automatically renew under the exact same conditions unless you cancel it or Subway Now cancels it. You may cancel your Subscription renewal through the App Store.
             </p>
             <h4>Fee Changes</h4>
             <p>
-              The Weekendest, in its sole discretion and at any time, may modify Subscription fees for the Subscriptions. Any Subscription fee change will become effective at the end of the then-current Billing Cycle.
+              Subway Now, in its sole discretion and at any time, may modify Subscription fees for the Subscriptions. Any Subscription fee change will become effective at the end of the then-current Billing Cycle.
             </p>
             <p>
-              The Weekendest will provide you with a reasonable prior notice of any change in Subscription fees to give you an opportunity to terminate your Subscription before such change becomes effective.
+              Subway Now will provide you with a reasonable prior notice of any change in Subscription fees to give you an opportunity to terminate your Subscription before such change becomes effective.
             </p>
             <p>
               Your continued use of Service after Subscription fee change comes into effect constitutes your agreement to pay the modified Subscription fee amount.
@@ -124,14 +124,14 @@ class TermsOfUseIosModal extends React.Component {
             </p>
             <h4>Intellectual Property</h4>
             <p>
-              Service and its original content (excluding Content provided by users), features and functionality are and will remain the exclusive property of The Weekendest and its licensors. Service is protected by copyright, trademark, and other laws of the United States. Our trademarks and trade dress may not be used in connection with any product or service without the prior written consent of The Weekendest.
+              Service and its original content (excluding Content provided by users), features and functionality are and will remain the exclusive property of Subway Now and its licensors. Service is protected by copyright, trademark, and other laws of the United States. Our trademarks and trade dress may not be used in connection with any product or service without the prior written consent of Subway Now.
             </p>
             <h4>Copyright Policy</h4>
             <p>
               We respect the intellectual property rights of others. It is our policy to respond to any claim that Content posted on Service infringes on the copyright or other intellectual property rights (“Infringement”) of any person or entity.
             </p>
             <p>
-              If you are a copyright owner, or authorized on behalf of one, and you believe that the copyrighted work has been copied in a way that constitutes copyright infringement, please submit your claim via email to hello@theweekendest.com, with the subject line: “Copyright Infringement” and include in your claim a detailed description of the alleged Infringement as detailed below, under “DMCA Notice and Procedure for Copyright Infringement Claims”
+              If you are a copyright owner, or authorized on behalf of one, and you believe that the copyrighted work has been copied in a way that constitutes copyright infringement, please submit your claim via email to hello@subwaynow.app, with the subject line: “Copyright Infringement” and include in your claim a detailed description of the alleged Infringement as detailed below, under “DMCA Notice and Procedure for Copyright Infringement Claims”
             </p>
             <p>
               You may be held accountable for damages (including costs and attorneys' fees) for misrepresentation or bad-faith claims on the infringement of any Content found on and/or through Service on your copyright.
@@ -161,25 +161,25 @@ class TermsOfUseIosModal extends React.Component {
               (f) a statement by you, made under penalty of perjury, that the above information in your notice is accurate and that you are the copyright owner or authorized to act on the copyright owner's behalf.
             </p>
             <p>
-              You can contact our Copyright Agent via email at hello@theweekendest.com
+              You can contact our Copyright Agent via email at hello@subwaynow.app
             </p>
             <h4>
               Error Reporting and Feedback
             </h4>
             <p>
-              You may provide us directly at ios@theweekendest.com with information and feedback concerning errors, suggestions for improvements, ideas, problems, complaints, and other matters related to our Service (“Feedback”). You acknowledge and agree that: (i) you shall not retain, acquire or assert any intellectual property right or other right, title or interest in or to the Feedback; (ii) Company may have development ideas similar to the Feedback; (iii) Feedback does not contain confidential information or proprietary information from you or any third party; and (iv) Company is not under any obligation of confidentiality with respect to the Feedback. In the event the transfer of the ownership to the Feedback is not possible due to applicable mandatory laws, you grant Company and its affiliates an exclusive, transferable, irrevocable, free-of-charge, sub-licensable, unlimited and perpetual right to use (including copy, modify, create derivative works, publish, distribute and commercialize) Feedback in any manner and for any purpose.
+              You may provide us directly at ios@subwaynow.app with information and feedback concerning errors, suggestions for improvements, ideas, problems, complaints, and other matters related to our Service (“Feedback”). You acknowledge and agree that: (i) you shall not retain, acquire or assert any intellectual property right or other right, title or interest in or to the Feedback; (ii) Company may have development ideas similar to the Feedback; (iii) Feedback does not contain confidential information or proprietary information from you or any third party; and (iv) Company is not under any obligation of confidentiality with respect to the Feedback. In the event the transfer of the ownership to the Feedback is not possible due to applicable mandatory laws, you grant Company and its affiliates an exclusive, transferable, irrevocable, free-of-charge, sub-licensable, unlimited and perpetual right to use (including copy, modify, create derivative works, publish, distribute and commercialize) Feedback in any manner and for any purpose.
             </p>
             <h4>
               Links To Other Web Sites
             </h4>
             <p>
-              Our Service may contain links to third party web sites or services that are not owned or controlled by The Weekendest.
+              Our Service may contain links to third party web sites or services that are not owned or controlled by Subway Now.
             </p>
             <p>
-              The Weekendest has no control over, and assumes no responsibility for the content, privacy policies, or practices of any third party web sites or services. We do not warrant the offerings of any of these entities/individuals or their websites.
+              Subway Now has no control over, and assumes no responsibility for the content, privacy policies, or practices of any third party web sites or services. We do not warrant the offerings of any of these entities/individuals or their websites.
             </p>
             <p>
-              YOU ACKNOWLEDGE AND AGREE THAT THE WEEKENDEST SHALL NOT BE RESPONSIBLE OR LIABLE, DIRECTLY OR INDIRECTLY, FOR ANY DAMAGE OR LOSS CAUSED OR ALLEGED TO BE CAUSED BY OR IN CONNECTION WITH USE OF OR RELIANCE ON ANY SUCH CONTENT, GOODS OR SERVICES AVAILABLE ON OR THROUGH ANY SUCH THIRD PARTY WEB SITES OR SERVICES.
+              YOU ACKNOWLEDGE AND AGREE THAT SUBWAY NOW SHALL NOT BE RESPONSIBLE OR LIABLE, DIRECTLY OR INDIRECTLY, FOR ANY DAMAGE OR LOSS CAUSED OR ALLEGED TO BE CAUSED BY OR IN CONNECTION WITH USE OF OR RELIANCE ON ANY SUCH CONTENT, GOODS OR SERVICES AVAILABLE ON OR THROUGH ANY SUCH THIRD PARTY WEB SITES OR SERVICES.
             </p>
             <p>
               WE STRONGLY ADVISE YOU TO READ THE TERMS OF SERVICE AND PRIVACY POLICIES OF ANY THIRD PARTY WEB SITES OR SERVICES THAT YOU VISIT.
@@ -251,7 +251,7 @@ class TermsOfUseIosModal extends React.Component {
               Contact Us
             </h4>
               <p>Please send your feedback, comments, requests for technical support:</p>
-              <p>By email: ios@theweekendest.com.</p>
+              <p>By email: ios@subwaynow.app.</p>
           </Modal.Description>
         </Modal.Content>
       </Modal>

@@ -125,8 +125,8 @@ class TrainDetails extends React.Component {
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
 
     navigator.share({
-      title: `The Weekendest - ${name} Train`,
-      url: `https://www.theweekendest.com/trains/${train.id}`
+      title: `Subway Now (formerly The Weekendest) - ${name} Train`,
+      url: `https://www.subwaynow.app/trains/${train.id}`
     });
   }
 
@@ -159,18 +159,18 @@ class TrainDetails extends React.Component {
   render() {
     const { routing, stops, train, trains, stations, accessibleStations, elevatorOutages, displayAccessibleOnly } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
-    const title = `The Weekendest - ${name} Train`;
+    const title = `Subway Now (formerly The Weekendest) - ${name} Train`;
     return (
       <Segment className="details-pane">
         <Helmet>
           <title>{title}</title>
           <meta property="og:title" content={`${name} Train`} />
           <meta name="twitter:title" content={title} />
-          <meta property="og:url" content={`https://www.theweekendest.com/trains/${train.id}`} />
-          <meta name="twitter:url" content={`https://www.theweekendest.com/trains/${train.id}`} />
+          <meta property="og:url" content={`https://www.subwaynow.app/trains/${train.id}`} />
+          <meta name="twitter:url" content={`https://www.subwaynow.app/trains/${train.id}`} />
           <meta property="og:description" content={`Check status, route map, service changes, and real-time train arrival times for ${name} Train on the New York City subway.`} />
           <meta name="twitter:description" content={`Check status, route map, service changes, and real-time train arrival times for ${name} Train on the New York City subway.`} />
-          <link rel="canonical" href={`https://www.theweekendest.com/trains/${train.id}`} />
+          <link rel="canonical" href={`https://www.subwaynow.app/trains/${train.id}`} />
           <meta name="Description" content={`Check status, route map, service changes, and real-time train arrival times for ${name} Train on the New York City subway.`} />
         </Helmet>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px"}}>
@@ -189,7 +189,7 @@ class TrainDetails extends React.Component {
               <Icon name='external share' />
             </Button>
           }
-          <Clipboard component={Button} className="icon right" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${this.props.train.id}`}>
+          <Clipboard component={Button} className="icon right" title="Copy Link" data-clipboard-text={`https://www.subwaynow.app/trains/${this.props.train.id}`}>
             <Icon name='linkify' />
           </Clipboard>
           <div className="train-details-header">
@@ -202,11 +202,6 @@ class TrainDetails extends React.Component {
             <div className="status">
               <Header as='h4' color={this.statusColor(train.status)}>
                 { train.status }
-              </Header>
-              <div></div>
-              <Header as='h6'>
-                { twitterLink(train.id) }
-                More info on <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>.
               </Header>
             </div>
           </div>
@@ -221,7 +216,7 @@ class TrainDetails extends React.Component {
               <Icon name='map outline' />
             </Button>
             { this.renderOverlayControls() }
-            <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${this.props.train.id}`}>
+            <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.subwaynow.app/trains/${this.props.train.id}`}>
               <Icon name='linkify' />
             </Clipboard>
             { navigator.share &&
@@ -243,10 +238,6 @@ class TrainDetails extends React.Component {
           <Button icon title="Center map" onClick={this.handleRealignMap}>
             <Icon name='crosshairs' />
           </Button>
-        </Responsive>
-        <Responsive maxWidth={Responsive.onlyMobile.maxWidth} as='h6' className="mobile-goodservice">
-          { twitterLink(train.id) }
-          More info on <a href={`https://www.goodservice.io/trains/${train.id}`} target="_blank">goodservice.io</a>.
         </Responsive>
         <div className="details-body">
           { this.renderDelays() }

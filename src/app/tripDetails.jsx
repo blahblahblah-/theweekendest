@@ -42,8 +42,8 @@ class TripDetails extends React.Component {
     const { trip, train } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
     navigator.share({
-      title: `The Weekendest - ${name} Train - Trip ${trip.id}`,
-      url: `https://www.theweekendest.com/trains/${train.id}/${trip.id}`
+      title: `Subway Now (formerly The Weekendest) - ${name} Train - Trip ${trip.id}`,
+      url: `https://www.subwaynow.app/trains/${train.id}/${trip.id}`
     });
   }
 
@@ -55,7 +55,7 @@ class TripDetails extends React.Component {
   render() {
     const { trip, stops, train, trains, stations, direction, accessibleStations, elevatorOutages } = this.props;
     const name = (train.alternate_name) ? `${train.name} - ${train.alternate_name}` : train.name;
-    const title = `The Weekendest - ${name} Train - Trip ${trip.id}`;
+    const title = `Subway Now (formerly The Weekendest) - ${name} Train - Trip ${trip.id}`;
     const destination = Object.keys(trip.stops).sort((a, b) => trip.stops[b] - trip.stops[a])[0];
     const scheduleDiscrepancy = Math.round(trip.schedule_discrepancy / 60);
     const scheduleDiscrepancyText = scheduleDiscrepancy > 0 ? `${scheduleDiscrepancy} min behind schedule` : `${Math.abs(scheduleDiscrepancy)} min ahead of schedule`;
@@ -69,11 +69,11 @@ class TripDetails extends React.Component {
           <title>{title}</title>
           <meta property="og:title" content={`${name} Train - Trip ${trip.id}`} />
           <meta name="twitter:title" content={title} />
-          <meta property="og:url" content={`https://www.theweekendest.com/trains/${train.id}/${trip.id}`} />
-          <meta name="twitter:url" content={`https://www.theweekendest.com/trains/${train.id}/${trip.id}`} />
+          <meta property="og:url" content={`https://www.subwaynow.app/trains/${train.id}/${trip.id}`} />
+          <meta name="twitter:url" content={`https://www.subwaynow.app/trains/${train.id}/${trip.id}`} />
           <meta property="og:description" content={`Track trip ${trip.id} on the ${name} Train on the New York City subway.`} />
           <meta name="twitter:description" content={`Track trip ${trip.id} on the ${name} Train on the New York City subway.`} />
-          <link rel="canonical" href={`https://www.theweekendest.com/trains/${train.id}/${trip.id}`} />
+          <link rel="canonical" href={`https://www.subwaynow.app/trains/${train.id}/${trip.id}`} />
           <meta name="Description" content={`Track trip ${trip.id} on the ${name} Train on the New York City subway.`} />
         </Helmet>
         <Responsive minWidth={Responsive.onlyTablet.minWidth} as='div' style={{padding: "14px 14px 0 14px"}}>
@@ -94,7 +94,7 @@ class TripDetails extends React.Component {
               <Icon name='external share' />
             </Button>
           }
-          <Clipboard component={Button} className="icon right" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${train.id}/${trip.id.replace('..', '-')}`}>
+          <Clipboard component={Button} className="icon right" title="Copy Link" data-clipboard-text={`https://www.subwaynow.app/trains/${train.id}/${trip.id.replace('..', '-')}`}>
             <Icon name='linkify' />
           </Clipboard>
           <div className="train-details-header">
@@ -132,9 +132,6 @@ class TripDetails extends React.Component {
                   </React.Fragment>
                 }
               </Header>
-              <Header as='h6'>
-                More info on <a href={`https://www.goodservice.io/trains/${train.id}/${direction[0].toUpperCase()}/${trip.id}`} target="_blank">goodservice.io</a>.
-              </Header>
             </div>
           </div>
         </Responsive>
@@ -150,7 +147,7 @@ class TripDetails extends React.Component {
             <Button icon onClick={this.handleGoToTrain} title="${name} Train Info">
               <Icon name='subway' />
             </Button>
-            <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.theweekendest.com/trains/${train.id}/${trip.id.replace('..', '-')}`}>
+            <Clipboard component={Button} className="icon" title="Copy Link" data-clipboard-text={`https://www.subwaynow.app/trains/${train.id}/${trip.id.replace('..', '-')}`}>
               <Icon name='linkify' />
             </Clipboard>
             { navigator.share &&
@@ -197,9 +194,6 @@ class TripDetails extends React.Component {
                   <span className='delay-info'>{ delayInfo }</span>
                 </React.Fragment>
               }
-            </Header>
-            <Header as='h6' style={{margin: 0}}>
-              More info on <a href={`https://www.goodservice.io/trains/${train.id}/${direction[0].toUpperCase()}/${trip.id}`} target="_blank">goodservice.io</a>.
             </Header>
           </div>
         </Responsive>
