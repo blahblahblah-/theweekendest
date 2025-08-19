@@ -2579,10 +2579,10 @@ class Mapbox extends React.Component {
             <Loader active={!(trains && Object.keys(trains.length > 0))} />
             <Header inverted as='h5' floated='left' style={{margin: "10px 5px"}}>
               Last updated {timestamp && (new Date(timestamp * 1000)).toLocaleTimeString('en-US')}.<br />
-              <a href="https://apps.apple.com/us/app/the-weekendest-nyc-subway-map/id6476543418?itsct=apps_box_badge&amp;itscg=30200" style={{display: "inline-block", overflow: "hidden", borderRadius: "7.5px", width: "125px", height: "41.5px", marginTop:"12px", marginBottom: "12px"}}>
+              <a href="https://apps.apple.com/us/app/the-weekendest-nyc-subway-map/id6476543418?itsct=apps_box_badge&amp;itscg=30200" style={{display: "inline-block", overflow: "hidden", borderRadius: "7.5px", width: "125px", height: "41.5px", marginTop:"12px", marginBottom: "12px", marginRight:"12px"}}>
                 <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1716681600" alt="Download on the App Store" style={{borderRadius: "7.5px", width: "125px", height: "41.5px"}} />
               </a>
-              <a href="https://play.google.com/store/apps/details?id=io.goodservice.theweekendest" style={{display: "inline-block", overflow: "hidden", height: "41.5px", marginLeft:"12px", marginTop:"12px", marginBottom: "12px"}}>
+              <a href="https://play.google.com/store/apps/details?id=io.goodservice.theweekendest" style={{display: "inline-block", overflow: "hidden", height: "41.5px", marginTop:"12px", marginBottom: "12px"}}>
                 <Image src={googleplay} alt="Download on Google Play" style={{height: "41.5px"}}  />
               </a>
               <br />
