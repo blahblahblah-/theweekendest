@@ -10,8 +10,15 @@ a:hover, a:active{
   color: #ffe21f;
 }
 
-.smartbanner {
-  top: -84px;
+html {
+  margin-top:0 !important;
+}
+
+.smartbanner.smartbanner--android.js_smartbanner {
+  position:fixed;
+  top:auto;
+  bottom:0;
+  z-index:1000;
 }
 
 #alpha {
