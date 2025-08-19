@@ -1,4 +1,4 @@
-# subwaynow-web (formerly The Weekendest)
+# subwaynow-web (formerly theweekendest)
 
 This is a React app that relies heavily on [subwaynow-server](https://github.com/blahblahblah-/subwaynow-server)'s APIs to dynamically generate real-time route maps for the New York City subway with the help of Mapbox, particularly useful when service changes regularly occur on weekends and overnights.
 
